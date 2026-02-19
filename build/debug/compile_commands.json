@@ -1,0 +1,44 @@
+[
+{
+  "directory": "C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/build/debug",
+  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/LowLevelEntities.dir/includes_CXX.rsp -g -O0 -Wall -Wextra -g -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles\\LowLevelEntities.dir\\src\\lowLevelEntities\\Card.cpp.obj -c C:\\Users\\minhk\\OneDrive\\Desktop\\OVERENGINEERED_BLACKJACK\\src\\lowLevelEntities\\Card.cpp",
+  "file": "C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/Card.cpp",
+  "output": "CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/Card.cpp.obj"
+},
+{
+  "directory": "C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/build/debug",
+  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/LowLevelEntities.dir/includes_CXX.rsp -g -O0 -Wall -Wextra -g -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles\\LowLevelEntities.dir\\src\\lowLevelEntities\\Deck.cpp.obj -c C:\\Users\\minhk\\OneDrive\\Desktop\\OVERENGINEERED_BLACKJACK\\src\\lowLevelEntities\\Deck.cpp",
+  "file": "C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/Deck.cpp",
+  "output": "CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/Deck.cpp.obj"
+},
+{
+  "directory": "C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/build/debug",
+  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/LowLevelEntities.dir/includes_CXX.rsp -g -O0 -Wall -Wextra -g -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles\\LowLevelEntities.dir\\src\\lowLevelEntities\\GameState.cpp.obj -c C:\\Users\\minhk\\OneDrive\\Desktop\\OVERENGINEERED_BLACKJACK\\src\\lowLevelEntities\\GameState.cpp",
+  "file": "C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/GameState.cpp",
+  "output": "CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/GameState.cpp.obj"
+},
+{
+  "directory": "C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/build/debug",
+  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/LowLevelEntities.dir/includes_CXX.rsp -g -O0 -Wall -Wextra -g -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles\\LowLevelEntities.dir\\src\\lowLevelEntities\\Player.cpp.obj -c C:\\Users\\minhk\\OneDrive\\Desktop\\OVERENGINEERED_BLACKJACK\\src\\lowLevelEntities\\Player.cpp",
+  "file": "C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/Player.cpp",
+  "output": "CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/Player.cpp.obj"
+},
+{
+  "directory": "C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/build/debug",
+  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/SkillEngine.dir/includes_CXX.rsp -g -O0 -Wall -Wextra -g -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles\\SkillEngine.dir\\src\\skillEngine\\skillManager.cpp.obj -c C:\\Users\\minhk\\OneDrive\\Desktop\\OVERENGINEERED_BLACKJACK\\src\\skillEngine\\skillManager.cpp",
+  "file": "C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/skillEngine/skillManager.cpp",
+  "output": "CMakeFiles/SkillEngine.dir/src/skillEngine/skillManager.cpp.obj"
+},
+{
+  "directory": "C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/build/debug",
+  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp -g -O0 -Wall -Wextra -g -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles\\GameEngine.dir\\src\\gameEngine\\Game.cpp.obj -c C:\\Users\\minhk\\OneDrive\\Desktop\\OVERENGINEERED_BLACKJACK\\src\\gameEngine\\Game.cpp",
+  "file": "C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/gameEngine/Game.cpp",
+  "output": "CMakeFiles/GameEngine.dir/src/gameEngine/Game.cpp.obj"
+},
+{
+  "directory": "C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/build/debug",
+  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/blackjack.dir/includes_CXX.rsp -g -O0 -Wall -Wextra -g -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles\\blackjack.dir\\src\\main.cpp.obj -c C:\\Users\\minhk\\OneDrive\\Desktop\\OVERENGINEERED_BLACKJACK\\src\\main.cpp",
+  "file": "C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/main.cpp",
+  "output": "CMakeFiles/blackjack.dir/src/main.cpp.obj"
+}
+]

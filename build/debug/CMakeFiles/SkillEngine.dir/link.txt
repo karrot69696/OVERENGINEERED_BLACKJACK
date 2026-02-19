@@ -1,0 +1,2 @@
+C:\msys64\ucrt64\bin\ar.exe qc lib\libSkillEngine.a CMakeFiles/SkillEngine.dir/src/skillEngine/skillManager.cpp.obj
+C:\msys64\ucrt64\bin\ranlib.exe lib\libSkillEngine.a
