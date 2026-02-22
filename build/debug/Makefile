@@ -200,17 +200,17 @@ GameEngine/fast:
 .PHONY : GameEngine/fast
 
 #=============================================================================
-# Target rules for targets named blackjack
+# Target rules for targets named MindJack
 
 # Build rule for target.
-blackjack: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 blackjack
-.PHONY : blackjack
+MindJack: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 MindJack
+.PHONY : MindJack
 
 # fast build rule for target.
-blackjack/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\blackjack.dir\build.make CMakeFiles/blackjack.dir/build
-.PHONY : blackjack/fast
+MindJack/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\MindJack.dir\build.make CMakeFiles/MindJack.dir/build
+.PHONY : MindJack/fast
 
 src/gameEngine/Game.obj: src/gameEngine/Game.cpp.obj
 .PHONY : src/gameEngine/Game.obj
@@ -337,7 +337,7 @@ src/main.obj: src/main.cpp.obj
 
 # target to build an object file
 src/main.cpp.obj:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\blackjack.dir\build.make CMakeFiles/blackjack.dir/src/main.cpp.obj
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\MindJack.dir\build.make CMakeFiles/MindJack.dir/src/main.cpp.obj
 .PHONY : src/main.cpp.obj
 
 src/main.i: src/main.cpp.i
@@ -345,7 +345,7 @@ src/main.i: src/main.cpp.i
 
 # target to preprocess a source file
 src/main.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\blackjack.dir\build.make CMakeFiles/blackjack.dir/src/main.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\MindJack.dir\build.make CMakeFiles/MindJack.dir/src/main.cpp.i
 .PHONY : src/main.cpp.i
 
 src/main.s: src/main.cpp.s
@@ -353,7 +353,7 @@ src/main.s: src/main.cpp.s
 
 # target to generate assembly for a file
 src/main.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\blackjack.dir\build.make CMakeFiles/blackjack.dir/src/main.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\MindJack.dir\build.make CMakeFiles/MindJack.dir/src/main.cpp.s
 .PHONY : src/main.cpp.s
 
 src/skillEngine/skillManager.obj: src/skillEngine/skillManager.cpp.obj
@@ -394,8 +394,8 @@ help:
 	@echo ... rebuild_cache
 	@echo ... GameEngine
 	@echo ... LowLevelEntities
+	@echo ... MindJack
 	@echo ... SkillEngine
-	@echo ... blackjack
 	@echo ... src/gameEngine/Game.obj
 	@echo ... src/gameEngine/Game.i
 	@echo ... src/gameEngine/Game.s

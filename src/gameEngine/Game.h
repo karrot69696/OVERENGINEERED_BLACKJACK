@@ -9,8 +9,14 @@
 #include "../lowLevelEntities/GameState.h"
 #include <algorithm>
 #include <memory>
+#include <SFML/Graphics.hpp>
 #define maxNumPlayer 7
 #define initialCardCount 2
+
+namespace GameConfig {
+    constexpr int WINDOW_WIDTH = 640;
+    constexpr int WINDOW_HEIGHT = 360;
+}
 class Game {
 private:
     Deck deck;

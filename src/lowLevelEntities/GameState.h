@@ -51,7 +51,7 @@ public:
         std::cout << "Can't find player "<< id << std::endl;
         return {};
     }
-
+    std::vector<PlayerInfo> getAllPlayerInfo() { return playersInfo; }
     std::string phaseToString(Phase phase) {
         switch (phase) {
             case Phase::BLACKJACK_CHECK_PHASE: return "BLACKJACK_CHECK_PHASE";

@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 
 # Project definition
-project(OverengineeredBlackjack
+project(MindJack
     VERSION 1.0.0
     DESCRIPTION "An overengineered blackjack game with skill system"
     LANGUAGES CXX
@@ -20,12 +20,16 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
+# set SFML Cmake directory
+set(SFML_DIR "C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/lib/cmake/SFML")
+
+# find the SFML require packages
+find_package(SFML 3 COMPONENTS System Window Graphics Audio Network REQUIRED)
+
+
+
 # Compiler warnings
-if(MSVC)
-    add_compile_options(/W4 /WX-)
-else()
-    add_compile_options(-Wall -Wextra -Wpedantic)
-endif()
+add_compile_options(-Wall -Wextra -Wpedantic)
 
 # Source files organization
 set(LOW_LEVEL_SOURCES
@@ -51,6 +55,7 @@ set(SKILL_ENGINE_HEADERS
     src/skillEngine/Skill.h
     src/skillEngine/SkillManager.h
     src/skillEngine/Skill_Deliverance.h
+    src/skillEngine/Skill_NeuralGambit.h
 )
 
 set(GAME_ENGINE_SOURCES
@@ -107,17 +112,26 @@ target_link_libraries(GameEngine
 
 # Main executable (assumes there's a main.cpp somewhere)
 # Uncomment and adjust when you have your main entry point
-add_executable(blackjack
+add_executable(MindJack
     src/main.cpp
 )
 
-target_link_libraries(blackjack
+target_link_libraries(MindJack
     PRIVATE
         GameEngine
         SkillEngine
         LowLevelEntities
+        SFML::Graphics
+        SFML::Window
+        SFML::System
+        SFML::Audio
+        SFML::Network
 )
-
+add_custom_command(TARGET MindJack POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    "C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/bin"
+    $<TARGET_FILE_DIR:MindJack>
+)
 # Installation rules
 install(TARGETS LowLevelEntities SkillEngine GameEngine
     ARCHIVE DESTINATION lib

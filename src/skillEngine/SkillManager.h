@@ -52,8 +52,6 @@ class SkillManager{
                         }
                         else skillDeliverance->resetUses();
                     break;
-
-                    default:
                 }
             }
         }

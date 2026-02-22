@@ -37,8 +37,8 @@
 },
 {
   "directory": "C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/build/debug",
-  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/blackjack.dir/includes_CXX.rsp -g -O0 -Wall -Wextra -g -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles\\blackjack.dir\\src\\main.cpp.obj -c C:\\Users\\minhk\\OneDrive\\Desktop\\OVERENGINEERED_BLACKJACK\\src\\main.cpp",
+  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/MindJack.dir/includes_CXX.rsp -g -O0 -Wall -Wextra -g -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles\\MindJack.dir\\src\\main.cpp.obj -c C:\\Users\\minhk\\OneDrive\\Desktop\\OVERENGINEERED_BLACKJACK\\src\\main.cpp",
   "file": "C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/main.cpp",
-  "output": "CMakeFiles/blackjack.dir/src/main.cpp.obj"
+  "output": "CMakeFiles/MindJack.dir/src/main.cpp.obj"
 }
 ]
