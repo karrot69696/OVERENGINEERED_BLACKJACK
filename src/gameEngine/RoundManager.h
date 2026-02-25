@@ -1,0 +1,106 @@
+#ifndef ROUNDMANAGER_H
+#define ROUNDMANAGER_H
+
+#include <algorithm>
+#include <memory>
+#include <vector>
+#include <optional>
+
+#include "../skillEngine/SkillManager.h"
+
+#include "../lowLevelEntities/Player.h"
+
+#include "../phaseEngine/Phase.h"
+#include "../phaseEngine/BlackJackCheckPhase.h"
+#include "../phaseEngine/PlayerHitPhase.h"
+#include "../phaseEngine/HostHitPhase.h"
+#include "../phaseEngine/BattlePhase.h"
+#include "../phaseEngine/RoundEndPhase.h"
+
+#include "UIManager.h"
+
+class Game;
+
+class RoundManager {
+private:
+    std::vector<Player>& players;
+    Deck& deck;
+    SkillManager skillManager;
+    GameState& gameState;
+    UIManager& uiManager;
+    std::unique_ptr<Phase> currentPhase;
+    int round = 0;
+public:
+
+
+    RoundManager(std::vector<Player>& players, Deck& deck, SkillManager& skillManager, GameState& _gameState, UIManager& _uiManager) 
+        : players(players), deck(deck), skillManager(skillManager), gameState(_gameState), uiManager(_uiManager) {}
+    //getters
+    Deck& getDeck(){return deck;}
+    SkillManager& getSkillManager(){return skillManager;}
+    int getRound(){return round;}
+
+    //setters
+    void incrementRound(){round++;}
+
+    //OLD PLAYROUND MAIN LOOP
+    bool playRound(int& round);
+
+    //OLD PHASE SYSTEM
+    bool blackJackHandler();
+    bool playerHitHandler();
+    bool hostHandler();
+    bool hostHitHandler(Player& host, Player& opponent);
+    bool battleHandler(Player& host, Player& opponent);
+    bool turnHandler(Player& player, Player& opponent);
+    void roundEndHandler();
+    void skillHandler(Player& player);
+
+    //EXTREMELY IMPORTANT STATE UPDATE
+    void updateGameState(PhaseName phase, int playerId);
+
+    //helper functions
+    void dealCardsToPlayers(int numCards);  
+    Player &getHostPlayer();
+    std::vector<Player>& getPlayers(){return players;}
+    Player& getPlayerById(int id);
+    GameState& getGameState(){return gameState;}
+    void createSkills();
+    std::string phaseToString();
+
+    //NEW PHASE SYSTEM
+    void update(){
+        auto next = currentPhase->onUpdate();
+
+        if (next)
+            changePhase(*next);
+    }
+
+    void changePhase(PhaseName newPhase){
+        if (currentPhase)
+            currentPhase->onExit();
+
+        currentPhase = createPhase(newPhase);
+
+        if (currentPhase)
+            currentPhase->onEnter();
+    }
+
+    std::unique_ptr<Phase> createPhase(const PhaseName name){
+        if (name == PhaseName::BLACKJACK_CHECK_PHASE)
+            return std::make_unique<BlackJackCheckPhase>(uiManager, *this);
+        if (name == PhaseName::PLAYER_HIT_PHASE)
+            return std::make_unique<PlayerHitPhase>(uiManager, *this);
+        if (name == PhaseName::HOST_HIT_PHASE)
+            return std::make_unique<HostHitPhase>(uiManager, *this);
+        if (name == PhaseName::BATTLE_PHASE)
+            return std::make_unique<BattlePhase>(uiManager, *this);
+        if (name == PhaseName::ROUND_END)
+            return std::make_unique<RoundEndPhase>(uiManager, *this);
+
+        return nullptr;
+    }
+
+};
+
+#endif

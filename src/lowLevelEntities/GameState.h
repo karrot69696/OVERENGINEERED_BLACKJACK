@@ -4,19 +4,28 @@
 #include "Deck.h"
 #include "SkillDeck.h"
 #include <vector>
-enum class Phase{
+namespace GameConfig {
+    constexpr int WINDOW_WIDTH = 1366;
+    constexpr int WINDOW_HEIGHT = 768;
+    constexpr int BLACKJACK_VALUE = 21;
+    constexpr int DEALER_STAND_VALUE = 17;
+    constexpr int ACE_HIGH_VALUE = 11;
+    constexpr int ACE_LOW_VALUE = 1;
+    constexpr int FACE_CARD_VALUE = 10;
+    constexpr int CARD_RANKS = 13;
+    
+    // Bot behavior constants
+    constexpr double BURST_RISK_WEIGHT = 0.5;
+    constexpr double OPPONENT_PRESSURE_WEIGHT = 0.70;
+    constexpr double LOSING_PRESSURE_WEIGHT = 0.15;
+}
+enum class PhaseName{
     BLACKJACK_CHECK_PHASE,
     PLAYER_HIT_PHASE,
     HOST_HIT_PHASE,
     BATTLE_PHASE,
     ROUND_END,
 };
-struct RevealedCardInfo {
-    int ownerId;
-    Suit suit;
-    Rank rank;
-};
-
 struct PlayerInfo {
     int playerId;
     std::vector<Card> cardsInHand;
@@ -24,25 +33,39 @@ struct PlayerInfo {
     int skillUses;
     int points;
 };
-
+enum class PlayerAction{
+    HIT,
+    SKILL_REQUEST,
+    STAND,
+    IDLE
+};
+struct PlayerTargeting{
+    std::vector<int> targetPLayerIds;
+    std::vector<Card*> targetCards;
+};
 class GameState {
 private:
     std::vector<PlayerInfo> playersInfo;
-    Phase phase;
+    PhaseName phase;
     int currentPlayerId=0;
     int deckCount;
 public:
-    void addRevealedCard(int ownerId, Card& card);
-    void updateAllPlayerInfo(std::vector<PlayerInfo> playersInfo);
-    std::string revealCardRankToString(const RevealedCardInfo& info);
-    std::string revealCardSuitToString(const RevealedCardInfo& info);
-    void updatePhase(Phase newPhase, int newCurrentPlayerId);
-    void updateDeckCount(int count){
+    PlayerAction pendingPlayerAction = PlayerAction::IDLE;
+    PlayerTargeting pendingPlayerTargeting;
+    void setAllPlayerInfo(std::vector<PlayerInfo> playersInfo);
+    void setPhaseName(PhaseName newPhaseName, int newCurrentPlayerId);
+    void setDeckCount(int count){
         deckCount=count;
     }
-    void updatePhase(Phase newPhase);
     int getCurrentPlayerId() {return currentPlayerId;}
-    Phase getPhase();
+    void incrementCurrentPlayerId(int numPlayers) {
+        currentPlayerId++;
+        if (currentPlayerId >= numPlayers) {
+            //std::cout << "[GameState][incrementCurrentPlayerId] Current player ID exceeded number of players" << std::endl;
+           currentPlayerId = -1;
+        }
+    }
+    PhaseName getPhaseName();
     PlayerInfo getPlayerInfo(int id){
         for (auto& player : playersInfo){
             if (player.playerId==id)
@@ -52,21 +75,21 @@ public:
         return {};
     }
     std::vector<PlayerInfo> getAllPlayerInfo() { return playersInfo; }
-    std::string phaseToString(Phase phase) {
+    std::string phaseToString(PhaseName phase) {
         switch (phase) {
-            case Phase::BLACKJACK_CHECK_PHASE: return "BLACKJACK_CHECK_PHASE";
-            case Phase::PLAYER_HIT_PHASE: return "PLAYER_HIT_PHASE";
-            case Phase::HOST_HIT_PHASE: return "HOST_HIT_PHASE";
-            case Phase::BATTLE_PHASE: return "BATTLE_PHASE";
-            case Phase::ROUND_END: return "ROUND_END";
-            default: return "UNKNOWN_PHASE";
+            case PhaseName::BLACKJACK_CHECK_PHASE: return "BLACKJACK CHECK PHASE";
+            case PhaseName::PLAYER_HIT_PHASE: return "PLAYER HIT PHASE";
+            case PhaseName::HOST_HIT_PHASE: return "HOST HIT PHASE";
+            case PhaseName::BATTLE_PHASE: return "BATTLE PHASE";
+            case PhaseName::ROUND_END: return "ROUND END";
+            default: return "UNKNOWN PHASE";
         }
     }
     
     std::string skillNameToString(SkillName skill) {
         switch (skill) {
             case SkillName::DELIVERANCE: return "DELIVERANCE";
-            default: return "UNKNOWN_SKILL";
+            default: return "UNKNOWN";
         }
     }
 

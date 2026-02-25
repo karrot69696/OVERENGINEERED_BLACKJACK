@@ -35,7 +35,7 @@ class SkillManager{
                     return skillDeliverance->getUses();
                 break;
                 default:
-                    std::cout << "[getSkillUses] Skill does not exist" << std::endl;
+                    //std::cout << "[getSkillUses] Skill does not exist" << std::endl;
                     return 100;
             }
         }

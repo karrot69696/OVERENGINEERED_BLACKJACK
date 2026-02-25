@@ -9,6 +9,8 @@ set(CMAKE_DEPENDS_LANGUAGES
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/gameEngine/Game.cpp" "CMakeFiles/GameEngine.dir/src/gameEngine/Game.cpp.obj" "gcc" "CMakeFiles/GameEngine.dir/src/gameEngine/Game.cpp.obj.d"
+  "C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/gameEngine/RoundManager.cpp" "CMakeFiles/GameEngine.dir/src/gameEngine/RoundManager.cpp.obj" "gcc" "CMakeFiles/GameEngine.dir/src/gameEngine/RoundManager.cpp.obj.d"
+  "C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/gameEngine/UIManager.cpp" "CMakeFiles/GameEngine.dir/src/gameEngine/UIManager.cpp.obj" "gcc" "CMakeFiles/GameEngine.dir/src/gameEngine/UIManager.cpp.obj.d"
   )
 
 # Targets to which this target links which contain Fortran sources.

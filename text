@@ -1,4 +1,6 @@
+cmake --preset debug
 cmake --build --preset debug
+
 
 RunGame
     |
@@ -8,7 +10,7 @@ RunGame
         playRound (loops X times, X = players)
         ^           |                                               ____ host? ==> set BJ status + endRound
         |           |                                               |
-        |       handleBlackjackPhase ==============> blackJack?=====|
+        |       handleBlackjackPhaseName ==============> blackJack?=====|
                     |                                               |___ player? ==> set BJ status 
         |           |
         |           |

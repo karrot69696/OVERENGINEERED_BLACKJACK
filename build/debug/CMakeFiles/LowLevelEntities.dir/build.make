@@ -76,60 +76,60 @@ CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/Card.cpp.obj: CMakeFiles/Lo
 CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/Card.cpp.obj: C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/Card.cpp
 CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/Card.cpp.obj: CMakeFiles/LowLevelEntities.dir/compiler_depend.ts
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\build\debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/Card.cpp.obj"
-	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/Card.cpp.obj -MF CMakeFiles\LowLevelEntities.dir\src\lowLevelEntities\Card.cpp.obj.d -o CMakeFiles\LowLevelEntities.dir\src\lowLevelEntities\Card.cpp.obj -c C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\src\lowLevelEntities\Card.cpp
+	C:\mingw64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/Card.cpp.obj -MF CMakeFiles\LowLevelEntities.dir\src\lowLevelEntities\Card.cpp.obj.d -o CMakeFiles\LowLevelEntities.dir\src\lowLevelEntities\Card.cpp.obj -c C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\src\lowLevelEntities\Card.cpp
 
 CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/Card.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/Card.cpp.i"
-	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\src\lowLevelEntities\Card.cpp > CMakeFiles\LowLevelEntities.dir\src\lowLevelEntities\Card.cpp.i
+	C:\mingw64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\src\lowLevelEntities\Card.cpp > CMakeFiles\LowLevelEntities.dir\src\lowLevelEntities\Card.cpp.i
 
 CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/Card.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/Card.cpp.s"
-	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\src\lowLevelEntities\Card.cpp -o CMakeFiles\LowLevelEntities.dir\src\lowLevelEntities\Card.cpp.s
+	C:\mingw64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\src\lowLevelEntities\Card.cpp -o CMakeFiles\LowLevelEntities.dir\src\lowLevelEntities\Card.cpp.s
 
 CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/Deck.cpp.obj: CMakeFiles/LowLevelEntities.dir/flags.make
 CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/Deck.cpp.obj: CMakeFiles/LowLevelEntities.dir/includes_CXX.rsp
 CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/Deck.cpp.obj: C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/Deck.cpp
 CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/Deck.cpp.obj: CMakeFiles/LowLevelEntities.dir/compiler_depend.ts
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\build\debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/Deck.cpp.obj"
-	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/Deck.cpp.obj -MF CMakeFiles\LowLevelEntities.dir\src\lowLevelEntities\Deck.cpp.obj.d -o CMakeFiles\LowLevelEntities.dir\src\lowLevelEntities\Deck.cpp.obj -c C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\src\lowLevelEntities\Deck.cpp
+	C:\mingw64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/Deck.cpp.obj -MF CMakeFiles\LowLevelEntities.dir\src\lowLevelEntities\Deck.cpp.obj.d -o CMakeFiles\LowLevelEntities.dir\src\lowLevelEntities\Deck.cpp.obj -c C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\src\lowLevelEntities\Deck.cpp
 
 CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/Deck.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/Deck.cpp.i"
-	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\src\lowLevelEntities\Deck.cpp > CMakeFiles\LowLevelEntities.dir\src\lowLevelEntities\Deck.cpp.i
+	C:\mingw64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\src\lowLevelEntities\Deck.cpp > CMakeFiles\LowLevelEntities.dir\src\lowLevelEntities\Deck.cpp.i
 
 CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/Deck.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/Deck.cpp.s"
-	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\src\lowLevelEntities\Deck.cpp -o CMakeFiles\LowLevelEntities.dir\src\lowLevelEntities\Deck.cpp.s
+	C:\mingw64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\src\lowLevelEntities\Deck.cpp -o CMakeFiles\LowLevelEntities.dir\src\lowLevelEntities\Deck.cpp.s
 
 CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/GameState.cpp.obj: CMakeFiles/LowLevelEntities.dir/flags.make
 CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/GameState.cpp.obj: CMakeFiles/LowLevelEntities.dir/includes_CXX.rsp
 CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/GameState.cpp.obj: C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/GameState.cpp
 CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/GameState.cpp.obj: CMakeFiles/LowLevelEntities.dir/compiler_depend.ts
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\build\debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/GameState.cpp.obj"
-	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/GameState.cpp.obj -MF CMakeFiles\LowLevelEntities.dir\src\lowLevelEntities\GameState.cpp.obj.d -o CMakeFiles\LowLevelEntities.dir\src\lowLevelEntities\GameState.cpp.obj -c C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\src\lowLevelEntities\GameState.cpp
+	C:\mingw64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/GameState.cpp.obj -MF CMakeFiles\LowLevelEntities.dir\src\lowLevelEntities\GameState.cpp.obj.d -o CMakeFiles\LowLevelEntities.dir\src\lowLevelEntities\GameState.cpp.obj -c C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\src\lowLevelEntities\GameState.cpp
 
 CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/GameState.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/GameState.cpp.i"
-	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\src\lowLevelEntities\GameState.cpp > CMakeFiles\LowLevelEntities.dir\src\lowLevelEntities\GameState.cpp.i
+	C:\mingw64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\src\lowLevelEntities\GameState.cpp > CMakeFiles\LowLevelEntities.dir\src\lowLevelEntities\GameState.cpp.i
 
 CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/GameState.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/GameState.cpp.s"
-	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\src\lowLevelEntities\GameState.cpp -o CMakeFiles\LowLevelEntities.dir\src\lowLevelEntities\GameState.cpp.s
+	C:\mingw64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\src\lowLevelEntities\GameState.cpp -o CMakeFiles\LowLevelEntities.dir\src\lowLevelEntities\GameState.cpp.s
 
 CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/Player.cpp.obj: CMakeFiles/LowLevelEntities.dir/flags.make
 CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/Player.cpp.obj: CMakeFiles/LowLevelEntities.dir/includes_CXX.rsp
 CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/Player.cpp.obj: C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/Player.cpp
 CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/Player.cpp.obj: CMakeFiles/LowLevelEntities.dir/compiler_depend.ts
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\build\debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/Player.cpp.obj"
-	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/Player.cpp.obj -MF CMakeFiles\LowLevelEntities.dir\src\lowLevelEntities\Player.cpp.obj.d -o CMakeFiles\LowLevelEntities.dir\src\lowLevelEntities\Player.cpp.obj -c C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\src\lowLevelEntities\Player.cpp
+	C:\mingw64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/Player.cpp.obj -MF CMakeFiles\LowLevelEntities.dir\src\lowLevelEntities\Player.cpp.obj.d -o CMakeFiles\LowLevelEntities.dir\src\lowLevelEntities\Player.cpp.obj -c C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\src\lowLevelEntities\Player.cpp
 
 CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/Player.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/Player.cpp.i"
-	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\src\lowLevelEntities\Player.cpp > CMakeFiles\LowLevelEntities.dir\src\lowLevelEntities\Player.cpp.i
+	C:\mingw64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\src\lowLevelEntities\Player.cpp > CMakeFiles\LowLevelEntities.dir\src\lowLevelEntities\Player.cpp.i
 
 CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/Player.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/Player.cpp.s"
-	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\src\lowLevelEntities\Player.cpp -o CMakeFiles\LowLevelEntities.dir\src\lowLevelEntities\Player.cpp.s
+	C:\mingw64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\src\lowLevelEntities\Player.cpp -o CMakeFiles\LowLevelEntities.dir\src\lowLevelEntities\Player.cpp.s
 
 # Object files for target LowLevelEntities
 LowLevelEntities_OBJECTS = \

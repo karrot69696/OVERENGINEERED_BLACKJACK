@@ -1,5 +1,5 @@
 #include "UIManager.h"
-#include <iostream>
+
 
 // ============================================================================
 // Layout Constants
@@ -67,9 +67,9 @@ bool CardVisual::isClicked(sf::Vector2f mousePos) {
 UIManager::UIManager(sf::RenderWindow& window, GameState& gameState)
     : window(window), gameState(gameState)
 {
-    if (!font.openFromFile("assets/font.ttf")) {
+    if (!font.openFromFile("../assets/fonts/PixeloidSans.ttf")) {
         // fallback - you'll see blank text but won't crash
-        std::cerr << "[UIManager] Failed to load font from assets/font.ttf" << std::endl;
+        std::cerr << "[UIManager] Failed to load font from assets/fonts/PixeloidSans.ttf" << std::endl;
     }
 
     // Build action buttons (hidden by default)
@@ -123,15 +123,18 @@ void UIManager::clearInput() {
 // ============================================================================
 // Event Handling
 // ============================================================================
-void UIManager::handleEvent(const sf::Event& event) {
-    if (const auto* mouseBtn = event.getIf<sf::Event::MouseButtonPressed>()) {
+void UIManager::handleEvent(const std::optional<sf::Event>& event) {
+    if (!event.has_value()) return;
+    if (const auto* mouseBtn = event->getIf<sf::Event::MouseButtonPressed>()) {
         if (mouseBtn->button != sf::Mouse::Button::Left) return;
+        std::cout << "[UIManager] Mouse click at (" << mouseBtn->position.x << ", " << mouseBtn->position.y << ")\n";
         sf::Vector2f mousePos = { (float)mouseBtn->position.x, (float)mouseBtn->position.y };
 
         // Action menu clicks
         if (showActionMenu) {
             for (auto& btn : actionButtons) {
                 if (btn.isClicked(mousePos) && btn.onClick) {
+                    std::cout << "[UIManager] Button '" << btn.label.getString().toAnsiString() << "' clicked\n";
                     btn.onClick();
                     return;
                 }
@@ -198,8 +201,8 @@ void UIManager::renderHands() {
 }
 
 void UIManager::renderHUD() {
-    // Phase label top-left
-    sf::Text phaseText(font, gameState.phaseToString(gameState.getPhase()), 16);
+    // PhaseName label top-left
+    sf::Text phaseText(font, gameState.phaseToString(gameState.getPhaseName()), 16);
     phaseText.setFillColor(sf::Color::White);
     phaseText.setPosition({10.f, 10.f});
     window.draw(phaseText);
@@ -269,12 +272,17 @@ void UIManager::buildCardVisuals() {
     cardVisuals.clear();
     auto players = gameState.getAllPlayerInfo();
 
-    for (auto& info : players) {
-        sf::Vector2f seatPos = getPlayerSeatPos(info.playerId, (int)players.size());
+    for (auto& player : players) {
+        sf::Vector2f seatPos = getPlayerSeatPos(player.playerId, (int)players.size());
 
-        for (int i = 0; i < (int)info.cardsInHand.size(); i++) {
-            CardVisual cv;
-            cv.ownerId = info.playerId;
+        for (int i = 0; i < (int)player.cardsInHand.size(); i++) {
+            CardVisual cv{
+                player.playerId,
+                i,
+                sf::RectangleShape(),
+                sf::Text(font, "", 14)
+            };
+            cv.ownerId = player.playerId;
             cv.cardIndex = i;
 
             cv.shape.setSize(UILayout::CARD_SIZE);
@@ -283,10 +291,15 @@ void UIManager::buildCardVisuals() {
             cv.shape.setOutlineColor(sf::Color::Black);
             cv.shape.setPosition({ seatPos.x + i * UILayout::CARD_SPACING, seatPos.y });
 
-            const Card& card = info.cardsInHand[i];
-            std::string cardStr = card.isFaceUp()
-                ? card.getRankAsString() + "\n" + card.getSuitAsString()
-                : "?";
+            const Card& card = player.cardsInHand[i];
+
+            std::string cardStr;
+            
+            if (cheatOn || card.isFaceUp()) {
+                cardStr = card.getRankAsString() + "\n" + card.getSuitAsString();
+            } else {
+                cardStr = "?";
+            }
 
             cv.rankSuitText = sf::Text(font, cardStr, 14);
             cv.rankSuitText.setFillColor(
@@ -317,13 +330,13 @@ sf::Vector2f UIManager::getPlayerSeatPos(int playerId, int totalPlayers) {
     return { spacing * playerId - 30.f, h - 200.f };
 }
 
-sf::Color UIManager::getPhaseColor() {
-    switch (gameState.getPhase()) {
-        case Phase::BATTLE_PHASE:          return sf::Color(200, 50, 50);
-        case Phase::PLAYER_HIT_PHASE:      return sf::Color(50, 200, 50);
-        case Phase::HOST_HIT_PHASE:        return sf::Color(200, 150, 50);
-        case Phase::BLACKJACK_CHECK_PHASE: return sf::Color(200, 200, 50);
-        case Phase::ROUND_END:             return sf::Color(150, 150, 150);
+sf::Color UIManager::getPhaseNameColor() {
+    switch (gameState.getPhaseName()) {
+        case PhaseName::BATTLE_PHASE:          return sf::Color(200, 50, 50);
+        case PhaseName::PLAYER_HIT_PHASE:      return sf::Color(50, 200, 50);
+        case PhaseName::HOST_HIT_PHASE:        return sf::Color(200, 150, 50);
+        case PhaseName::BLACKJACK_CHECK_PHASE: return sf::Color(200, 200, 50);
+        case PhaseName::ROUND_END:             return sf::Color(150, 150, 150);
         default:                           return sf::Color::White;
     }
 }

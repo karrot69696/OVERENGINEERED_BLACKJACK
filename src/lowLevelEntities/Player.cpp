@@ -100,6 +100,7 @@ PlayerAction Player::manualMode(GameState& state){
 
         default: return PlayerAction::IDLE;
     }
+
 }
 
 PlayerAction Player::botMode(GameState& state){

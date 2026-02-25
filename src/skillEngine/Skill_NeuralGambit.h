@@ -27,8 +27,8 @@ class SkillNeuralGambit : public Skill{
         
         bool canUse(const SkillContext& context) override {
             // At the end of any player's hit phase, 
-            if (context.state.getPhase() != Phase::PLAYER_HIT_PHASE 
-                    && context.state.getPhase() != Phase::HOST_HIT_PHASE ) {
+            if (context.state.getPhaseName() != PhaseName::PLAYER_HIT_PHASE 
+                    && context.state.getPhaseName() != PhaseName::HOST_HIT_PHASE ) {
                 std::cout << "[SkillNeuralGambit - canUse] Can only be used during hit phase" << std::endl;
                 return 0;
             }

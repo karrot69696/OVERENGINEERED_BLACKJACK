@@ -76,15 +76,15 @@ CMakeFiles/SkillEngine.dir/src/skillEngine/skillManager.cpp.obj: CMakeFiles/Skil
 CMakeFiles/SkillEngine.dir/src/skillEngine/skillManager.cpp.obj: C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/skillEngine/skillManager.cpp
 CMakeFiles/SkillEngine.dir/src/skillEngine/skillManager.cpp.obj: CMakeFiles/SkillEngine.dir/compiler_depend.ts
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\build\debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/SkillEngine.dir/src/skillEngine/skillManager.cpp.obj"
-	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/SkillEngine.dir/src/skillEngine/skillManager.cpp.obj -MF CMakeFiles\SkillEngine.dir\src\skillEngine\skillManager.cpp.obj.d -o CMakeFiles\SkillEngine.dir\src\skillEngine\skillManager.cpp.obj -c C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\src\skillEngine\skillManager.cpp
+	C:\mingw64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/SkillEngine.dir/src/skillEngine/skillManager.cpp.obj -MF CMakeFiles\SkillEngine.dir\src\skillEngine\skillManager.cpp.obj.d -o CMakeFiles\SkillEngine.dir\src\skillEngine\skillManager.cpp.obj -c C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\src\skillEngine\skillManager.cpp
 
 CMakeFiles/SkillEngine.dir/src/skillEngine/skillManager.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/SkillEngine.dir/src/skillEngine/skillManager.cpp.i"
-	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\src\skillEngine\skillManager.cpp > CMakeFiles\SkillEngine.dir\src\skillEngine\skillManager.cpp.i
+	C:\mingw64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\src\skillEngine\skillManager.cpp > CMakeFiles\SkillEngine.dir\src\skillEngine\skillManager.cpp.i
 
 CMakeFiles/SkillEngine.dir/src/skillEngine/skillManager.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/SkillEngine.dir/src/skillEngine/skillManager.cpp.s"
-	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\src\skillEngine\skillManager.cpp -o CMakeFiles\SkillEngine.dir\src\skillEngine\skillManager.cpp.s
+	C:\mingw64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\src\skillEngine\skillManager.cpp -o CMakeFiles\SkillEngine.dir\src\skillEngine\skillManager.cpp.s
 
 # Object files for target SkillEngine
 SkillEngine_OBJECTS = \
