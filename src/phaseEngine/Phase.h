@@ -28,7 +28,8 @@ class Phase {
 
         //helper functions to inherit
         Player& getCurrentPlayer();
-        void moveToNextPlayer();
+        int getCurrentPlayerId();
+        void incrementCurrentPlayerId();
 
 };
 

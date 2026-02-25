@@ -9,7 +9,9 @@ Player& Phase::getCurrentPlayer(){
     Player& currentPlayer = players[currentPlayerIndex];
     return currentPlayer;
 }
-
-void Phase::moveToNextPlayer(){
+int Phase::getCurrentPlayerId(){
+    return roundManager.getGameState().getCurrentPlayerId();
+}
+void Phase::incrementCurrentPlayerId(){
     roundManager.getGameState().incrementCurrentPlayerId(roundManager.getPlayers().size());
 }

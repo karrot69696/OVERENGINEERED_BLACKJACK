@@ -24,9 +24,9 @@ std::optional<PhaseName> HostHitPhase::onUpdate() {
     // handle player that is not host or blackjacked
     if (currentPlayer.getHost() == 1 || currentPlayer.getBlackJacked() == 1){
 
-        moveToNextPlayer();
+        incrementCurrentPlayerId();
         //if all players have been checked, reset to first player and move to next phase
-        if (getCurrentPlayer().getId() == -1){
+        if (getCurrentPlayerId() == -1){
             roundManager.updateGameState(PhaseName::ROUND_END, 0);
             return PhaseName::ROUND_END;
         }

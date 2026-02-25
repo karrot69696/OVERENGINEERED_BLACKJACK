@@ -32,10 +32,10 @@ std::optional<PhaseName> BlackJackCheckPhase::onUpdate(){
     }
 
     //increment player id for next check
-    moveToNextPlayer();
+    incrementCurrentPlayerId();
 
     //if all players have been checked move to next phase
-    if (getCurrentPlayer().getId() == -1){
+    if ( getCurrentPlayerId() == -1 ){
         std::cout << "[BlackJackCheckPhase] All players checked for blackjack. Moving to PLAYER_HIT_PHASE." << std::endl;
         return PhaseName::PLAYER_HIT_PHASE;
     }

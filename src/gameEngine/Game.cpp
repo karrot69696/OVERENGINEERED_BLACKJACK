@@ -62,12 +62,9 @@ void Game::RunGame(){
     SkillManager skillManager;
     RoundManager roundManager(players, deck, skillManager, this->gameState, this->uiManager);
     roundManager.createSkills();
-    roundManager.updateGameState(PhaseName::BLACKJACK_CHECK_PHASE, gameState.getCurrentPlayerId());
-    int round = 0;
-    // for (int round = 0; round < players.size(); round++) {
-    //     roundManager.playRound(round);
-    //     displayPoints();
-    // }
+    roundManager.updateGameState(PhaseName::BLACKJACK_CHECK_PHASE, 0);
+    roundManager.changePhase(PhaseName::BLACKJACK_CHECK_PHASE);
+
     while (window.isOpen()){
 
         while (std::optional event = this->window.pollEvent()){
@@ -76,6 +73,7 @@ void Game::RunGame(){
 
 
         //===============OLD MAIN ROUND LOOP=================
+        // int round = 0;
         // if(!roundManager.playRound(round)){
         //     std::cout << "\n=== GAME OVER ===\n" << std::endl;
         //     return;

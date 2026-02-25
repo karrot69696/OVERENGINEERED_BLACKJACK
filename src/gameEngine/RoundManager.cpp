@@ -485,6 +485,10 @@ Player& RoundManager::getPlayerById(int id){
 
 void RoundManager::update(){
 
+    if (!currentPhase){
+        std::cout << "[RoundManager]No current phase set. Cannot update." << std::endl;
+        return; 
+    }
     auto next = currentPhase->onUpdate();
 
     if (next)

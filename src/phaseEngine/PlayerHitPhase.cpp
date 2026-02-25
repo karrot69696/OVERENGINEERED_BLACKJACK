@@ -18,9 +18,9 @@ std::optional<PhaseName> PlayerHitPhase::onUpdate() {
     // skip player that is not host or blackjacked
     if (currentPlayer.getHost() == 1 || currentPlayer.getBlackJacked() == 1){
 
-        moveToNextPlayer();
+        incrementCurrentPlayerId();
         //if all players have been checked, reset to first player and move to next phase
-        if (getCurrentPlayer().getId() == -1){
+        if (getCurrentPlayerId() == -1){
             roundManager.updateGameState(PhaseName::HOST_HIT_PHASE, 0);
             return PhaseName::HOST_HIT_PHASE;
         }
@@ -31,10 +31,10 @@ std::optional<PhaseName> PlayerHitPhase::onUpdate() {
         std::cout << "[playerHitHandler] Player " << currentPlayer.getId() << " has finished their turn." << std::endl;
         
         //indexing next player
-        moveToNextPlayer();
+        incrementCurrentPlayerId();
 
         //if all players have been checked, reset to first player and move to next phase
-        if (getCurrentPlayer().getId() == -1){
+        if (getCurrentPlayerId()== -1){
             std::cout << "[playerHitHandler] Moving to HOST_HIT_PHASE\n";
             roundManager.updateGameState(PhaseName::HOST_HIT_PHASE, 0);
             return PhaseName::HOST_HIT_PHASE;

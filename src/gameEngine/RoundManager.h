@@ -30,7 +30,7 @@ private:
     UIManager& uiManager;
 
     //NEW PHASE SYSTEM
-    std::unique_ptr<Phase> currentPhase;
+    std::unique_ptr<Phase> currentPhase; 
     int round = 0;
 public:
 
@@ -44,7 +44,6 @@ public:
 
     //setters
     void incrementRound(){round++;}
-
     //OLD PLAYROUND MAIN LOOP
     bool playRound(int& round);
 
