@@ -11,13 +11,6 @@ void Game::dealInitialCards(int numCards){
     }
 }
 
-void Game::displayPoints(){
-    std::cout << "Points tally:" << std::endl;
-    for (auto& player : players){
-        std::cout << "Player " << player.getId() << ": " << player.getPoint() << " points." << std::endl;
-    }
-}
-
 void Game::SetupGame(){
 
     //initialize deck and skill deck
@@ -59,9 +52,9 @@ void Game::SetupGame(){
     //choose host
     players.front().setHost();
     std::cout << "Player " << players.front().getId() << " is the host." << std::endl;
+    
     //deal initial cards to players
     dealInitialCards(initialCardCount);
-
 }   
 
 void Game::RunGame(){
@@ -81,10 +74,20 @@ void Game::RunGame(){
             eventHandler(event);
         }
 
-        if(!roundManager.playRound(round)){
-            std::cout << "\n=== GAME OVER ===\n" << std::endl;
-            return;
+
+        //===============OLD MAIN ROUND LOOP=================
+        // if(!roundManager.playRound(round)){
+        //     std::cout << "\n=== GAME OVER ===\n" << std::endl;
+        //     return;
+        // }
+        //===================================================
+
+        //===============NEW PHASE SYSTEM====================
+        if(roundManager.getGameState().getPhaseName() != PhaseName::GAME_OVER){
+            roundManager.update();
         }
+        //===================================================
+
         window.clear();
         uiManager.render();
         window.display();
@@ -97,6 +100,7 @@ void Game::RunGame(){
     skillDeck.clearCards();
     
 }
+
 void Game::eventHandler(const std::optional<sf::Event>& event){
 
     if ( event->is<sf::Event::Closed>()){

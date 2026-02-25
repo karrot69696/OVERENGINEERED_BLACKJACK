@@ -116,8 +116,12 @@ CMakeFiles/MindJack.dir/src/main.cpp.obj: C:/Users/minhk/OneDrive/Desktop/OVEREN
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/GameState.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/Player.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/SkillDeck.h \
+  C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/BattlePhase.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/BlackJackCheckPhase.h \
+  C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/HostHitPhase.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/Phase.h \
+  C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/PlayerHitPhase.h \
+  C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/RoundEndPhase.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/skillEngine/Skill.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/skillEngine/SkillManager.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/skillEngine/Skill_Deliverance.h \
@@ -682,6 +686,8 @@ C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include/SFML/Window/WindowB
 
 C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include/SFML/Window/WindowEnums.hpp:
 
+C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/BattlePhase.h:
+
 C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include/SFML/Window/WindowHandle.hpp:
 
 C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/Card.h:
@@ -698,9 +704,15 @@ C:/mingw64/include/c++/14.2.0/bits/codecvt.h:
 
 C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/BlackJackCheckPhase.h:
 
+C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/HostHitPhase.h:
+
 C:/mingw64/include/c++/14.2.0/ext/aligned_buffer.h:
 
 C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/Phase.h:
+
+C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/PlayerHitPhase.h:
+
+C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/RoundEndPhase.h:
 
 C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/skillEngine/SkillManager.h:
 

@@ -28,6 +28,8 @@ private:
     SkillManager skillManager;
     GameState& gameState;
     UIManager& uiManager;
+
+    //NEW PHASE SYSTEM
     std::unique_ptr<Phase> currentPhase;
     int round = 0;
 public:
@@ -69,37 +71,9 @@ public:
     std::string phaseToString();
 
     //NEW PHASE SYSTEM
-    void update(){
-        auto next = currentPhase->onUpdate();
-
-        if (next)
-            changePhase(*next);
-    }
-
-    void changePhase(PhaseName newPhase){
-        if (currentPhase)
-            currentPhase->onExit();
-
-        currentPhase = createPhase(newPhase);
-
-        if (currentPhase)
-            currentPhase->onEnter();
-    }
-
-    std::unique_ptr<Phase> createPhase(const PhaseName name){
-        if (name == PhaseName::BLACKJACK_CHECK_PHASE)
-            return std::make_unique<BlackJackCheckPhase>(uiManager, *this);
-        if (name == PhaseName::PLAYER_HIT_PHASE)
-            return std::make_unique<PlayerHitPhase>(uiManager, *this);
-        if (name == PhaseName::HOST_HIT_PHASE)
-            return std::make_unique<HostHitPhase>(uiManager, *this);
-        if (name == PhaseName::BATTLE_PHASE)
-            return std::make_unique<BattlePhase>(uiManager, *this);
-        if (name == PhaseName::ROUND_END)
-            return std::make_unique<RoundEndPhase>(uiManager, *this);
-
-        return nullptr;
-    }
+    void update();
+    void changePhase(PhaseName newPhase);
+    std::unique_ptr<Phase> createPhase(const PhaseName name);
 
 };
 

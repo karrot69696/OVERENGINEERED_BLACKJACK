@@ -117,8 +117,12 @@ CMakeFiles/MindJack.dir/src/main.cpp.obj
  C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/GameState.h
  C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/Player.h
  C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/SkillDeck.h
+ C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/BattlePhase.h
  C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/BlackJackCheckPhase.h
+ C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/HostHitPhase.h
  C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/Phase.h
+ C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/PlayerHitPhase.h
+ C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/RoundEndPhase.h
  C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/skillEngine/Skill.h
  C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/skillEngine/SkillManager.h
  C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/skillEngine/Skill_Deliverance.h

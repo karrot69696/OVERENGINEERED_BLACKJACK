@@ -3,7 +3,7 @@
 
 void BlackJackCheckPhase::onEnter() {
     std::cout << "\n=== ENTERING BLACKJACK CHECK PHASE ===\n" << std::endl;
-
+    std::cout << "ROUND: " << roundManager.getRound() << std::endl;
     Player& currentPlayer = getCurrentPlayer();
     roundManager.updateGameState(PhaseName::BLACKJACK_CHECK_PHASE,currentPlayer.getId());
 }

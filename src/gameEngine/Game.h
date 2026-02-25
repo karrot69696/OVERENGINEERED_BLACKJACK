@@ -28,7 +28,7 @@ private:
     GameState& gameState;
     UIManager uiManager;
 public:
-        Game(sf::RenderWindow& window, GameState& _gameState) 
+    Game(sf::RenderWindow& window, GameState& _gameState) 
         : window(window), gameState(_gameState), uiManager(window, gameState) {}
     ~Game(){}
     void dealInitialCards(int numCards);  

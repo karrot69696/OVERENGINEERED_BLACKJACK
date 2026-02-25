@@ -25,6 +25,7 @@ enum class PhaseName{
     HOST_HIT_PHASE,
     BATTLE_PHASE,
     ROUND_END,
+    GAME_OVER
 };
 struct PlayerInfo {
     int playerId;

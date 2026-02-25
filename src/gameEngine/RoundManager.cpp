@@ -2,9 +2,9 @@
 #include "Game.h"
 
 
-    // ========================================================================
-    // OLD MAIN ROUND LOOP
-    // ========================================================================
+// ========================================================================
+// OLD MAIN ROUND LOOP
+// ========================================================================
 bool RoundManager::playRound(int& round){
 
     //if handleBlackjackPhaseName returns false -> host has blackjack -> end round immediately
@@ -75,9 +75,11 @@ bool RoundManager::playRound(int& round){
     }
     return true;
 }
-    // ========================================================================
-    // OLD PHASE HANDLER
-    // ========================================================================
+
+// ========================================================================
+// OLD PHASE SYSTEM
+// ========================================================================
+
 bool RoundManager::blackJackHandler(){
 
     //checks current player    
@@ -384,9 +386,9 @@ void RoundManager::roundEndHandler(){
     updateGameState(PhaseName::BLACKJACK_CHECK_PHASE, 0);
 }
 
-    // ========================================================================
-    // Helper functions
-    // ========================================================================
+// ========================================================================
+// Helper functions
+// ========================================================================
 void RoundManager::updateGameState(PhaseName phase, int playerId){
     // std::cout<< "[updateGameState] - "<< phaseToString() 
     //             << " Player Id: "<< playerId << std::endl;
@@ -467,10 +469,59 @@ std::string RoundManager::phaseToString(){
         }
     }
 
+
+// ========================================================================
+// NEW PHASE SYSTEM
+// ========================================================================
+
 Player& RoundManager::getPlayerById(int id){
     for (auto& player : players){
         if (player.getId() == id)
             return player;
     }
     throw std::runtime_error("Player with ID " + std::to_string(id) + " not found.");
+}
+
+
+void RoundManager::update(){
+
+    auto next = currentPhase->onUpdate();
+
+    if (next)
+        changePhase(*next);
+        
+    else if (next == std::nullopt && gameState.getPhaseName() == PhaseName::GAME_OVER){
+        std::cout << "Game Over! Thanks for playing!" << std::endl;
+    }
+}
+
+void RoundManager::changePhase(PhaseName newPhase){
+    //call onExit of CURRENT phase before changing
+    if (currentPhase)
+        currentPhase->onExit();
+
+    //change phase
+    currentPhase = createPhase(newPhase);
+
+    //call onEnter of NEW phase after changing
+    if (currentPhase)
+        currentPhase->onEnter();
+}
+
+std::unique_ptr<Phase> RoundManager::createPhase(const PhaseName name){
+    if (name == PhaseName::BLACKJACK_CHECK_PHASE)
+        return std::make_unique<BlackJackCheckPhase>(uiManager, *this);
+    if (name == PhaseName::PLAYER_HIT_PHASE)
+        return std::make_unique<PlayerHitPhase>(uiManager, *this);
+    if (name == PhaseName::HOST_HIT_PHASE)
+        return std::make_unique<HostHitPhase>(uiManager, *this);
+    if (name == PhaseName::BATTLE_PHASE)
+        return std::make_unique<BattlePhase>(uiManager, *this);
+    if (name == PhaseName::ROUND_END)
+        return std::make_unique<RoundEndPhase>(uiManager, *this);
+    if (name == PhaseName::GAME_OVER){
+        return nullptr;
+    }
+
+    return nullptr;
 }
