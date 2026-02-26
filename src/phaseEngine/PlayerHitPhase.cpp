@@ -9,6 +9,19 @@ void PlayerHitPhase::onEnter() {
 
     //update player info in game state
     roundManager.updateGameState(PhaseName::PLAYER_HIT_PHASE,currentPlayer.getId());
+
+    // Set up callback for player action input
+    uiManager.onActionChosen = [&](PlayerAction chosenAction){
+        std::cout << "[turnHandler] Player " << getCurrentPlayer().getId() << " chose action: " 
+                    << (chosenAction == PlayerAction::HIT ? 
+                        "HIT" : chosenAction == PlayerAction::STAND ? "STAND" : "SKILL_REQUEST") 
+                    << std::endl;
+
+        getCurrentPlayer().setPendingAction(chosenAction);
+    };
+
+    //UI prompt for player action input
+    uiManager.requestActionInput(currentPlayer.getId());
 }
 
 std::optional<PhaseName> PlayerHitPhase::onUpdate() {
@@ -24,6 +37,7 @@ std::optional<PhaseName> PlayerHitPhase::onUpdate() {
             roundManager.updateGameState(PhaseName::HOST_HIT_PHASE, 0);
             return PhaseName::HOST_HIT_PHASE;
         }
+        return PhaseName::PLAYER_HIT_PHASE;
     }
 
     // if turnHandler returns false -> player stands -> move to next player
@@ -45,20 +59,5 @@ std::optional<PhaseName> PlayerHitPhase::onUpdate() {
 
 void PlayerHitPhase::onExit() {
     std::cout << "\n=== EXITING PLAYER HIT PHASE ===\n" << std::endl;
-    
-    //get current player
-    Player& hostPlayer = roundManager.getHostPlayer();
-
-    // Set up callback for HOST action input during the next phase
-    uiManager.onActionChosen = [&](PlayerAction chosenAction){
-        std::cout << "[PlayerHitPhase][onExit] Host " << hostPlayer.getId() << " chose action: " 
-                    << (chosenAction == PlayerAction::HIT ? 
-                        "HIT" : chosenAction == PlayerAction::STAND ? "STAND" : "SKILL_REQUEST") 
-                    << std::endl;
-
-        hostPlayer.setPendingAction(chosenAction);
-    };
-
-    //update game state for next phase
-    roundManager.updateGameState(PhaseName::HOST_HIT_PHASE, 0);
+    uiManager.clearInput();
 }

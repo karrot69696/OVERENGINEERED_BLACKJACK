@@ -37,6 +37,7 @@ std::optional<PhaseName> BlackJackCheckPhase::onUpdate(){
     //if all players have been checked move to next phase
     if ( getCurrentPlayerId() == -1 ){
         std::cout << "[BlackJackCheckPhase] All players checked for blackjack. Moving to PLAYER_HIT_PHASE." << std::endl;
+        roundManager.updateGameState(PhaseName::PLAYER_HIT_PHASE, 0);
         return PhaseName::PLAYER_HIT_PHASE;
     }
     
@@ -45,20 +46,6 @@ std::optional<PhaseName> BlackJackCheckPhase::onUpdate(){
 
 
 void BlackJackCheckPhase::onExit() {
-
     //reset current player index to 0 for next phase
     std::cout << "\n=== EXITING BLACKJACK CHECK PHASE ===\n" << std::endl;
-
-    // Set up callback for player action input during the next phase
-    uiManager.onActionChosen = [&](PlayerAction chosenAction){
-        std::cout << "[turnHandler] Player " << getCurrentPlayer().getId() << " chose action: " 
-                    << (chosenAction == PlayerAction::HIT ? 
-                        "HIT" : chosenAction == PlayerAction::STAND ? "STAND" : "SKILL_REQUEST") 
-                    << std::endl;
-
-        getCurrentPlayer().setPendingAction(chosenAction);
-    };
-
-    //update game state for next phase
-    roundManager.updateGameState(PhaseName::PLAYER_HIT_PHASE, 0);
 }

@@ -8,6 +8,19 @@ void HostHitPhase::onEnter() {
     Player& hostPlayer = roundManager.getHostPlayer();
     Player& currentPlayer = getCurrentPlayer();
 
+    //set callback for host action input during host hit phase
+    uiManager.onActionChosen = [&](PlayerAction chosenAction){
+            std::cout << "[turnHandler] Host " << hostPlayer.getId() << " chose action: " 
+                        << (chosenAction == PlayerAction::HIT ? 
+                            "HIT" : chosenAction == PlayerAction::STAND ? "STAND" : "SKILL_REQUEST") 
+                        << std::endl;
+
+            hostPlayer.setPendingAction(chosenAction);
+    };
+    
+    //UI prompt for host action input
+    uiManager.requestActionInput(hostPlayer.getId());
+
     //update player info in game state
     roundManager.updateGameState(PhaseName::HOST_HIT_PHASE,currentPlayer.getId());
 }
@@ -42,4 +55,5 @@ std::optional<PhaseName> HostHitPhase::onUpdate() {
 
 void HostHitPhase::onExit() {
     std::cout << "\n=== EXITING HOST HIT PHASE ===\n" << std::endl;
+    uiManager.clearInput();
 }

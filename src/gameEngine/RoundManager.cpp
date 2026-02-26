@@ -201,7 +201,8 @@ bool RoundManager::turnHandler(Player& player, Player& opponent){
     //     action = player.playerTurnLogic(gameState);
     // }
 
-
+    //for bots: setPendingAction directly in botMode
+    //for humans: wait for UI input to set pendingAction
     if(player._isBot()){
        player.setPendingAction(player.botMode(gameState));
     }

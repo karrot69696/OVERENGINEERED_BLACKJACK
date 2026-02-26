@@ -19,6 +19,7 @@ class Phase {
     protected:
         UIManager& uiManager;
         RoundManager& roundManager;
+        SkillManager& skillManager = roundManager.getSkillManager();
     public:
         Phase(UIManager& uiManager, RoundManager& roundManager) : uiManager(uiManager), roundManager(roundManager){}
         virtual ~Phase() = default;
@@ -30,7 +31,6 @@ class Phase {
         Player& getCurrentPlayer();
         int getCurrentPlayerId();
         void incrementCurrentPlayerId();
-
 };
 
 #endif
