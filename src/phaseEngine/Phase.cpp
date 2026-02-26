@@ -1,6 +1,5 @@
 #include "Phase.h"
-#include "../gameEngine/RoundManager.h"
-#include "../gameEngine/UIManager.h"
+#include "../gameEngine/Game.h"
 
 Player& Phase::getCurrentPlayer(){
     //grabs current player    

@@ -3,6 +3,7 @@
 #include "Phase.h"
 class UIManager;
 class RoundManager;
+class SkillManager;
 
 class PlayerHitPhase :public Phase {
     public:

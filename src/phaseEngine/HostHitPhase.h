@@ -4,6 +4,7 @@
 
 class UIManager;
 class RoundManager;
+class SkillManager;
 
 class HostHitPhase : public Phase {
     public:

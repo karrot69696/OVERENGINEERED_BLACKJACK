@@ -514,19 +514,19 @@ void RoundManager::changePhase(PhaseName newPhase){
 }
 
 std::unique_ptr<Phase> RoundManager::createPhase(const PhaseName name){
-    if (name == PhaseName::BLACKJACK_CHECK_PHASE)
-        return std::make_unique<BlackJackCheckPhase>(uiManager, *this);
-    if (name == PhaseName::PLAYER_HIT_PHASE)
-        return std::make_unique<PlayerHitPhase>(uiManager, *this);
-    if (name == PhaseName::HOST_HIT_PHASE)
-        return std::make_unique<HostHitPhase>(uiManager, *this);
-    if (name == PhaseName::BATTLE_PHASE)
-        return std::make_unique<BattlePhase>(uiManager, *this);
-    if (name == PhaseName::ROUND_END)
-        return std::make_unique<RoundEndPhase>(uiManager, *this);
-    if (name == PhaseName::GAME_OVER){
-        return nullptr;
+    switch (name){
+        case PhaseName::BLACKJACK_CHECK_PHASE:
+            return std::make_unique<BlackJackCheckPhase>(this->uiManager, *this, this->skillManager);
+        case PhaseName::PLAYER_HIT_PHASE:
+            return std::make_unique<PlayerHitPhase>(this->uiManager, *this, this->skillManager);
+        case PhaseName::HOST_HIT_PHASE:
+            return std::make_unique<HostHitPhase>(this->uiManager, *this, this->skillManager);
+        case PhaseName::BATTLE_PHASE:
+            return std::make_unique<BattlePhase>(this->uiManager, *this, this->skillManager);
+        case PhaseName::ROUND_END:
+            return std::make_unique<RoundEndPhase>(this->uiManager, *this, this->skillManager);
+        case PhaseName::GAME_OVER:
+            return nullptr;
     }
-
     return nullptr;
 }

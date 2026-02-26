@@ -4,6 +4,7 @@
 
 class UIManager;
 class RoundManager;
+class SkillManager;
 
 class BattlePhase : public Phase {
     public:

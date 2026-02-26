@@ -4,6 +4,7 @@
 
 class UIManager;
 class RoundManager;
+class SkillManager;
 
 class RoundEndPhase : public Phase {
     public:
