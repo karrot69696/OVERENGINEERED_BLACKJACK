@@ -38,8 +38,19 @@ class Player{
 
 
         //getters
-        Card getCardInHand(int index){
+        Card getCardInHand(int index) const {
+            if(index >= cardsInHand.size()){
+                std::cout << "Invalid card index: " << index << std::endl;
+                throw std::out_of_range("Card index out of range");
+            }
             return cardsInHand[index];
+        }
+        Card* getCardAddr(int index){
+            if(index >= cardsInHand.size()){
+                std::cout << "Invalid card index: " << index << std::endl;
+                throw std::out_of_range("Card index out of range");
+            }
+            return &cardsInHand[index];
         }
         void blackJackSet(bool status = 1){
             isBlackJacked = status;

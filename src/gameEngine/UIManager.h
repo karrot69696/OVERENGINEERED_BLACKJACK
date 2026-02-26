@@ -87,7 +87,6 @@ private:
     bool showActionMenu = false;
     bool showTargetingOverlay_Deliverance = false;
     int activePlayerId = -1;
-
     // Card visuals built each frame from GameState
     std::vector<CardVisual> cardVisuals;
     void buildCardVisuals();

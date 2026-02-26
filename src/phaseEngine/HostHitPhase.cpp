@@ -10,14 +10,33 @@ void HostHitPhase::onEnter() {
 
     //set callback for host action input during host hit phase
     uiManager.onActionChosen = [&](PlayerAction chosenAction){
-            std::cout << "[turnHandler] Host " << hostPlayer.getId() << " chose action: " 
+        std::cout << "[HostHitPhase] Host " << hostPlayer.getId() << " chose action: " 
                         << (chosenAction == PlayerAction::HIT ? 
                             "HIT" : chosenAction == PlayerAction::STAND ? "STAND" : "SKILL_REQUEST") 
                         << std::endl;
 
-            hostPlayer.setPendingAction(chosenAction);
+        hostPlayer.setPendingAction(chosenAction);
+    
+        // If host chooses skill, switch to targeting mode immediately
+        if (chosenAction == PlayerAction::SKILL_REQUEST) {
+            // Switch to targeting mode
+            //UI prompt for skill target input
+            uiManager.requestTargetInput(currentPlayer.getId());
+        }
     };
     
+    //populate callback for skill target input during host hit phase
+    uiManager.onTargetChosen = [&](PlayerTargeting chosenTarget){
+        std::cout << "[uiManager.onTargetChosen] Host " << hostPlayer.getId() << " chose skill target: " 
+                    << (chosenTarget.targetPlayerIds.size() > 0 ? 
+                        "Player " + chosenTarget.targetPlayerIds[0] : 
+                        "Card " + chosenTarget.targetCards[0].getRankAsString() 
+                        + " of " 
+                        + chosenTarget.targetCards[0].getSuitAsString())
+                    << std::endl;
+        roundManager.getGameState().pendingTarget = chosenTarget;
+    };
+
     //UI prompt for host action input
     uiManager.requestActionInput(hostPlayer.getId());
 

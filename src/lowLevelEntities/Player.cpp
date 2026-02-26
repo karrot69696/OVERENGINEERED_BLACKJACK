@@ -152,7 +152,7 @@ PlayerTargeting Player::skillTarget_Deliverance(GameState& gameState){
     }
 
     PlayerTargeting target;
-    target.targetCards.push_back(&cardsInHand[cardId]);
+    target.targetCards.push_back(cardsInHand[cardId]);
     target.targetPlayerIds.push_back(id);
 
     return target;

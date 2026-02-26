@@ -18,7 +18,7 @@ bool RoundManager::playRound(int& round){
                 else {
                     uiManager.onActionChosen = [&](PlayerAction chosenAction){
 
-                        std::cout << "[turnHandler] Player " << players[gameState.getCurrentPlayerId()].getId() << " chose action: " 
+                        std::cout << "[playRound] Player " << players[gameState.getCurrentPlayerId()].getId() << " chose action: " 
                                     << (chosenAction == PlayerAction::HIT ? 
                                         "HIT" : chosenAction == PlayerAction::STAND ? "STAND" : "SKILL_REQUEST") 
                                     << std::endl;
@@ -38,7 +38,7 @@ bool RoundManager::playRound(int& round){
                 //set callback for host action input during host hit phase
                 uiManager.onActionChosen = [&](PlayerAction chosenAction){
 
-                        std::cout << "[turnHandler] Host " << getHostPlayer().getId() << " chose action: " 
+                        std::cout << "[playRound] Host " << getHostPlayer().getId() << " chose action: " 
                                     << (chosenAction == PlayerAction::HIT ? 
                                         "HIT" : chosenAction == PlayerAction::STAND ? "STAND" : "SKILL_REQUEST") 
                                     << std::endl;
@@ -110,7 +110,7 @@ bool RoundManager::blackJackHandler(){
         std::cout << "[blackJackHandler] All players checked for blackjack. Moving to PLAYER_HIT_PHASE." << std::endl;
         uiManager.onActionChosen = [&](PlayerAction chosenAction){
 
-            std::cout << "[turnHandler] Player " << currentPlayer.getId() << " chose action: " 
+            std::cout << "[blackJackHandler] Player " << currentPlayer.getId() << " chose action: " 
                         << (chosenAction == PlayerAction::HIT ? 
                             "HIT" : chosenAction == PlayerAction::STAND ? "STAND" : "SKILL_REQUEST") 
                         << std::endl;
@@ -317,11 +317,6 @@ void RoundManager::skillHandler(Player& player){
     //     std::vector<Card*> targetCards;
     // };
 
-    
-    uiManager.requestTargetInput(player.getId());
-    uiManager.onTargetChosen = [&](PlayerTargeting chosenTarget){
-        gameState.pendingTarget = chosenTarget;
-    };
     //grab ACTUAL players and cards from the given ids.
     std::vector<Player*> actualTargets;
     std::vector<Card*> actualTargetCards;
@@ -337,9 +332,10 @@ void RoundManager::skillHandler(Player& player){
     for (Card card : gameState.pendingTarget.targetCards) {
         for (auto& p : players) {
             for (int i = 0; i < p.getHandSize(); i++) {
-                Card c = p.getCardInHand(i);
-                if (c.getSuit() == card.getSuit() && c.getRank() == card.getRank()) {
-                    actualTargetCards.push_back(&p.getCardInHand(i)); //*pointerToObject = &object
+                Card* c = p.getCardAddr(i);
+                if (c->getSuit() == card.getSuit() && c->getRank() == card.getRank()) {
+                    std::cout << "[skillHandler] Found target card: " << c->getRankAsString() << c->getSuitAsString() << " in player " << p.getId() << "'s hand." << std::endl;
+                    actualTargetCards.push_back(c); 
                 }
             }
         }
@@ -360,7 +356,13 @@ void RoundManager::skillHandler(Player& player){
         gameState
     };
 
-    skillManager.processSkill(context);
+    if(!skillManager.processSkill(context)){
+        std::cout << "[skillHandler] Skill processing failed for player " << player.getId() << std::endl;
+    }
+    
+    gameState.pendingTarget = {}; //reset pending target after processing skill
+    uiManager.requestActionInput(player.getId());
+    player.setPendingAction(PlayerAction::IDLE);
 }
 
 void RoundManager::roundEndHandler(){

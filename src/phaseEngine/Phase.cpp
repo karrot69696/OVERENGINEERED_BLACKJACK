@@ -35,17 +35,17 @@ bool Phase::turnHandler(Player& player, Player& opponent){
         break;
 
         case PlayerAction::SKILL_REQUEST:
-            if(skillManager.getSkillUses(player.getSkillName()) > 0){
-
+        
+            //wait until target exists, then process skill in skillHandler
+            if(roundManager.getGameState().pendingTarget.targetPlayerIds.size() > 0 || 
+            roundManager.getGameState().pendingTarget.targetCards.size() > 0){
+                std::cout << "[Phase][turnHandler] Processing skill for player " << player.getId() << std::endl;
                 roundManager.skillHandler(player);
 
                 roundManager.updateGameState(
                     player.getHost() ? PhaseName::HOST_HIT_PHASE : PhaseName::PLAYER_HIT_PHASE,
                     player.getHost() ? opponent.getId() : player.getId()
                 );
-            }
-            else{
-                std::cout<< "[turnHandler] SKILL OUT OF USES" << std::endl;
             }
         break;
 

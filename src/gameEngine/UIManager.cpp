@@ -145,6 +145,7 @@ void UIManager::handleEvent(const std::optional<sf::Event>& event) {
         if (showTargetingOverlay_Deliverance) {
             for (auto& cv : cardVisuals) {
                 if (cv.ownerId == activePlayerId && cv.isClicked(mousePos)) {
+                    std::cout << "[UIManager]Card has been clicked: ownerId=" << cv.ownerId << ", cardIndex=" << cv.cardIndex << std::endl;
                     // Toggle selection
                     cv.isTarget = !cv.isTarget;
                     if (cv.isTarget) {
@@ -183,7 +184,6 @@ void UIManager::handleEvent(const std::optional<sf::Event>& event) {
 
 void UIManager::confirmTargeting() {
     if (onTargetChosen) onTargetChosen(pendingTargeting);
-    clearInput();
 }
 
 // ============================================================================

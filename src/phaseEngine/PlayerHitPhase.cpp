@@ -12,14 +12,23 @@ void PlayerHitPhase::onEnter() {
 
     // Set up callback for player action input
     uiManager.onActionChosen = [&](PlayerAction chosenAction){
-        std::cout << "[turnHandler] Player " << getCurrentPlayer().getId() << " chose action: " 
+        std::cout << "[PlayerHitPhase] Player " << getCurrentPlayer().getId() << " chose action: " 
                     << (chosenAction == PlayerAction::HIT ? 
                         "HIT" : chosenAction == PlayerAction::STAND ? "STAND" : "SKILL_REQUEST") 
                     << std::endl;
 
         getCurrentPlayer().setPendingAction(chosenAction);
+        if (chosenAction == PlayerAction::SKILL_REQUEST) {
+            // Switch to targeting mode
+            //UI prompt for skill target input
+            uiManager.requestTargetInput(currentPlayer.getId());
+        }
     };
 
+    //populate callback for skill target input during player hit phase
+    uiManager.onTargetChosen = [&](PlayerTargeting chosenTarget){
+        roundManager.getGameState().pendingTarget = chosenTarget;
+    };
     //UI prompt for player action input
     uiManager.requestActionInput(currentPlayer.getId());
 }
