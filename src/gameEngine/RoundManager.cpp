@@ -359,7 +359,7 @@ void RoundManager::skillHandler(Player& player){
     if(!skillManager.processSkill(context)){
         std::cout << "[skillHandler] Skill processing failed for player " << player.getId() << std::endl;
     }
-    
+
     gameState.pendingTarget = {}; //reset pending target after processing skill
     uiManager.requestActionInput(player.getId());
     player.setPendingAction(PlayerAction::IDLE);
@@ -450,6 +450,14 @@ Player& RoundManager::getHostPlayer() {
     return *it;
 }
 
+Player& RoundManager::getPlayerById(int id){
+    for (auto& player : players){
+        if (player.getId() == id)
+            return player;
+    }
+    throw std::runtime_error("Player with ID " + std::to_string(id) + " not found.");
+}
+
 void RoundManager::dealCardsToPlayers(int numCards){
     for (int i = 0; i < numCards; i++){
         for (auto& player : players){
@@ -489,29 +497,22 @@ std::string RoundManager::phaseToString(){
 // NEW PHASE SYSTEM
 // ========================================================================
 
-Player& RoundManager::getPlayerById(int id){
-    for (auto& player : players){
-        if (player.getId() == id)
-            return player;
-    }
-    throw std::runtime_error("Player with ID " + std::to_string(id) + " not found.");
-}
-
-
 void RoundManager::update(){
-
-    if (!currentPhase){
-        std::cout << "[RoundManager]No current phase set. Cannot update." << std::endl;
+    
+    //check for game end or invalid currentPhase
+    if(gameState.getPhaseName() == PhaseName::GAME_OVER){
+        std::cout<<"Game Over. Thanks for playing"<<std::endl;
+    }
+    else if (!currentPhase){
+        std::cout << "[RoundManager] No current phase set. Cannot update." << std::endl;
         return; 
     }
+
+    //game loop
     auto next = currentPhase->onUpdate();
 
     if (next)
         changePhase(*next);
-        
-    else if (next == std::nullopt && gameState.getPhaseName() == PhaseName::GAME_OVER){
-        std::cout << "Game Over! Thanks for playing!" << std::endl;
-    }
 }
 
 void RoundManager::changePhase(PhaseName newPhase){
@@ -530,15 +531,15 @@ void RoundManager::changePhase(PhaseName newPhase){
 std::unique_ptr<Phase> RoundManager::createPhase(const PhaseName name){
     switch (name){
         case PhaseName::BLACKJACK_CHECK_PHASE:
-            return std::make_unique<BlackJackCheckPhase>(this->uiManager, *this, this->skillManager);
+            return std::make_unique<BlackJackCheckPhase>(this->uiManager, *this, this->skillManager, this->gameState);
         case PhaseName::PLAYER_HIT_PHASE:
-            return std::make_unique<PlayerHitPhase>(this->uiManager, *this, this->skillManager);
+            return std::make_unique<PlayerHitPhase>(this->uiManager, *this, this->skillManager, this->gameState);
         case PhaseName::HOST_HIT_PHASE:
-            return std::make_unique<HostHitPhase>(this->uiManager, *this, this->skillManager);
+            return std::make_unique<HostHitPhase>(this->uiManager, *this, this->skillManager, this->gameState);
         case PhaseName::BATTLE_PHASE:
-            return std::make_unique<BattlePhase>(this->uiManager, *this, this->skillManager);
+            return std::make_unique<BattlePhase>(this->uiManager, *this, this->skillManager, this->gameState);
         case PhaseName::ROUND_END:
-            return std::make_unique<RoundEndPhase>(this->uiManager, *this, this->skillManager);
+            return std::make_unique<RoundEndPhase>(this->uiManager, *this, this->skillManager, this->gameState);
         case PhaseName::GAME_OVER:
             return nullptr;
     }

@@ -19,9 +19,15 @@ class Phase {
         UIManager& uiManager;
         RoundManager& roundManager;
         SkillManager& skillManager;
+        GameState& gameState;
+        std::vector<Player>& players;
+        Deck& deck;
     public:
-        Phase(UIManager& uiManager, RoundManager& roundManager, SkillManager& skillManager) 
-        : uiManager(uiManager), roundManager(roundManager), skillManager(skillManager){}
+        Phase(UIManager& uiManager,
+          RoundManager& roundManager,
+          SkillManager& skillManager,
+          GameState& gameState);
+
         virtual ~Phase() = default;
         virtual void onEnter(){};
         virtual std::optional<PhaseName> onUpdate(){return std::nullopt;};
@@ -34,6 +40,7 @@ class Phase {
 
         //ULTRA IMPORTANT TURN HANDLER
         bool turnHandler(Player& player, Player& opponent);
+        void skillHandler(Player& player);
 };
 
 #endif

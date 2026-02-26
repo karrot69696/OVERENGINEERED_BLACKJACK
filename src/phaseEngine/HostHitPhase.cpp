@@ -21,7 +21,7 @@ void HostHitPhase::onEnter() {
         if (chosenAction == PlayerAction::SKILL_REQUEST) {
             // Switch to targeting mode
             //UI prompt for skill target input
-            uiManager.requestTargetInput(currentPlayer.getId());
+            uiManager.requestTargetInput(hostPlayer.getId());
         }
     };
     
@@ -34,7 +34,7 @@ void HostHitPhase::onEnter() {
                         + " of " 
                         + chosenTarget.targetCards[0].getSuitAsString())
                     << std::endl;
-        roundManager.getGameState().pendingTarget = chosenTarget;
+        gameState.pendingTarget = chosenTarget;
     };
 
     //UI prompt for host action input

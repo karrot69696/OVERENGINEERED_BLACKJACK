@@ -27,7 +27,7 @@ void PlayerHitPhase::onEnter() {
 
     //populate callback for skill target input during player hit phase
     uiManager.onTargetChosen = [&](PlayerTargeting chosenTarget){
-        roundManager.getGameState().pendingTarget = chosenTarget;
+       gameState.pendingTarget = chosenTarget;
     };
     //UI prompt for player action input
     uiManager.requestActionInput(currentPlayer.getId());

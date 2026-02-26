@@ -18,7 +18,7 @@ std::optional<PhaseName> BlackJackCheckPhase::onUpdate(){
         if (currentPlayer.getHost() == 1){
 
             std::cout << "[BlackJackCheckPhase] Host player has Black Jack! Host player wins the round!" << std::endl;
-            currentPlayer.gainPoint(roundManager.getPlayers().size()-1);
+            currentPlayer.gainPoint(players.size()-1);
             roundManager.updateGameState(PhaseName::ROUND_END, currentPlayer.getId());
             return PhaseName::ROUND_END;
         }

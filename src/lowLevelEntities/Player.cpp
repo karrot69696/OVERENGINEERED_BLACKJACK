@@ -9,8 +9,12 @@ void Player::Stand() {
 }\
 //return all cards
 void Player::returnCards(Deck& deck){
+    std::cout<< "Card(s) returned: ";
+    for (Card& card : cardsInHand){
+        std::cout<< card.getRankAsString() << " of " << card.getSuitAsString() << std::endl;
+    }
     for (auto& card : cardsInHand){
-        card.setOwnerId(-1); //reset ownerId before returning to deck
+        card.setOwnerId(-1);
         deck.retrieveCard(card);
     }
     cardsInHand.clear();

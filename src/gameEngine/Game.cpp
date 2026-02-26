@@ -81,9 +81,7 @@ void Game::RunGame(){
         //===================================================
 
         //===============NEW PHASE SYSTEM====================
-        if(roundManager.getGameState().getPhaseName() != PhaseName::GAME_OVER){
-            roundManager.update();
-        }
+        roundManager.update();
         //===================================================
 
         window.clear();

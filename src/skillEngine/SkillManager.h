@@ -40,9 +40,9 @@ class SkillManager{
             }
         }
         void resetSkillUses(std::vector<Player>& players){
-            std::cout<< "Reset all skills' uses" << std::endl;
+            std::cout<< "[SkillManager] Reset all skills' uses" << std::endl;
             for (auto& player : players){
-
+                std::cout<<"player:"<<player.getId()<<std::endl;
                 switch (player.getSkillName()){
 
                     case SkillName::DELIVERANCE:
