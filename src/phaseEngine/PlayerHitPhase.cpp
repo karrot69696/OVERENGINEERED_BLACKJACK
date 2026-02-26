@@ -41,7 +41,7 @@ std::optional<PhaseName> PlayerHitPhase::onUpdate() {
     }
 
     // if turnHandler returns false -> player stands -> move to next player
-    else if(!roundManager.turnHandler(currentPlayer, currentPlayer)){
+    else if(!turnHandler(currentPlayer, currentPlayer)){
         std::cout << "[playerHitHandler] Player " << currentPlayer.getId() << " has finished their turn." << std::endl;
         
         //indexing next player

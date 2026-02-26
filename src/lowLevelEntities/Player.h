@@ -58,6 +58,9 @@ class Player{
             pendingAction = PlayerAction::IDLE; 
             return temp;
         }
+        PlayerAction getPendingAction() const {
+            return pendingAction;
+        }
         void setPendingAction(PlayerAction action){
             pendingAction = action;
         }
@@ -99,8 +102,9 @@ class Player{
         //hand manipulation
         void Stand();
         void returnCards(Deck& deck);
-        void returnCards(Deck& deck, const std::vector<Card*>& cards);
-        void addCardToHand(const Card& card){
+        void returnCards(Deck& deck, std::vector<Card*>& cards);
+        void addCardToHand(Card card){
+            card.setOwnerId(this->id);
             cardsInHand.push_back(card);
         }
         void flipAllCardsFaceUp();

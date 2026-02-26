@@ -44,7 +44,8 @@ std::optional<PhaseName> HostHitPhase::onUpdate() {
             return PhaseName::ROUND_END;
         }
     }
-    else if(!roundManager.turnHandler(hostPlayer, currentPlayer)){
+    // run [turnHandler], if turnHandler returns false -> player stands -> move to next player
+    else if(!turnHandler(hostPlayer, currentPlayer)){
 
         roundManager.updateGameState(PhaseName::BATTLE_PHASE, currentPlayer.getId());
         return PhaseName::BATTLE_PHASE;

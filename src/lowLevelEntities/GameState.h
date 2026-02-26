@@ -41,8 +41,8 @@ enum class PlayerAction{
     IDLE
 };
 struct PlayerTargeting{
-    std::vector<int> targetPLayerIds;
-    std::vector<Card*> targetCards;
+    std::vector<int> targetPlayerIds;
+    std::vector<Card> targetCards;
 };
 class GameState {
 private:
@@ -52,12 +52,13 @@ private:
     int deckCount;
 public:
     PlayerAction pendingPlayerAction = PlayerAction::IDLE;
-    PlayerTargeting pendingPlayerTargeting;
+    PlayerTargeting pendingTarget;
     void setAllPlayerInfo(std::vector<PlayerInfo> playersInfo);
     void setPhaseName(PhaseName newPhaseName, int newCurrentPlayerId);
     void setDeckCount(int count){
         deckCount=count;
     }
+    //getters
     int getCurrentPlayerId() {return currentPlayerId;}
     void incrementCurrentPlayerId(int numPlayers) {
         currentPlayerId++;
@@ -76,6 +77,31 @@ public:
         return {};
     }
     std::vector<PlayerInfo> getAllPlayerInfo() { return playersInfo; }
+
+    Rank getCardRank(int playerId, int cardIndex){
+        for (auto& player : playersInfo){
+            if (player.playerId==playerId)
+            return player.cardsInHand[cardIndex].getRank();
+        }
+        std::cout << "Can't find player "<< playerId << " or card index " << cardIndex << std::endl;
+        return Rank::Ace; //default return to avoid compile error
+    }
+    Suit getCardSuit(int playerId, int cardIndex){
+        for (auto& player : playersInfo){
+            if (player.playerId==playerId)
+            return player.cardsInHand[cardIndex].getSuit();
+        }
+        std::cout << "Can't find player "<< playerId << " or card index " << cardIndex << std::endl;
+        return Suit::Hearts; //default return to avoid compile error
+    }
+    bool isCardFaceUp(int playerId, int cardIndex){
+        for (auto& player : playersInfo){
+            if (player.playerId==playerId)
+            return player.cardsInHand[cardIndex].isFaceUp();
+        }
+        std::cout << "Can't find player "<< playerId << " or card index " << cardIndex << std::endl;
+        return false; //default return to avoid compile error
+    }
     std::string phaseToString(PhaseName phase) {
         switch (phase) {
             case PhaseName::BLACKJACK_CHECK_PHASE: return "BLACKJACK CHECK PHASE";

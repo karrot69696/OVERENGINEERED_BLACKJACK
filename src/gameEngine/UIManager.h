@@ -44,6 +44,7 @@ struct CardVisual {
     int ownerId;
     bool highlighted = false;
     bool isTarget = false;
+    bool faceUp = true;
 
     void draw(sf::RenderWindow& window);
     bool isClicked(sf::Vector2f mousePos);
@@ -79,12 +80,12 @@ private:
     void renderHands();
     void renderHUD();
     void renderActionMenu();
-    void renderTargetingOverlay();
+    void renderTargetingOverlay_Deliverance();
 
     // Action menu buttons
     std::vector<Button> actionButtons;
     bool showActionMenu = false;
-    bool showTargetingOverlay = false;
+    bool showTargetingOverlay_Deliverance = false;
     int activePlayerId = -1;
 
     // Card visuals built each frame from GameState

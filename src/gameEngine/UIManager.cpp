@@ -90,7 +90,7 @@ UIManager::UIManager(sf::RenderWindow& window, GameState& gameState)
         if (onActionChosen) onActionChosen(PlayerAction::SKILL_REQUEST);
         // Switch to targeting mode
         showActionMenu = false;
-        showTargetingOverlay = true;
+        showTargetingOverlay_Deliverance = true;
     };
 
     clearInput();
@@ -102,20 +102,20 @@ UIManager::UIManager(sf::RenderWindow& window, GameState& gameState)
 void UIManager::requestActionInput(int playerId) {
     activePlayerId = playerId;
     showActionMenu = true;
-    showTargetingOverlay = false;
+    showTargetingOverlay_Deliverance = false;
     pendingTargeting = {};
 }
 
 void UIManager::requestTargetInput(int playerId) {
     activePlayerId = playerId;
     showActionMenu = false;
-    showTargetingOverlay = true;
+    showTargetingOverlay_Deliverance = true;
     pendingTargeting = {};
 }
 
 void UIManager::clearInput() {
     showActionMenu = false;
-    showTargetingOverlay = false;
+    showTargetingOverlay_Deliverance = false;
     activePlayerId = -1;
     pendingTargeting = {};
 }
@@ -142,16 +142,27 @@ void UIManager::handleEvent(const std::optional<sf::Event>& event) {
         }
 
         // Card targeting clicks
-        if (showTargetingOverlay) {
+        if (showTargetingOverlay_Deliverance) {
             for (auto& cv : cardVisuals) {
                 if (cv.ownerId == activePlayerId && cv.isClicked(mousePos)) {
                     // Toggle selection
                     cv.isTarget = !cv.isTarget;
                     if (cv.isTarget) {
-                        // Get actual card pointer from gameState
-                        // NOTE: You'll need a way to get Card* from gameState/player
-                        // For now we store the index and resolve later
-                        pendingTargeting.targetPLayerIds.push_back(cv.ownerId);
+
+                        // Create the exact copy of the card chosen and store it in target.targetCards
+                            PlayerTargeting target;
+                            Card chosenCard(
+                                gameState.getCardSuit(activePlayerId, cv.cardIndex),
+                                gameState.getCardRank(activePlayerId, cv.cardIndex),
+                                gameState.isCardFaceUp(activePlayerId, cv.cardIndex)
+                            );
+                            target.targetCards.push_back(chosenCard);
+                            
+                        //store the ownerId
+                            target.targetPlayerIds.push_back(cv.ownerId);
+
+                        //finish one target
+                            pendingTargeting = target;
                     }
                     return;
                 }
@@ -184,7 +195,7 @@ void UIManager::render() {
     renderHands();
     renderHUD();
     if (showActionMenu)      renderActionMenu();
-    if (showTargetingOverlay) renderTargetingOverlay();
+    if (showTargetingOverlay_Deliverance) renderTargetingOverlay_Deliverance();
 }
 
 void UIManager::renderTable() {
@@ -239,7 +250,7 @@ void UIManager::renderActionMenu() {
     for (auto& btn : actionButtons) btn.draw(window);
 }
 
-void UIManager::renderTargetingOverlay() {
+void UIManager::renderTargetingOverlay_Deliverance() {
     // Highlight cards belonging to the active player
     for (auto& cv : cardVisuals) {
         if (cv.ownerId == activePlayerId) {

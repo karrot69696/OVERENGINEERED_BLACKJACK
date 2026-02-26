@@ -313,22 +313,34 @@ void RoundManager::skillHandler(Player& player){
     
     //PlayerTargeting targets = player.targetAndConfirm(gameState);
     // struct PlayerTargeting{
-    //     std::vector<int> targetPLayerIds;
+    //     std::vector<int> targetPlayerIds;
     //     std::vector<Card*> targetCards;
     // };
 
     
     uiManager.requestTargetInput(player.getId());
     uiManager.onTargetChosen = [&](PlayerTargeting chosenTarget){
-        gameState.pendingPlayerTargeting = chosenTarget;
+        gameState.pendingTarget = chosenTarget;
     };
-    //grab ACTUAL players from the given ids.
+    //grab ACTUAL players and cards from the given ids.
     std::vector<Player*> actualTargets;
+    std::vector<Card*> actualTargetCards;
 
-    for (int id : gameState.pendingPlayerTargeting.targetPLayerIds) {
+    for (int id : gameState.pendingTarget.targetPlayerIds) {
         for (auto& p : players) {
             if (p.getId() == id) {
                 actualTargets.push_back(&p); //*pointerToObject = &object
+            }
+        }
+    }
+
+    for (Card card : gameState.pendingTarget.targetCards) {
+        for (auto& p : players) {
+            for (int i = 0; i < p.getHandSize(); i++) {
+                Card c = p.getCardInHand(i);
+                if (c.getSuit() == card.getSuit() && c.getRank() == card.getRank()) {
+                    actualTargetCards.push_back(&p.getCardInHand(i)); //*pointerToObject = &object
+                }
             }
         }
     }
@@ -343,7 +355,7 @@ void RoundManager::skillHandler(Player& player){
     SkillContext context{
         player,
         actualTargets,
-        gameState.pendingPlayerTargeting.targetCards,
+        actualTargetCards,
         deck,
         gameState
     };
