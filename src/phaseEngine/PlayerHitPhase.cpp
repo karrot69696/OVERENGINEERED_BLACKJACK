@@ -1,6 +1,8 @@
 #include "PlayerHitPhase.h"
 #include "../gameEngine/Game.h"
-
+////////////////////////////////////////////////
+//                  ON ENTER
+////////////////////////////////////////////////
 void PlayerHitPhase::onEnter() {
     std::cout << "\n=== ENTERING PLAYER HIT PHASE ===\n" << std::endl;
 
@@ -33,6 +35,9 @@ void PlayerHitPhase::onEnter() {
     uiManager.requestActionInput(currentPlayer.getId());
 }
 
+////////////////////////////////////////////////
+//                  ON UPDATE
+////////////////////////////////////////////////
 std::optional<PhaseName> PlayerHitPhase::onUpdate() {
 
     //get current player
@@ -66,6 +71,9 @@ std::optional<PhaseName> PlayerHitPhase::onUpdate() {
     return std::nullopt ;
 }
 
+////////////////////////////////////////////////
+//                  ON EXIT
+////////////////////////////////////////////////
 void PlayerHitPhase::onExit() {
     std::cout << "\n=== EXITING PLAYER HIT PHASE ===\n" << std::endl;
     uiManager.clearInput();
