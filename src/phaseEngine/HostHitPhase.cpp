@@ -27,14 +27,20 @@ void HostHitPhase::onEnter() {
     
     //populate callback for skill target input during host hit phase
     uiManager.onTargetChosen = [&](PlayerTargeting chosenTarget){
-        std::cout << "[uiManager.onTargetChosen] Host " << hostPlayer.getId() << " chose skill target: " 
-                    << (chosenTarget.targetPlayerIds.size() > 0 ? 
-                        "Player " + chosenTarget.targetPlayerIds[0] : 
-                        "Card " + chosenTarget.targetCards[0].getRankAsString() 
-                        + " of " 
-                        + chosenTarget.targetCards[0].getSuitAsString())
-                    << std::endl;
-        gameState.pendingTarget = chosenTarget;
+        if (chosenTarget.targetPlayerIds.empty() && chosenTarget.targetCards.empty()){
+            uiManager.requestActionInput(hostPlayer.getId());
+            getCurrentPlayer().setPendingAction(PlayerAction::IDLE);
+        }
+        else {
+            std::cout << "[uiManager.onTargetChosen] Host " << hostPlayer.getId() << " chose skill target: " 
+                        << (chosenTarget.targetPlayerIds.size() > 0 ? 
+                            "Player " + chosenTarget.targetPlayerIds[0] : 
+                            "Card " + chosenTarget.targetCards[0].getRankAsString() 
+                            + " of " 
+                            + chosenTarget.targetCards[0].getSuitAsString())
+                        << std::endl;
+            gameState.pendingTarget = chosenTarget;
+        }
     };
 
     //UI prompt for host action input
@@ -42,6 +48,12 @@ void HostHitPhase::onEnter() {
 
     //update player info in game state
     roundManager.updateGameState(PhaseName::HOST_HIT_PHASE,currentPlayer.getId());
+
+    //check and execute skill passive if existed
+    if(skillManager.skillPassiveHandler(this->gameState)){
+        std::cout << "[HostHitPhase] Passive handler done" << std::endl;
+        roundManager.updateGameState(PhaseName::HOST_HIT_PHASE,currentPlayer.getId());
+    }
 }
 
 std::optional<PhaseName> HostHitPhase::onUpdate() {

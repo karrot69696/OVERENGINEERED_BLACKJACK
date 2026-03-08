@@ -17,6 +17,13 @@ void Card::flip() {
 int Card::getOwnerId() const {
     return ownerId;
 }
+int Card::getHandIndex() const {
+    return handIndex;
+}
 void Card::setOwnerId(int id) {
     ownerId = id;
+}
+
+void Card::setHandIndex(int id){
+    handIndex = id;
 }

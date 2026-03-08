@@ -29,7 +29,13 @@ void PlayerHitPhase::onEnter() {
 
     //populate callback for skill target input during player hit phase
     uiManager.onTargetChosen = [&](PlayerTargeting chosenTarget){
-       gameState.pendingTarget = chosenTarget;
+
+        if (chosenTarget.targetPlayerIds.empty() && chosenTarget.targetCards.empty()){
+            uiManager.requestActionInput(currentPlayer.getId());
+            getCurrentPlayer().setPendingAction(PlayerAction::IDLE);
+        }
+        else gameState.pendingTarget = chosenTarget;
+
     };
     //UI prompt for player action input
     uiManager.requestActionInput(currentPlayer.getId());

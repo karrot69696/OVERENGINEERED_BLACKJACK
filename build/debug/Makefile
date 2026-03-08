@@ -225,6 +225,19 @@ MindJack/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\MindJack.dir\build.make CMakeFiles/MindJack.dir/build
 .PHONY : MindJack/fast
 
+#=============================================================================
+# Target rules for targets named copy_assets
+
+# Build rule for target.
+copy_assets: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 copy_assets
+.PHONY : copy_assets
+
+# fast build rule for target.
+copy_assets/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\copy_assets.dir\build.make CMakeFiles/copy_assets.dir/build
+.PHONY : copy_assets/fast
+
 src/gameEngine/Game.obj: src/gameEngine/Game.cpp.obj
 .PHONY : src/gameEngine/Game.obj
 
@@ -597,6 +610,7 @@ help:
 	@echo ... install/strip
 	@echo ... list_install_components
 	@echo ... rebuild_cache
+	@echo ... copy_assets
 	@echo ... GameEngine
 	@echo ... LowLevelEntities
 	@echo ... MindJack

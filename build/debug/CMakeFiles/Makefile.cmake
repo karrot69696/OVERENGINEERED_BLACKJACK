@@ -72,4 +72,5 @@ set(CMAKE_DEPEND_INFO_FILES
   "CMakeFiles/GameEngine.dir/DependInfo.cmake"
   "CMakeFiles/PhaseEngine.dir/DependInfo.cmake"
   "CMakeFiles/MindJack.dir/DependInfo.cmake"
+  "CMakeFiles/copy_assets.dir/DependInfo.cmake"
   )

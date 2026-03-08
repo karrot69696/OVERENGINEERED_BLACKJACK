@@ -26,6 +26,8 @@ void Phase::incrementCurrentPlayerId(){
     gameState.incrementCurrentPlayerId(players.size());
 }
 
+
+
 bool Phase::turnHandler(Player& player, Player& opponent){
     
     if(player._isBot()){

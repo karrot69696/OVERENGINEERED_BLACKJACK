@@ -37,7 +37,6 @@ class Phase {
         Player& getCurrentPlayer();
         int getCurrentPlayerId();
         void incrementCurrentPlayerId();
-
         //ULTRA IMPORTANT TURN HANDLER
         bool turnHandler(Player& player, Player& opponent);
         void skillHandler(Player& player);

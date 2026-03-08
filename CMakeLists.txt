@@ -153,9 +153,13 @@ target_link_libraries(PhaseEngine
 add_executable(MindJack
     src/main.cpp
 )
+
 # copy src/assets to build directory
-file(COPY ${CMAKE_SOURCE_DIR}/src/assets
-     DESTINATION ${CMAKE_BINARY_DIR})
+add_custom_command(TARGET MindJack POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    "C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/bin"
+    $<TARGET_FILE_DIR:MindJack>
+)
 
 target_link_libraries(MindJack
     PRIVATE
@@ -170,10 +174,10 @@ target_link_libraries(MindJack
         SFML::Network
 )
 # copy SFML dlls to build directory after build
-add_custom_command(TARGET MindJack POST_BUILD
+add_custom_target(copy_assets ALL
     COMMAND ${CMAKE_COMMAND} -E copy_directory
-    "C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/bin"
-    $<TARGET_FILE_DIR:MindJack>
+    ${CMAKE_SOURCE_DIR}/src/assets
+    ${CMAKE_BINARY_DIR}/assets
 )
 # Installation rules
 install(TARGETS LowLevelEntities SkillEngine GameEngine PhaseEngine

@@ -116,6 +116,7 @@ class Player{
         void returnCards(Deck& deck, std::vector<Card*>& cards);
         void addCardToHand(Card card){
             card.setOwnerId(this->id);
+            card.setHandIndex(cardsInHand.size());
             cardsInHand.push_back(card);
         }
         void flipAllCardsFaceUp();

@@ -6,6 +6,8 @@
 #include "Skill_NeuralGambit.h"
 #include <string>
 #include <iostream>
+#include "../lowLevelEntities/GameState.h"
+
 //every time a new skill is added
 // 0. Create the class for that skill
 // 1. add them to property of SkillManager : SkillDeliverance* skillDeliverance;
@@ -15,46 +17,12 @@ class SkillManager{
         SkillDeliverance* skillDeliverance;
         //other skills go here
     public:
+        SkillManager(){};
         void createSkills(std::vector<Player>& players);
-        bool processSkill(SkillContext& context){
-            if (context.user.getSkillName()==SkillName::DELIVERANCE ){
-                std::cout<< "[processSkill] Using "<< skillDeliverance->skillNameToString() 
-                << std::endl;
-                if ( skillDeliverance->canUse(context) ){
-                    return skillDeliverance->execute(context);
-                }
-                return false;
-            }
-
-            std::cout << "[processSkill] Skill does not exist" << std::endl;
-            return false;
-        }
-        int getSkillUses(SkillName name){
-            switch (name){
-                case SkillName::DELIVERANCE:
-                    return skillDeliverance->getUses();
-                break;
-                default:
-                    //std::cout << "[getSkillUses] Skill does not exist" << std::endl;
-                    return 100;
-            }
-        }
-        void resetSkillUses(std::vector<Player>& players){
-            std::cout<< "[SkillManager] Reset all skills' uses" << std::endl;
-            for (auto& player : players){
-                std::cout<<"player:"<<player.getId()<<std::endl;
-                switch (player.getSkillName()){
-
-                    case SkillName::DELIVERANCE:
-                        if (player.getHost() && skillDeliverance){
-                            skillDeliverance->resetUses();
-                            skillDeliverance->gainUses(3);
-                        }
-                        else skillDeliverance->resetUses();
-                    break;
-                }
-            }
-        }
+        bool processSkill(SkillContext& context);
+        int getSkillUses(SkillName name);
+        void resetSkillUses(std::vector<Player>& players);
+        bool skillPassiveHandler(GameState& gameState);
 
 
 };

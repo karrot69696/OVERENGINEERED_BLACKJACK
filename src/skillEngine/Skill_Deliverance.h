@@ -55,6 +55,14 @@ class SkillDeliverance : public Skill{
             uses--;
             return true;
         }
+        bool activatePassive(GameState& gameState){ 
+            //At the beginning of your host phase, gain 1 uses
+            if  (gameState.getPhaseName() == PhaseName::HOST_HIT_PHASE){
+                    uses++;
+                    return true;
+            }
+            return false;
+        }
         void resetUses(){
             uses = 3;
         }

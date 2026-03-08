@@ -15,6 +15,7 @@ void Player::returnCards(Deck& deck){
     }
     for (auto& card : cardsInHand){
         card.setOwnerId(-1);
+        card.setHandIndex(-1); //reset ownerId before returning to deck
         deck.retrieveCard(card);
     }
     cardsInHand.clear();
@@ -29,12 +30,16 @@ void Player::returnCards(Deck& deck, std::vector<Card*>& cards) {
 
     for (Card* card : cards) {
         card->setOwnerId(-1); //reset ownerId before returning to deck
+        card->setHandIndex(-1); //reset ownerId before returning to deck
         deck.retrieveCard(*card); //dereference Card* card
 
         auto it = std::find(cardsInHand.begin(), cardsInHand.end(), *card);
         if (it != cardsInHand.end()) {
             cardsInHand.erase(it);
         }
+    }
+    for (int i=0;i<cardsInHand.size();i++){
+        cardsInHand[i].setHandIndex(i);
     }
     printCardsInHand();
 }
@@ -302,7 +307,7 @@ void Player::displayGameState(GameState& state) const {
 void Player::printCardsInHand(){
     std::cout<<"Player " << id <<"'s hand: " << std::endl;
     for (auto& card : cardsInHand){
-        std::cout<< card.getRankAsString() << " of " << card.getSuitAsString() << std::endl;
+        std::cout<< card.getRankAsString() << " of " << card.getSuitAsString() << " index: "<< card.getHandIndex()<< std::endl;
     }
 }
 

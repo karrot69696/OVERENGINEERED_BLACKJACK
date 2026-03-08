@@ -3,6 +3,7 @@ C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/build/debug/CMakeFiles/
 C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/build/debug/CMakeFiles/GameEngine.dir
 C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/build/debug/CMakeFiles/PhaseEngine.dir
 C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/build/debug/CMakeFiles/MindJack.dir
+C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/build/debug/CMakeFiles/copy_assets.dir
 C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/build/debug/CMakeFiles/edit_cache.dir
 C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/build/debug/CMakeFiles/rebuild_cache.dir
 C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/build/debug/CMakeFiles/list_install_components.dir

@@ -35,11 +35,9 @@ struct Button {
 // Card Visual
 // ============================================================================
 struct CardVisual {
-
-    CardVisual(int ownerId, int cardIndex, sf::RectangleShape shape, sf::Text rankSuitText)
-        : ownerId(ownerId), cardIndex(cardIndex), shape(shape), rankSuitText(rankSuitText) {}
-    sf::RectangleShape shape;
-    sf::Text rankSuitText;
+    CardVisual(int ownerId, int cardIndex, sf::Sprite sprite)
+        : ownerId(ownerId), cardIndex(cardIndex), cardSprite(std::move(sprite)) {}
+    sf::Sprite cardSprite;
     int cardIndex;      // index in player's hand
     int ownerId;
     bool highlighted = false;
@@ -74,6 +72,7 @@ private:
     sf::RenderWindow& window;
     GameState& gameState;
     sf::Font font;
+    sf::Texture cardTexture;
 
     // Sub-renderers
     void renderTable();

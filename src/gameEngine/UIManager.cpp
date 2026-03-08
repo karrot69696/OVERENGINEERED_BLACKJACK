@@ -1,4 +1,5 @@
 #include "UIManager.h"
+#include <map>
 
 
 // ============================================================================
@@ -53,23 +54,28 @@ bool Button::isClicked(sf::Vector2f mousePos) {
 // CardVisual
 // ============================================================================
 void CardVisual::draw(sf::RenderWindow& window) {
-    window.draw(shape);
-    window.draw(rankSuitText);
+    window.draw(cardSprite);
 }
 
 bool CardVisual::isClicked(sf::Vector2f mousePos) {
-    return shape.getGlobalBounds().contains(mousePos);
+    return cardSprite.getGlobalBounds().contains(mousePos);
 }
 
 // ============================================================================
 // UIManager
 // ============================================================================
 UIManager::UIManager(sf::RenderWindow& window, GameState& gameState)
-    : window(window), gameState(gameState)
-{
-    if (!font.openFromFile("../assets/fonts/PixeloidSans.ttf")) {
-        // fallback - you'll see blank text but won't crash
+    : window(window), gameState(gameState) {
+
+    std::filesystem::path fontPath =            "../assets/fonts/PixeloidSans.ttf";
+    std::filesystem::path cardTexturePath =     "../assets/fonts/CuteCards.png";
+
+    if (!font.openFromFile(fontPath)) {
         std::cerr << "[UIManager] Failed to load font from assets/fonts/PixeloidSans.ttf" << std::endl;
+    }
+
+    if (!cardTexture.loadFromFile(cardTexturePath)) {
+        std::cerr << "[UIManager] Failed to load card texture from assets/fonts/CuteCards.png" << std::endl;
     }
 
     // Build action buttons (hidden by default)
@@ -144,12 +150,15 @@ void UIManager::handleEvent(const std::optional<sf::Event>& event) {
         // Card targeting clicks
         if (showTargetingOverlay_Deliverance) {
             for (auto& cv : cardVisuals) {
-                if (cv.ownerId == activePlayerId && cv.isClicked(mousePos)) {
-                    std::cout << "[UIManager]Card has been clicked: ownerId=" << cv.ownerId << ", cardIndex=" << cv.cardIndex << std::endl;
-                    // Toggle selection
-                    cv.isTarget = !cv.isTarget;
-                    if (cv.isTarget) {
 
+                if (    cv.ownerId == activePlayerId 
+                        && cv.isClicked(mousePos) 
+                        //if one card exists clicking won't work
+                       ) {
+
+                    std::cout << "[UIManager] Card has been clicked: ownerId=" << cv.ownerId << ", cardIndex=" << cv.cardIndex << std::endl;
+                    //if not targetted and no pendingTarget
+                    if (!cv.isTarget && pendingTargeting.targetCards.empty()) {
                         // Create the exact copy of the card chosen and store it in target.targetCards
                             PlayerTargeting target;
                             Card chosenCard(
@@ -157,6 +166,10 @@ void UIManager::handleEvent(const std::optional<sf::Event>& event) {
                                 gameState.getCardRank(activePlayerId, cv.cardIndex),
                                 gameState.isCardFaceUp(activePlayerId, cv.cardIndex)
                             );
+
+                            chosenCard.setOwnerId(cv.ownerId);
+                            chosenCard.setHandIndex(cv.cardIndex);
+
                             target.targetCards.push_back(chosenCard);
                             
                         //store the ownerId
@@ -164,6 +177,15 @@ void UIManager::handleEvent(const std::optional<sf::Event>& event) {
 
                         //finish one target
                             pendingTargeting = target;
+                            cv.isTarget = true;
+                    }
+                    else if ( pendingTargeting.targetCards.size() > 0 ){
+                        if (cv.ownerId == pendingTargeting.targetCards.front().getOwnerId()
+                            && cv.cardIndex == pendingTargeting.targetCards.front().getHandIndex()){
+                                
+                                pendingTargeting= {};
+                                cv.isTarget = false;
+                            }
                     }
                     return;
                 }
@@ -183,6 +205,7 @@ void UIManager::handleEvent(const std::optional<sf::Event>& event) {
 }
 
 void UIManager::confirmTargeting() {
+    for (auto& cv : cardVisuals) cv.isTarget=false;
     if (onTargetChosen) onTargetChosen(pendingTargeting);
 }
 
@@ -206,8 +229,7 @@ void UIManager::renderTable() {
 
 void UIManager::renderHands() {
     for (auto& cv : cardVisuals) {
-        window.draw(cv.shape);
-        window.draw(cv.rankSuitText);
+        window.draw(cv.cardSprite);
     }
 }
 
@@ -255,7 +277,7 @@ void UIManager::renderTargetingOverlay_Deliverance() {
     for (auto& cv : cardVisuals) {
         if (cv.ownerId == activePlayerId) {
             sf::RectangleShape highlight(UILayout::CARD_SIZE + sf::Vector2f{6.f, 6.f});
-            highlight.setPosition(cv.shape.getPosition() - sf::Vector2f{3.f, 3.f});
+            highlight.setPosition(cv.cardSprite.getPosition() - sf::Vector2f{3.f, 3.f});
             highlight.setFillColor(sf::Color::Transparent);
             highlight.setOutlineThickness(2.f);
             highlight.setOutlineColor(cv.isTarget ? UILayout::CARD_TARGET : UILayout::CARD_HIGHLIGHT);
@@ -279,51 +301,66 @@ void UIManager::renderTargetingOverlay_Deliverance() {
 // ============================================================================
 // Card Visual Builder
 // ============================================================================
+// Sprite sheet: 15 columns (A,2..10,J,Q,K,Joker,Back), 4 rows (Spades,Diamonds,Clubs,Hearts)
+static int cardSpriteCol(Rank rank) {
+    return static_cast<int>(rank) - 1; // Ace=1 -> col 0, King=13 -> col 12
+}
+static int cardSpriteRow(Suit suit) {
+    switch (suit) {
+        case Suit::Spades:   return 0;
+        case Suit::Diamonds: return 1;
+        case Suit::Clubs:    return 2;
+        case Suit::Hearts:   return 3;
+        default:             return 0;
+    }
+}
+
 void UIManager::buildCardVisuals() {
+    // Save isTarget state before rebuilding
+    std::map<std::pair<int,int>, bool> targetState;
+    for (auto& cv : cardVisuals) {
+        targetState[{cv.ownerId, cv.cardIndex}] = cv.isTarget;
+    }
+
     cardVisuals.clear();
     auto players = gameState.getAllPlayerInfo();
+
+    sf::Vector2u texSize = cardTexture.getSize();
+    int cellW = (int)texSize.x / 15;
+    int cellH = (int)texSize.y / 4;
+    float scaleX = UILayout::CARD_SIZE.x / cellW;
+    float scaleY = UILayout::CARD_SIZE.y / cellH;
 
     for (auto& player : players) {
         sf::Vector2f seatPos = getPlayerSeatPos(player.playerId, (int)players.size());
 
         for (int i = 0; i < (int)player.cardsInHand.size(); i++) {
-            CardVisual cv{
-                player.playerId,
-                i,
-                sf::RectangleShape(),
-                sf::Text(font, "", 14)
-            };
-            cv.ownerId = player.playerId;
-            cv.cardIndex = i;
-
-            cv.shape.setSize(UILayout::CARD_SIZE);
-            cv.shape.setFillColor(UILayout::CARD_WHITE);
-            cv.shape.setOutlineThickness(1.f);
-            cv.shape.setOutlineColor(sf::Color::Black);
-            cv.shape.setPosition({ seatPos.x + i * UILayout::CARD_SPACING, seatPos.y });
-
             const Card& card = player.cardsInHand[i];
+            bool showFace = cheatOn || card.isFaceUp();
 
-            std::string cardStr;
-            
-            if (cheatOn || card.isFaceUp()) {
-                cardStr = card.getRankAsString() + "\n" + card.getSuitAsString();
+            int col, row;
+            if (showFace) {
+                col = cardSpriteCol(card.getRank());
+                row = cardSpriteRow(card.getSuit());
             } else {
-                cardStr = "?";
+                col = 14; row = 2; // black striped card back
             }
 
-            cv.rankSuitText = sf::Text(font, cardStr, 14);
-            cv.rankSuitText.setFillColor(
-                (card.getSuitAsString() == "Hearts" || card.getSuitAsString() == "Diamonds")
-                ? sf::Color::Red : sf::Color::Black
-            );
-            cv.rankSuitText.setPosition(cv.shape.getPosition() + sf::Vector2f{6.f, 6.f});
+            sf::Sprite sprite(cardTexture);
+            sprite.setTextureRect(sf::IntRect({col * cellW, row * cellH}, {cellW, cellH}));
+            sprite.setScale({scaleX, scaleY});
+            sprite.setPosition({ seatPos.x + i * UILayout::CARD_SPACING, seatPos.y });
 
-            cardVisuals.push_back(cv);
+            cardVisuals.emplace_back(player.playerId, card.getHandIndex(), std::move(sprite));
+
+            // Restore isTarget state
+            auto it = targetState.find({player.playerId, i});
+            if (it != targetState.end()) {
+                cardVisuals.back().isTarget = it->second;
+            }
         }
     }
 }
-
 // ============================================================================
 // Layout Helpers
 // ============================================================================

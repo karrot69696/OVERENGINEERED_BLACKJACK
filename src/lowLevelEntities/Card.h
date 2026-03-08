@@ -33,6 +33,7 @@ class Card {
         Color color;
         bool faceUp;
         int ownerId=-1;
+        int handIndex=-1;
     public:
         bool operator==(const Card& other) const {
             return rank == other.rank && suit == other.suit;
@@ -48,6 +49,7 @@ class Card {
             }
         };
         int getOwnerId() const;
+        int getHandIndex() const;
         Suit getSuit() const;
         Rank getRank() const;
         std::string getRankAsString() const {
@@ -82,6 +84,7 @@ class Card {
         //setters
         void flip();
         void setOwnerId(int id);
+        void setHandIndex(int id);
 };
 
 #endif
