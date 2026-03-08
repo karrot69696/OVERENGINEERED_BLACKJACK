@@ -200,6 +200,19 @@ GameEngine/fast:
 .PHONY : GameEngine/fast
 
 #=============================================================================
+# Target rules for targets named PhaseEngine
+
+# Build rule for target.
+PhaseEngine: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 PhaseEngine
+.PHONY : PhaseEngine
+
+# fast build rule for target.
+PhaseEngine/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\PhaseEngine.dir\build.make CMakeFiles/PhaseEngine.dir/build
+.PHONY : PhaseEngine/fast
+
+#=============================================================================
 # Target rules for targets named MindJack
 
 # Build rule for target.
@@ -235,6 +248,54 @@ src/gameEngine/Game.s: src/gameEngine/Game.cpp.s
 src/gameEngine/Game.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\GameEngine.dir\build.make CMakeFiles/GameEngine.dir/src/gameEngine/Game.cpp.s
 .PHONY : src/gameEngine/Game.cpp.s
+
+src/gameEngine/RoundManager.obj: src/gameEngine/RoundManager.cpp.obj
+.PHONY : src/gameEngine/RoundManager.obj
+
+# target to build an object file
+src/gameEngine/RoundManager.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\GameEngine.dir\build.make CMakeFiles/GameEngine.dir/src/gameEngine/RoundManager.cpp.obj
+.PHONY : src/gameEngine/RoundManager.cpp.obj
+
+src/gameEngine/RoundManager.i: src/gameEngine/RoundManager.cpp.i
+.PHONY : src/gameEngine/RoundManager.i
+
+# target to preprocess a source file
+src/gameEngine/RoundManager.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\GameEngine.dir\build.make CMakeFiles/GameEngine.dir/src/gameEngine/RoundManager.cpp.i
+.PHONY : src/gameEngine/RoundManager.cpp.i
+
+src/gameEngine/RoundManager.s: src/gameEngine/RoundManager.cpp.s
+.PHONY : src/gameEngine/RoundManager.s
+
+# target to generate assembly for a file
+src/gameEngine/RoundManager.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\GameEngine.dir\build.make CMakeFiles/GameEngine.dir/src/gameEngine/RoundManager.cpp.s
+.PHONY : src/gameEngine/RoundManager.cpp.s
+
+src/gameEngine/UIManager.obj: src/gameEngine/UIManager.cpp.obj
+.PHONY : src/gameEngine/UIManager.obj
+
+# target to build an object file
+src/gameEngine/UIManager.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\GameEngine.dir\build.make CMakeFiles/GameEngine.dir/src/gameEngine/UIManager.cpp.obj
+.PHONY : src/gameEngine/UIManager.cpp.obj
+
+src/gameEngine/UIManager.i: src/gameEngine/UIManager.cpp.i
+.PHONY : src/gameEngine/UIManager.i
+
+# target to preprocess a source file
+src/gameEngine/UIManager.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\GameEngine.dir\build.make CMakeFiles/GameEngine.dir/src/gameEngine/UIManager.cpp.i
+.PHONY : src/gameEngine/UIManager.cpp.i
+
+src/gameEngine/UIManager.s: src/gameEngine/UIManager.cpp.s
+.PHONY : src/gameEngine/UIManager.s
+
+# target to generate assembly for a file
+src/gameEngine/UIManager.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\GameEngine.dir\build.make CMakeFiles/GameEngine.dir/src/gameEngine/UIManager.cpp.s
+.PHONY : src/gameEngine/UIManager.cpp.s
 
 src/lowLevelEntities/Card.obj: src/lowLevelEntities/Card.cpp.obj
 .PHONY : src/lowLevelEntities/Card.obj
@@ -356,6 +417,150 @@ src/main.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\MindJack.dir\build.make CMakeFiles/MindJack.dir/src/main.cpp.s
 .PHONY : src/main.cpp.s
 
+src/phaseEngine/BattlePhase.obj: src/phaseEngine/BattlePhase.cpp.obj
+.PHONY : src/phaseEngine/BattlePhase.obj
+
+# target to build an object file
+src/phaseEngine/BattlePhase.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\PhaseEngine.dir\build.make CMakeFiles/PhaseEngine.dir/src/phaseEngine/BattlePhase.cpp.obj
+.PHONY : src/phaseEngine/BattlePhase.cpp.obj
+
+src/phaseEngine/BattlePhase.i: src/phaseEngine/BattlePhase.cpp.i
+.PHONY : src/phaseEngine/BattlePhase.i
+
+# target to preprocess a source file
+src/phaseEngine/BattlePhase.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\PhaseEngine.dir\build.make CMakeFiles/PhaseEngine.dir/src/phaseEngine/BattlePhase.cpp.i
+.PHONY : src/phaseEngine/BattlePhase.cpp.i
+
+src/phaseEngine/BattlePhase.s: src/phaseEngine/BattlePhase.cpp.s
+.PHONY : src/phaseEngine/BattlePhase.s
+
+# target to generate assembly for a file
+src/phaseEngine/BattlePhase.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\PhaseEngine.dir\build.make CMakeFiles/PhaseEngine.dir/src/phaseEngine/BattlePhase.cpp.s
+.PHONY : src/phaseEngine/BattlePhase.cpp.s
+
+src/phaseEngine/BlackJackCheckPhase.obj: src/phaseEngine/BlackJackCheckPhase.cpp.obj
+.PHONY : src/phaseEngine/BlackJackCheckPhase.obj
+
+# target to build an object file
+src/phaseEngine/BlackJackCheckPhase.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\PhaseEngine.dir\build.make CMakeFiles/PhaseEngine.dir/src/phaseEngine/BlackJackCheckPhase.cpp.obj
+.PHONY : src/phaseEngine/BlackJackCheckPhase.cpp.obj
+
+src/phaseEngine/BlackJackCheckPhase.i: src/phaseEngine/BlackJackCheckPhase.cpp.i
+.PHONY : src/phaseEngine/BlackJackCheckPhase.i
+
+# target to preprocess a source file
+src/phaseEngine/BlackJackCheckPhase.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\PhaseEngine.dir\build.make CMakeFiles/PhaseEngine.dir/src/phaseEngine/BlackJackCheckPhase.cpp.i
+.PHONY : src/phaseEngine/BlackJackCheckPhase.cpp.i
+
+src/phaseEngine/BlackJackCheckPhase.s: src/phaseEngine/BlackJackCheckPhase.cpp.s
+.PHONY : src/phaseEngine/BlackJackCheckPhase.s
+
+# target to generate assembly for a file
+src/phaseEngine/BlackJackCheckPhase.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\PhaseEngine.dir\build.make CMakeFiles/PhaseEngine.dir/src/phaseEngine/BlackJackCheckPhase.cpp.s
+.PHONY : src/phaseEngine/BlackJackCheckPhase.cpp.s
+
+src/phaseEngine/HostHitPhase.obj: src/phaseEngine/HostHitPhase.cpp.obj
+.PHONY : src/phaseEngine/HostHitPhase.obj
+
+# target to build an object file
+src/phaseEngine/HostHitPhase.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\PhaseEngine.dir\build.make CMakeFiles/PhaseEngine.dir/src/phaseEngine/HostHitPhase.cpp.obj
+.PHONY : src/phaseEngine/HostHitPhase.cpp.obj
+
+src/phaseEngine/HostHitPhase.i: src/phaseEngine/HostHitPhase.cpp.i
+.PHONY : src/phaseEngine/HostHitPhase.i
+
+# target to preprocess a source file
+src/phaseEngine/HostHitPhase.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\PhaseEngine.dir\build.make CMakeFiles/PhaseEngine.dir/src/phaseEngine/HostHitPhase.cpp.i
+.PHONY : src/phaseEngine/HostHitPhase.cpp.i
+
+src/phaseEngine/HostHitPhase.s: src/phaseEngine/HostHitPhase.cpp.s
+.PHONY : src/phaseEngine/HostHitPhase.s
+
+# target to generate assembly for a file
+src/phaseEngine/HostHitPhase.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\PhaseEngine.dir\build.make CMakeFiles/PhaseEngine.dir/src/phaseEngine/HostHitPhase.cpp.s
+.PHONY : src/phaseEngine/HostHitPhase.cpp.s
+
+src/phaseEngine/Phase.obj: src/phaseEngine/Phase.cpp.obj
+.PHONY : src/phaseEngine/Phase.obj
+
+# target to build an object file
+src/phaseEngine/Phase.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\PhaseEngine.dir\build.make CMakeFiles/PhaseEngine.dir/src/phaseEngine/Phase.cpp.obj
+.PHONY : src/phaseEngine/Phase.cpp.obj
+
+src/phaseEngine/Phase.i: src/phaseEngine/Phase.cpp.i
+.PHONY : src/phaseEngine/Phase.i
+
+# target to preprocess a source file
+src/phaseEngine/Phase.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\PhaseEngine.dir\build.make CMakeFiles/PhaseEngine.dir/src/phaseEngine/Phase.cpp.i
+.PHONY : src/phaseEngine/Phase.cpp.i
+
+src/phaseEngine/Phase.s: src/phaseEngine/Phase.cpp.s
+.PHONY : src/phaseEngine/Phase.s
+
+# target to generate assembly for a file
+src/phaseEngine/Phase.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\PhaseEngine.dir\build.make CMakeFiles/PhaseEngine.dir/src/phaseEngine/Phase.cpp.s
+.PHONY : src/phaseEngine/Phase.cpp.s
+
+src/phaseEngine/PlayerHitPhase.obj: src/phaseEngine/PlayerHitPhase.cpp.obj
+.PHONY : src/phaseEngine/PlayerHitPhase.obj
+
+# target to build an object file
+src/phaseEngine/PlayerHitPhase.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\PhaseEngine.dir\build.make CMakeFiles/PhaseEngine.dir/src/phaseEngine/PlayerHitPhase.cpp.obj
+.PHONY : src/phaseEngine/PlayerHitPhase.cpp.obj
+
+src/phaseEngine/PlayerHitPhase.i: src/phaseEngine/PlayerHitPhase.cpp.i
+.PHONY : src/phaseEngine/PlayerHitPhase.i
+
+# target to preprocess a source file
+src/phaseEngine/PlayerHitPhase.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\PhaseEngine.dir\build.make CMakeFiles/PhaseEngine.dir/src/phaseEngine/PlayerHitPhase.cpp.i
+.PHONY : src/phaseEngine/PlayerHitPhase.cpp.i
+
+src/phaseEngine/PlayerHitPhase.s: src/phaseEngine/PlayerHitPhase.cpp.s
+.PHONY : src/phaseEngine/PlayerHitPhase.s
+
+# target to generate assembly for a file
+src/phaseEngine/PlayerHitPhase.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\PhaseEngine.dir\build.make CMakeFiles/PhaseEngine.dir/src/phaseEngine/PlayerHitPhase.cpp.s
+.PHONY : src/phaseEngine/PlayerHitPhase.cpp.s
+
+src/phaseEngine/RoundEndPhase.obj: src/phaseEngine/RoundEndPhase.cpp.obj
+.PHONY : src/phaseEngine/RoundEndPhase.obj
+
+# target to build an object file
+src/phaseEngine/RoundEndPhase.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\PhaseEngine.dir\build.make CMakeFiles/PhaseEngine.dir/src/phaseEngine/RoundEndPhase.cpp.obj
+.PHONY : src/phaseEngine/RoundEndPhase.cpp.obj
+
+src/phaseEngine/RoundEndPhase.i: src/phaseEngine/RoundEndPhase.cpp.i
+.PHONY : src/phaseEngine/RoundEndPhase.i
+
+# target to preprocess a source file
+src/phaseEngine/RoundEndPhase.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\PhaseEngine.dir\build.make CMakeFiles/PhaseEngine.dir/src/phaseEngine/RoundEndPhase.cpp.i
+.PHONY : src/phaseEngine/RoundEndPhase.cpp.i
+
+src/phaseEngine/RoundEndPhase.s: src/phaseEngine/RoundEndPhase.cpp.s
+.PHONY : src/phaseEngine/RoundEndPhase.s
+
+# target to generate assembly for a file
+src/phaseEngine/RoundEndPhase.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\PhaseEngine.dir\build.make CMakeFiles/PhaseEngine.dir/src/phaseEngine/RoundEndPhase.cpp.s
+.PHONY : src/phaseEngine/RoundEndPhase.cpp.s
+
 src/skillEngine/skillManager.obj: src/skillEngine/skillManager.cpp.obj
 .PHONY : src/skillEngine/skillManager.obj
 
@@ -395,10 +600,17 @@ help:
 	@echo ... GameEngine
 	@echo ... LowLevelEntities
 	@echo ... MindJack
+	@echo ... PhaseEngine
 	@echo ... SkillEngine
 	@echo ... src/gameEngine/Game.obj
 	@echo ... src/gameEngine/Game.i
 	@echo ... src/gameEngine/Game.s
+	@echo ... src/gameEngine/RoundManager.obj
+	@echo ... src/gameEngine/RoundManager.i
+	@echo ... src/gameEngine/RoundManager.s
+	@echo ... src/gameEngine/UIManager.obj
+	@echo ... src/gameEngine/UIManager.i
+	@echo ... src/gameEngine/UIManager.s
 	@echo ... src/lowLevelEntities/Card.obj
 	@echo ... src/lowLevelEntities/Card.i
 	@echo ... src/lowLevelEntities/Card.s
@@ -414,6 +626,24 @@ help:
 	@echo ... src/main.obj
 	@echo ... src/main.i
 	@echo ... src/main.s
+	@echo ... src/phaseEngine/BattlePhase.obj
+	@echo ... src/phaseEngine/BattlePhase.i
+	@echo ... src/phaseEngine/BattlePhase.s
+	@echo ... src/phaseEngine/BlackJackCheckPhase.obj
+	@echo ... src/phaseEngine/BlackJackCheckPhase.i
+	@echo ... src/phaseEngine/BlackJackCheckPhase.s
+	@echo ... src/phaseEngine/HostHitPhase.obj
+	@echo ... src/phaseEngine/HostHitPhase.i
+	@echo ... src/phaseEngine/HostHitPhase.s
+	@echo ... src/phaseEngine/Phase.obj
+	@echo ... src/phaseEngine/Phase.i
+	@echo ... src/phaseEngine/Phase.s
+	@echo ... src/phaseEngine/PlayerHitPhase.obj
+	@echo ... src/phaseEngine/PlayerHitPhase.i
+	@echo ... src/phaseEngine/PlayerHitPhase.s
+	@echo ... src/phaseEngine/RoundEndPhase.obj
+	@echo ... src/phaseEngine/RoundEndPhase.i
+	@echo ... src/phaseEngine/RoundEndPhase.s
 	@echo ... src/skillEngine/skillManager.obj
 	@echo ... src/skillEngine/skillManager.i
 	@echo ... src/skillEngine/skillManager.s

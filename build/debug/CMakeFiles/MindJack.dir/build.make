@@ -76,15 +76,15 @@ CMakeFiles/MindJack.dir/src/main.cpp.obj: CMakeFiles/MindJack.dir/includes_CXX.r
 CMakeFiles/MindJack.dir/src/main.cpp.obj: C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/main.cpp
 CMakeFiles/MindJack.dir/src/main.cpp.obj: CMakeFiles/MindJack.dir/compiler_depend.ts
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\build\debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/MindJack.dir/src/main.cpp.obj"
-	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/MindJack.dir/src/main.cpp.obj -MF CMakeFiles\MindJack.dir\src\main.cpp.obj.d -o CMakeFiles\MindJack.dir\src\main.cpp.obj -c C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\src\main.cpp
+	C:\mingw64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/MindJack.dir/src/main.cpp.obj -MF CMakeFiles\MindJack.dir\src\main.cpp.obj.d -o CMakeFiles\MindJack.dir\src\main.cpp.obj -c C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\src\main.cpp
 
 CMakeFiles/MindJack.dir/src/main.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/MindJack.dir/src/main.cpp.i"
-	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\src\main.cpp > CMakeFiles\MindJack.dir\src\main.cpp.i
+	C:\mingw64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\src\main.cpp > CMakeFiles\MindJack.dir\src\main.cpp.i
 
 CMakeFiles/MindJack.dir/src/main.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/MindJack.dir/src/main.cpp.s"
-	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\src\main.cpp -o CMakeFiles\MindJack.dir\src\main.cpp.s
+	C:\mingw64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\src\main.cpp -o CMakeFiles\MindJack.dir\src\main.cpp.s
 
 # Object files for target MindJack
 MindJack_OBJECTS = \
@@ -98,10 +98,13 @@ bin/MindJack.exe: CMakeFiles/MindJack.dir/build.make
 bin/MindJack.exe: lib/libGameEngine.a
 bin/MindJack.exe: lib/libSkillEngine.a
 bin/MindJack.exe: lib/libLowLevelEntities.a
+bin/MindJack.exe: lib/libPhaseEngine.a
 bin/MindJack.exe: C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/lib/libsfml-graphics-d.a
 bin/MindJack.exe: C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/lib/libsfml-window-d.a
 bin/MindJack.exe: C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/lib/libsfml-audio-d.a
 bin/MindJack.exe: C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/lib/libsfml-network-d.a
+bin/MindJack.exe: lib/libSkillEngine.a
+bin/MindJack.exe: lib/libLowLevelEntities.a
 bin/MindJack.exe: C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/lib/libsfml-system-d.a
 bin/MindJack.exe: CMakeFiles/MindJack.dir/linkLibs.rsp
 bin/MindJack.exe: CMakeFiles/MindJack.dir/objects1.rsp

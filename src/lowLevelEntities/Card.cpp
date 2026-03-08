@@ -14,3 +14,9 @@ bool Card::isFaceUp() const {
 void Card::flip() {
     faceUp = !faceUp;
 }
+int Card::getOwnerId() const {
+    return ownerId;
+}
+void Card::setOwnerId(int id) {
+    ownerId = id;
+}

@@ -1,42 +1,22 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
+#include <iostream>
+#include <random>
+#include <algorithm>
 #include <vector>
 #include <memory>
+
 #include "Card.h"
 #include "Deck.h"
 #include "SkillDeck.h"
-#include <iostream>
 #include "GameState.h"
-#include <random>
-#include <algorithm>
+
 // ============================================================================
 // Constants and Configuration
 // ============================================================================
 
-namespace GameConfig {
-    constexpr int BLACKJACK_VALUE = 21;
-    constexpr int DEALER_STAND_VALUE = 17;
-    constexpr int ACE_HIGH_VALUE = 11;
-    constexpr int ACE_LOW_VALUE = 1;
-    constexpr int FACE_CARD_VALUE = 10;
-    constexpr int CARD_RANKS = 13;
-    
-    // Bot behavior constants
-    constexpr double BURST_RISK_WEIGHT = 0.5;
-    constexpr double OPPONENT_PRESSURE_WEIGHT = 0.70;
-    constexpr double LOSING_PRESSURE_WEIGHT = 0.15;
-}
-enum class PlayerAction{
-    HIT,
-    SKILL_REQUEST,
-    STAND,
-    IDLE
-};
-struct PlayerTargeting{
-    std::vector<int> targetPLayerIds;
-    std::vector<Card*> targetCards;
-};
+
 class Player{
     protected:
         //basic properties
@@ -50,7 +30,7 @@ class Player{
         bool isBlackJacked = 0;
         int loss = 0;
         int battleCount = 0;
-
+        PlayerAction pendingAction = PlayerAction::IDLE;
     public:
         bool isBot = 1;
         Player( int id, SkillName skillName, int isBot, int isHost) : skillName(skillName), isBot(isBot), isHost(isHost), id(id) {};
@@ -58,8 +38,19 @@ class Player{
 
 
         //getters
-        Card getCardInHand(int index){
+        Card getCardInHand(int index) const {
+            if(index >= cardsInHand.size()){
+                std::cout << "Invalid card index: " << index << std::endl;
+                throw std::out_of_range("Card index out of range");
+            }
             return cardsInHand[index];
+        }
+        Card* getCardAddr(int index){
+            if(index >= cardsInHand.size()){
+                std::cout << "Invalid card index: " << index << std::endl;
+                throw std::out_of_range("Card index out of range");
+            }
+            return &cardsInHand[index];
         }
         void blackJackSet(bool status = 1){
             isBlackJacked = status;
@@ -72,6 +63,17 @@ class Player{
         }
         int getLoss() const{
             return loss;
+        }
+        PlayerAction consumePendingAction() {
+            PlayerAction temp = pendingAction;
+            pendingAction = PlayerAction::IDLE; 
+            return temp;
+        }
+        PlayerAction getPendingAction() const {
+            return pendingAction;
+        }
+        void setPendingAction(PlayerAction action){
+            pendingAction = action;
         }
         int getBattleCount() const{
             return battleCount;
@@ -91,12 +93,11 @@ class Player{
         int getPoint() const{
             return point;
         }
-
         // setters
-        void giveHost(){
+        void setHost(){
             isHost = 1;
         }
-        void removeHost(){
+        void resetHost(){
             isHost = 0;
         }
         void gainPoint(int pointsGained = 1){
@@ -112,8 +113,9 @@ class Player{
         //hand manipulation
         void Stand();
         void returnCards(Deck& deck);
-        void returnCards(Deck& deck, const std::vector<Card*>& cards);
-        void addCardToHand(const Card& card){
+        void returnCards(Deck& deck, std::vector<Card*>& cards);
+        void addCardToHand(Card card){
+            card.setOwnerId(this->id);
             cardsInHand.push_back(card);
         }
         void flipAllCardsFaceUp();

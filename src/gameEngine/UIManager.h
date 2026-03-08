@@ -1,11 +1,21 @@
 #ifndef UIMANAGER_H
 #define UIMANAGER_H
-
-#include <SFML/Graphics.hpp>
 #include <vector>
 #include <functional>
+#include <optional>
+#include <algorithm>
+#include <memory>
+#include <iostream>
+
 #include "../lowLevelEntities/GameState.h"
 #include "../lowLevelEntities/Player.h"
+
+#include <SFML/Graphics.hpp>
+#include <SFML/System.hpp>
+#include <SFML/Window.hpp>
+#include <SFML/Network.hpp>
+#include <SFML/Audio.hpp>
+
 
 // ============================================================================
 // Simple Button
@@ -24,18 +34,20 @@ struct Button {
 // ============================================================================
 // Card Visual
 // ============================================================================
-class CardVisual {
-    public:
-        CardVisual();
-        sf::RectangleShape shape;
-        sf::Text rankSuitText;
-        int cardIndex;      // index in player's hand
-        int ownerId;
-        bool highlighted = false;
-        bool isTarget = false;
+struct CardVisual {
 
-        void draw(sf::RenderWindow& window);
-        bool isClicked(sf::Vector2f mousePos);
+    CardVisual(int ownerId, int cardIndex, sf::RectangleShape shape, sf::Text rankSuitText)
+        : ownerId(ownerId), cardIndex(cardIndex), shape(shape), rankSuitText(rankSuitText) {}
+    sf::RectangleShape shape;
+    sf::Text rankSuitText;
+    int cardIndex;      // index in player's hand
+    int ownerId;
+    bool highlighted = false;
+    bool isTarget = false;
+    bool faceUp = true;
+
+    void draw(sf::RenderWindow& window);
+    bool isClicked(sf::Vector2f mousePos);
 };
 
 // ============================================================================
@@ -46,9 +58,9 @@ public:
     UIManager(sf::RenderWindow& window, GameState& gameState);
 
     // Call once per frame
-    void handleEvent(const sf::Event& event);
+    void handleEvent(const std::optional<sf::Event>& event);
     void render();
-
+    int cheatOn = 1;
     // Called by game logic to tell UI what input is needed
     void requestActionInput(int playerId);                          // show Hit/Stand/Skill buttons
     void requestTargetInput(int playerId);                          // show card targeting overlay
@@ -68,14 +80,13 @@ private:
     void renderHands();
     void renderHUD();
     void renderActionMenu();
-    void renderTargetingOverlay();
+    void renderTargetingOverlay_Deliverance();
 
     // Action menu buttons
     std::vector<Button> actionButtons;
     bool showActionMenu = false;
-    bool showTargetingOverlay = false;
+    bool showTargetingOverlay_Deliverance = false;
     int activePlayerId = -1;
-
     // Card visuals built each frame from GameState
     std::vector<CardVisual> cardVisuals;
     void buildCardVisuals();
@@ -86,7 +97,7 @@ private:
 
     // Layout helpers
     sf::Vector2f getPlayerSeatPos(int playerId, int totalPlayers);
-    sf::Color getPhaseColor();
+    sf::Color getPhaseNameColor();
 };
 
 #endif

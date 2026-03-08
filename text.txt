@@ -1,0 +1,91 @@
+cmake --preset debug
+cmake --build --preset debug
+
+
+RunGame
+    |
+    |___________
+                |
+                |
+        playRound (loops X times, X = players)
+        ^           |                                               ____ host? ==> set BJ status + endRound
+        |           |                                               |
+        |       handleBlackjackPhaseName ==============> blackJack?==
+                    |                                               |___ player? ==> set BJ status 
+        |           |
+        |           \/
+        |       handleNormalPlayerTurns ============> [hit] [stand] [skill] 
+        |           |           
+        |           |
+        |         Stand
+        |           |
+        |           \/
+        |       Host [hit] [stand] [skill] =====Stand===> Battle phase + [Skill]
+        |           |      ^                                                 |
+        |           |      |                                                 |
+        |           |      |                                                 |
+        |           |      |_____________________next player_________________|
+        |           |
+        |           |
+        |           \/
+        |__ prepareNextRound (wont run if this is round X)
+                |
+                |
+     ___________|
+     |
+     \/
+    Game over - cleanup
+
+Class authority:
+    High:
+        RoundManager: run onUpdate, handle phase change (run onExit of old phase + createNewPhase + run onEnter of new phase)
+        [SkillManager]: check conditions, manipulate deck, player's cards and player's skills
+        [PhaseEngine]: execution of each phases, handle checks, handle player action, requests UI, set callbacks for UI
+    Middle:
+        Player: draw, return cards to deck, choose target and REQUEST skill activation
+        AI player: build decisions based on GameState + their own properties (cards in hand, skill uses) to: draw, return cards back and make skill REQUEST
+    Low:
+        SkillDeck: deck containing skillName - because players dont have access to "real skills", they only have its NAME and DESCRIPTION
+        GameState: contains info about the game, gets updated constantly by PhaseEngine, will be read by UIManager to render graphics
+        [UIManager]: provides callbacks when certain objects are clicked (when player input), shows menus when requested, play animation
+    MOST IMPORTANT:
+        PhaseEngine: handles most of the logic + game flow
+        UIManager: read from GameState and provides INPUT (PlayerAction and PlayerTargeting)
+        SkillManager: player + card + deck based on INPUT (PlayerTargeting)
+
+Skill timing
+   Basic:  Skills used during player hit phase + host hit phase : Deliverance , MindGame, Multiverse, Sigma
+   Intermediate:  Skills used during battle phase:
+   Advanced: Skills used in response to specific events: 
+
+Terms: 
+    + uses - the amount of time a skill can be casted, resets every round
+    + reveal - after reveal the card is added to game state
+    + gaining points - a card rank can be increased up to 13, a card of rank A will
+    be counted as 1 before applying the rank increase.
+Deliverance - 3 uses
+    During your hit phase, 
+    you can return 1 card from you hand
+    to the deck, then shuffle it. If your are a host, this skill gains 3 uses
+Neural gambit - 2 use 
+    During your hit phase, you can choose another player, you and that player each choose
+    one card from your hand and reveal them, then you choose one of the cards revealed, 
+    that card rank is increased by X (X is the difference between the revealed cards)
+Changing timeline - 2 use:
+    During your hit phase or at the beginning of another player's hit phase,
+    You can check the top 2 cards of the deck, then put them back anywhere in the deck.
+Sigma - unlimited use:
+    For once during your hit phase, you can force all players to draw one card.
+
+To do:
+    - debug skill
+        player requests and targets 
+                -> game handleSkillRequest 
+                        -> skillManager check skill name then call skill class
+                                -> skill canUse
+                                    -> skill execute
+    -  Code and debug skill deliverance
+    -  Need to update gameState regularly, showing changes to players info as well
+    -  right now bots can directly calculate player's hand
+        they should only be able to do this through GameState 
+        (check revealed cards of opp and then calculate)

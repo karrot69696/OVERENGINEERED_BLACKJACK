@@ -9,20 +9,26 @@ void Player::Stand() {
 }\
 //return all cards
 void Player::returnCards(Deck& deck){
+    std::cout<< "Card(s) returned: ";
+    for (Card& card : cardsInHand){
+        std::cout<< card.getRankAsString() << " of " << card.getSuitAsString() << std::endl;
+    }
     for (auto& card : cardsInHand){
+        card.setOwnerId(-1);
         deck.retrieveCard(card);
     }
     cardsInHand.clear();
 }
 
 //return cards inside card pointers inside a vector
-void Player::returnCards(Deck& deck, const std::vector<Card*>& cards) {
+void Player::returnCards(Deck& deck, std::vector<Card*>& cards) {
     std::cout<< "Card(s) returned: ";
     for (Card* card : cards){
         std::cout<< card->getRankAsString() << " of " << card->getSuitAsString() << std::endl;
     }
 
     for (Card* card : cards) {
+        card->setOwnerId(-1); //reset ownerId before returning to deck
         deck.retrieveCard(*card); //dereference Card* card
 
         auto it = std::find(cardsInHand.begin(), cardsInHand.end(), *card);
@@ -100,6 +106,7 @@ PlayerAction Player::manualMode(GameState& state){
 
         default: return PlayerAction::IDLE;
     }
+
 }
 
 PlayerAction Player::botMode(GameState& state){
@@ -149,8 +156,8 @@ PlayerTargeting Player::skillTarget_Deliverance(GameState& gameState){
     }
 
     PlayerTargeting target;
-    target.targetCards.push_back(&cardsInHand[cardId]);
-    target.targetPLayerIds.push_back(id);
+    target.targetCards.push_back(cardsInHand[cardId]);
+    target.targetPlayerIds.push_back(id);
 
     return target;
 }

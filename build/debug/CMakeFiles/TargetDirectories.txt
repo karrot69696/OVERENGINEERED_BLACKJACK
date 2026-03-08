@@ -1,6 +1,7 @@
 C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/build/debug/CMakeFiles/LowLevelEntities.dir
 C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/build/debug/CMakeFiles/SkillEngine.dir
 C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/build/debug/CMakeFiles/GameEngine.dir
+C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/build/debug/CMakeFiles/PhaseEngine.dir
 C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/build/debug/CMakeFiles/MindJack.dir
 C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/build/debug/CMakeFiles/edit_cache.dir
 C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/build/debug/CMakeFiles/rebuild_cache.dir

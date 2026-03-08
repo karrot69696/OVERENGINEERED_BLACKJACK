@@ -1,2 +1,2 @@
-C:\msys64\ucrt64\bin\ar.exe qc lib\libLowLevelEntities.a CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/Card.cpp.obj CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/Deck.cpp.obj CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/GameState.cpp.obj CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/Player.cpp.obj
-C:\msys64\ucrt64\bin\ranlib.exe lib\libLowLevelEntities.a
+C:\mingw64\bin\ar.exe qc lib\libLowLevelEntities.a CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/Card.cpp.obj CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/Deck.cpp.obj CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/GameState.cpp.obj CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/Player.cpp.obj
+C:\mingw64\bin\ranlib.exe lib\libLowLevelEntities.a

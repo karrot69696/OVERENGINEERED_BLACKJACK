@@ -22,7 +22,6 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
 # set SFML Cmake directory
 set(SFML_DIR "C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/lib/cmake/SFML")
-
 # find the SFML require packages
 find_package(SFML 3 COMPONENTS System Window Graphics Audio Network REQUIRED)
 
@@ -30,7 +29,7 @@ find_package(SFML 3 COMPONENTS System Window Graphics Audio Network REQUIRED)
 
 # Compiler warnings
 add_compile_options(-Wall -Wextra -Wpedantic)
-
+add_compile_options(-I "C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include")
 # Source files organization
 set(LOW_LEVEL_SOURCES
     src/lowLevelEntities/Card.cpp
@@ -60,10 +59,32 @@ set(SKILL_ENGINE_HEADERS
 
 set(GAME_ENGINE_SOURCES
     src/gameEngine/Game.cpp
+    src/gameEngine/UIManager.cpp
+    src/gameEngine/RoundManager.cpp
 )
 
 set(GAME_ENGINE_HEADERS
     src/gameEngine/Game.h
+    src/gameEngine/UIManager.h
+    src/gameEngine/RoundManager.h
+)
+
+set(PHASE_ENGINE_SOURCES
+    src/phaseEngine/Phase.cpp
+    src/phaseEngine/PlayerHitPhase.cpp
+    src/phaseEngine/HostHitPhase.cpp
+    src/phaseEngine/BattlePhase.cpp
+    src/phaseEngine/BlackJackCheckPhase.cpp
+    src/phaseEngine/RoundEndPhase.cpp
+)
+
+set(PHASE_ENGINE_HEADERS
+    src/phaseEngine/Phase.h
+    src/phaseEngine/PlayerHitPhase.h
+    src/phaseEngine/HostHitPhase.h
+    src/phaseEngine/BattlePhase.h
+    src/phaseEngine/BlackJackCheckPhase.h
+    src/phaseEngine/RoundEndPhase.h
 )
 
 # Create static library for low level entities
@@ -110,30 +131,52 @@ target_link_libraries(GameEngine
         SkillEngine
 )
 
+# Create static library for phase engine
+add_library(PhaseEngine STATIC
+    ${PHASE_ENGINE_SOURCES}
+    ${PHASE_ENGINE_HEADERS}
+)
+
+target_include_directories(PhaseEngine
+    PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}/src
+)
+
+target_link_libraries(PhaseEngine
+    PUBLIC
+        LowLevelEntities
+        SkillEngine
+)
+
 # Main executable (assumes there's a main.cpp somewhere)
 # Uncomment and adjust when you have your main entry point
 add_executable(MindJack
     src/main.cpp
 )
+# copy src/assets to build directory
+file(COPY ${CMAKE_SOURCE_DIR}/src/assets
+     DESTINATION ${CMAKE_BINARY_DIR})
 
 target_link_libraries(MindJack
     PRIVATE
         GameEngine
         SkillEngine
         LowLevelEntities
+        PhaseEngine
         SFML::Graphics
         SFML::Window
         SFML::System
         SFML::Audio
         SFML::Network
 )
+# copy SFML dlls to build directory after build
 add_custom_command(TARGET MindJack POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
     "C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/bin"
     $<TARGET_FILE_DIR:MindJack>
 )
 # Installation rules
-install(TARGETS LowLevelEntities SkillEngine GameEngine
+install(TARGETS LowLevelEntities SkillEngine GameEngine PhaseEngine
     ARCHIVE DESTINATION lib
     LIBRARY DESTINATION lib
     RUNTIME DESTINATION bin
