@@ -71,18 +71,7 @@ void Game::RunGame(){
             eventHandler(event);
         }
 
-
-        //===============OLD MAIN ROUND LOOP=================
-        // int round = 0;
-        // if(!roundManager.playRound(round)){
-        //     std::cout << "\n=== GAME OVER ===\n" << std::endl;
-        //     return;
-        // }
-        //===================================================
-
-        //===============NEW PHASE SYSTEM====================
         roundManager.update();
-        //===================================================
 
         window.clear();
         uiManager.render();

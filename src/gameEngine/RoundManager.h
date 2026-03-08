@@ -44,18 +44,6 @@ public:
 
     //setters
     void incrementRound(){round++;}
-    //OLD PLAYROUND MAIN LOOP
-    bool playRound(int& round);
-
-    //OLD PHASE SYSTEM
-    bool blackJackHandler();
-    bool playerHitHandler();
-    bool hostHandler();
-    bool hostHitHandler(Player& host, Player& opponent);
-    bool battleHandler(Player& host, Player& opponent);
-    bool turnHandler(Player& player, Player& opponent);
-    void roundEndHandler();
-    void skillHandler(Player& player);
 
     //EXTREMELY IMPORTANT STATE UPDATE
     void updateGameState(PhaseName phase, int playerId);

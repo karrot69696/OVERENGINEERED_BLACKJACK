@@ -51,7 +51,7 @@ bool Phase::turnHandler(Player& player, Player& opponent){
             if(gameState.pendingTarget.targetPlayerIds.size() > 0 || 
             gameState.pendingTarget.targetCards.size() > 0){
                 std::cout << "[Phase][turnHandler] Processing skill for player " << player.getId() << std::endl;
-                roundManager.skillHandler(player);
+                skillHandler(player);
 
                 roundManager.updateGameState(
                     player.getHost() ? PhaseName::HOST_HIT_PHASE : PhaseName::PLAYER_HIT_PHASE,
