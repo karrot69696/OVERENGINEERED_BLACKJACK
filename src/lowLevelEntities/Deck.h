@@ -9,12 +9,12 @@
 
 class Deck {
     private:
-        std::vector<Card> cards;
+        std::vector<Card*> cards;
     public:
-        Deck();
+        Deck(){};
         void shuffle();
-        Card draw();
-        void retrieveCard(const Card& card){
+        Card* draw();
+        void addCard(Card* card){
             cards.push_back(card);
         }
         bool isEmpty();
@@ -24,8 +24,9 @@ class Deck {
             cards.clear();
         }
         int getSize(){
-            return cards.size();
+            return (int)cards.size();
         }
+        std::vector<Card*> getCards() {return cards;}
         void flipAllCardsFaceDown();
 };
 

@@ -48,6 +48,7 @@ std::optional<PhaseName> PlayerHitPhase::onUpdate() {
 
     //get current player
     Player& currentPlayer = getCurrentPlayer();
+    std::cout<<"[PlayerHitPhase] Player "<<currentPlayer.getId()<<std::endl;
     // skip player that is not host or blackjacked
     if (currentPlayer.getHost() == 1 || currentPlayer.getBlackJacked() == 1){
 

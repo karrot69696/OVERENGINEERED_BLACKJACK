@@ -7,6 +7,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/GameState.cpp.obj.d"
   "CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/Player.cpp.obj"
   "CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/Player.cpp.obj.d"
+  "CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/VisualState.cpp.obj"
+  "CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/VisualState.cpp.obj.d"
   "lib/libLowLevelEntities.a"
   "lib/libLowLevelEntities.pdb"
 )

@@ -33,7 +33,7 @@ void HostHitPhase::onEnter() {
         }
         else {
             std::cout << "[uiManager.onTargetChosen] Host " << hostPlayer.getId() << " chose skill target: " 
-                        << (chosenTarget.targetPlayerIds.size() > 0 ? 
+                        << ((int)chosenTarget.targetPlayerIds.size() > 0 ? 
                             "Player " + chosenTarget.targetPlayerIds[0] : 
                             "Card " + chosenTarget.targetCards[0].getRankAsString() 
                             + " of " 

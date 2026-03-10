@@ -10,46 +10,68 @@ void Player::Stand() {
 //return all cards
 void Player::returnCards(Deck& deck){
     std::cout<< "Card(s) returned: ";
-    for (Card& card : cardsInHand){
-        std::cout<< card.getRankAsString() << " of " << card.getSuitAsString() << std::endl;
+    for (Card* card : cardsInHand){
+        std::cout<< card->getRankAsString() << " of " << card->getSuitAsString() << std::endl;
     }
-    for (auto& card : cardsInHand){
-        card.setOwnerId(-1);
-        card.setHandIndex(-1); //reset ownerId before returning to deck
-        deck.retrieveCard(card);
+    for (auto* card : cardsInHand){
+        card->setOwnerId(-1);
+        card->setHandIndex(-1); //reset ownerId before returning to deck
+        deck.addCard(card);
     }
     cardsInHand.clear();
 }
 
 //return cards inside card pointers inside a vector
-void Player::returnCards(Deck& deck, std::vector<Card*>& cards) {
-    std::cout<< "Card(s) returned: ";
+void Player::returnCards(Deck& deck, const std::vector<Card*>& cards) {
+
+    std::cout << "Card(s) returned:\n";
+
     for (Card* card : cards){
-        std::cout<< card->getRankAsString() << " of " << card->getSuitAsString() << std::endl;
+        std::cout << card->getRankAsString()
+                  << " of "
+                  << card->getSuitAsString()
+                  << std::endl;
     }
 
     for (Card* card : cards) {
-        card->setOwnerId(-1); //reset ownerId before returning to deck
-        card->setHandIndex(-1); //reset ownerId before returning to deck
-        deck.retrieveCard(*card); //dereference Card* card
 
-        auto it = std::find(cardsInHand.begin(), cardsInHand.end(), *card);
+        card->setOwnerId(-1);
+        card->setHandIndex(-1);
+
+        deck.addCard(card);
+
+        auto it = std::find(cardsInHand.begin(), cardsInHand.end(), card);
+
         if (it != cardsInHand.end()) {
             cardsInHand.erase(it);
         }
     }
-    for (int i=0;i<cardsInHand.size();i++){
-        cardsInHand[i].setHandIndex(i);
+
+    for (int i = 0; i < (int)cardsInHand.size(); i++){
+        cardsInHand[i]->setHandIndex(i);
     }
+
     printCardsInHand();
 }
 
-
+void Player::addCardToHand(Card* card){
+    if (card == nullptr) {
+        std::cout << "[Player] Card is null" << std::endl;
+        return;
+    }
+    card->setOwnerId(this->id);
+    card->setHandIndex((int)cardsInHand.size());
+    cardsInHand.push_back(card);
+    
+    std::cout << "[Player] Card owned by Player "<< card->getOwnerId() 
+    << " at index "<<card->getHandIndex()
+    <<std::endl;
+}
 
 void Player::flipAllCardsFaceUp(){
-    for (auto& card : cardsInHand){
-        if (!card.isFaceUp()){
-            card.flip();
+    for (auto* card : cardsInHand){
+        if (!card->isFaceUp()){
+            card->flip();
         }
     }
 }
@@ -57,15 +79,6 @@ void Player::flipAllCardsFaceUp(){
 // ============================================================================
 // Player Decision Logic
 // ============================================================================
-PlayerAction Player::playerTurnLogic(GameState& state){
-    std::cout << "[playerTurnLogic] Player " << (isBot ? "(bot) " : "") << id << " thinking...Hand value: " << calculateHandValue() << std::endl;
-    if (isBot){
-       return botMode(state);
-    }
-    else {
-        return manualMode(state);
-    }
-}
 
 PlayerAction Player::hostTurnLogic(GameState& state, Player& opponent, int hostLossCount){
     std::cout << "Host player " << id <<(isBot? "(bot)" : "") << " thinking...Hand value: " << calculateHandValue() << std::endl;
@@ -82,36 +95,6 @@ PlayerAction Player::hostTurnLogic(GameState& state, Player& opponent, int hostL
         }
         return PlayerAction::STAND;
     }
-    else {
-        return manualMode(state);
-    }  
-}
-
-PlayerAction Player::manualMode(GameState& state){
-    std::cout << "[manualMode]" << std::endl;
-    displayManualMenu();
-    char choice = getValidChoice();
-    switch (choice){
-        case '1':
-            return PlayerAction::HIT;
-        break;
-
-        case '2':
-            return PlayerAction::STAND;
-        break;
-
-        case '3':
-            return PlayerAction::SKILL_REQUEST;
-        break;
-
-        case '4':
-            displayGameState(state);
-            return PlayerAction::IDLE;
-        break;
-
-        default: return PlayerAction::IDLE;
-    }
-
 }
 
 PlayerAction Player::botMode(GameState& state){
@@ -126,66 +109,6 @@ PlayerAction Player::botMode(GameState& state){
     }
     return PlayerAction::STAND;
 }
-
-// ============================================================================
-// Player Skill Targeting Logic
-// ============================================================================
-PlayerTargeting Player::targetAndConfirm(GameState& gameState){
-    switch (skillName){
-        case SkillName::DELIVERANCE:
-            return skillTarget_Deliverance(gameState);
-        break;
-        case SkillName::NEURALGAMBIT:
-            return skillTarget_NeuralGambit(gameState);
-        default:
-            std::cout<<" targetAndConfirm : can't find skill "<<std::endl;
-            return PlayerTargeting{};
-    }
-}
-
-PlayerTargeting Player::skillTarget_Deliverance(GameState& gameState){
-    std::cout << "Skill: "<< skillNameToString() 
-                <<" - Uses: "<< gameState.getPlayerInfo(id).skillUses << std::endl;
-    std::cout << "Your cards:" << std::endl;
-
-    for (auto& card: cardsInHand){
-        std::cout << card.getRankAsString() << " of " << card.getSuitAsString() << std::endl;
-    }
-    std::cout <<"Please type id of a card: ";
-    int cardId;
-    std::cin >> cardId;
-    while (cardId >= cardsInHand.size()){
-        std::cout << "Wrong card id, try again: ";
-        std::cin >> cardId; 
-        std::cout<<std::endl;
-    }
-
-    PlayerTargeting target;
-    target.targetCards.push_back(cardsInHand[cardId]);
-    target.targetPlayerIds.push_back(id);
-
-    return target;
-}
-
-PlayerTargeting Player::skillTarget_NeuralGambit(GameState& gameState){
-    std::cout << "Skill: "<< skillNameToString() 
-                <<" - Uses: "<< gameState.getPlayerInfo(id).skillUses << std::endl;
-    std::cout << "Your cards:" << std::endl;
-
-    for (auto& card: cardsInHand){
-        std::cout << card.getRankAsString() << " of " << card.getSuitAsString() << std::endl;
-    }
-
-    std::cout <<"Please type id of a card: ";
-    int cardId;
-    std::cin >> cardId;
-    while (cardId >= cardsInHand.size()){
-        std::cout << "Wrong card id, try again: ";
-        std::cin >> cardId; 
-        std::cout<<std::endl;
-    }
-    
-}
 // ============================================================================
 // Helper functions
 // ============================================================================
@@ -195,8 +118,8 @@ int Player::calculateHandValue() const{
     int aceCount = 0;
 
     // First pass: count all cards except aces
-    for (auto& card  : cardsInHand){
-        Rank cardRank=card.getRank();
+    for (auto* card  : cardsInHand){
+        Rank cardRank = card->getRank();
         if (cardRank == Rank::Jack || cardRank == Rank::Queen
             || cardRank == Rank::King){
                handValue += GameConfig::FACE_CARD_VALUE; 
@@ -306,8 +229,9 @@ void Player::displayGameState(GameState& state) const {
 
 void Player::printCardsInHand(){
     std::cout<<"Player " << id <<"'s hand: " << std::endl;
-    for (auto& card : cardsInHand){
-        std::cout<< card.getRankAsString() << " of " << card.getSuitAsString() << " index: "<< card.getHandIndex()<< std::endl;
+    for (auto* card : cardsInHand){
+        std::cout<< card->getRankAsString() << " of " << card->getSuitAsString() 
+        << " index: "<< card->getHandIndex()<< std::endl;
     }
 }
 

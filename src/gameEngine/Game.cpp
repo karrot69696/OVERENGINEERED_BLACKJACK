@@ -3,6 +3,15 @@
 // ============================================================================
 // Game Implementation
 // ============================================================================
+Game::Game(sf::RenderWindow& window)
+    : 
+        window(window),
+        gameState(),
+        visualState(gameState, this->deck, this->players),
+        uiManager(window, gameState, visualState.getCardVisuals()),
+        animationManager(window, gameState, visualState)
+{}
+
 void Game::dealInitialCards(int numCards){
     for (int i = 0; i < numCards; i++){
         for (auto& player: players){
@@ -12,10 +21,19 @@ void Game::dealInitialCards(int numCards){
 }
 
 void Game::SetupGame(){
-
-    //initialize deck and skill deck
-    deck = Deck();
-    deck.shuffle();
+    //initialize card container
+    for (int s = 0; s < 4; s++) {
+        for ( int r = 1; r <= 13; r++) {
+            this->allCards.push_back(std::make_unique<Card>(
+                static_cast<Suit>(s), 
+                static_cast<Rank>(r), false
+            ));
+        }
+    }
+    //initialize deck 
+    for (auto& card : this->allCards) {
+        deck.addCard(card.get());
+    }
     skillDeck = SkillDeck();
     //skillDeck.shuffle();
     
@@ -28,8 +46,9 @@ void Game::SetupGame(){
     std::cin >> numBots; 
     // Validate input
     if (numPlayers <= 1 || numBots < 0 ) {
-        std::cout << "Invalid input. Using defaults (2 bots, 2 players)." << std::endl;
-        numPlayers = 2;  
+        std::cout << "Invalid input. Using defaults (2 bots, 1 players)." << std::endl;
+        numPlayers = 3;
+        numBots = 2;  
     }
     else{
         numPlayers = (numPlayers>maxNumPlayer)? maxNumPlayer : numPlayers;

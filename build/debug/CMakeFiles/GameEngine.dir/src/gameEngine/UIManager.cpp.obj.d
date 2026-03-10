@@ -186,33 +186,6 @@ CMakeFiles/GameEngine.dir/src/gameEngine/UIManager.cpp.obj: \
  C:/mingw64/include/c++/14.2.0/bits/istream.tcc \
  C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/GameState.h \
  C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/Card.h \
- C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/Deck.h \
- C:/mingw64/include/c++/14.2.0/random C:/mingw64/include/c++/14.2.0/cmath \
- C:/mingw64/x86_64-w64-mingw32/include/math.h \
- C:/mingw64/include/c++/14.2.0/bits/specfun.h \
- C:/mingw64/include/c++/14.2.0/limits \
- C:/mingw64/include/c++/14.2.0/tr1/gamma.tcc \
- C:/mingw64/include/c++/14.2.0/tr1/special_function_util.h \
- C:/mingw64/include/c++/14.2.0/tr1/bessel_function.tcc \
- C:/mingw64/include/c++/14.2.0/tr1/beta_function.tcc \
- C:/mingw64/include/c++/14.2.0/tr1/ell_integral.tcc \
- C:/mingw64/include/c++/14.2.0/tr1/exp_integral.tcc \
- C:/mingw64/include/c++/14.2.0/tr1/hypergeometric.tcc \
- C:/mingw64/include/c++/14.2.0/tr1/legendre_function.tcc \
- C:/mingw64/include/c++/14.2.0/tr1/modified_bessel_func.tcc \
- C:/mingw64/include/c++/14.2.0/tr1/poly_hermite.tcc \
- C:/mingw64/include/c++/14.2.0/tr1/poly_laguerre.tcc \
- C:/mingw64/include/c++/14.2.0/tr1/riemann_zeta.tcc \
- C:/mingw64/include/c++/14.2.0/cstdint \
- C:/mingw64/include/c++/14.2.0/bits/random.h \
- C:/mingw64/include/c++/14.2.0/x86_64-w64-mingw32/bits/opt_random.h \
- C:/mingw64/include/c++/14.2.0/bits/random.tcc \
- C:/mingw64/include/c++/14.2.0/numeric \
- C:/mingw64/include/c++/14.2.0/bits/stl_numeric.h \
- C:/mingw64/include/c++/14.2.0/pstl/glue_numeric_defs.h \
- C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/SkillDeck.h \
- C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/Player.h \
- C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/GameState.h \
  C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include/SFML/Graphics.hpp \
  C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include/SFML/Graphics/BlendMode.hpp \
  C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include/SFML/Graphics/Export.hpp \
@@ -220,6 +193,7 @@ CMakeFiles/GameEngine.dir/src/gameEngine/UIManager.cpp.obj: \
  C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include/SFML/Graphics/CircleShape.hpp \
  C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include/SFML/Graphics/Shape.hpp \
  C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include/SFML/Graphics/Color.hpp \
+ C:/mingw64/include/c++/14.2.0/cstdint \
  C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include/SFML/Graphics/Color.inl \
  C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include/SFML/Graphics/Drawable.hpp \
  C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include/SFML/Graphics/PrimitiveType.hpp \
@@ -249,7 +223,8 @@ CMakeFiles/GameEngine.dir/src/gameEngine/UIManager.cpp.obj: \
  C:/mingw64/include/c++/14.2.0/filesystem \
  C:/mingw64/include/c++/14.2.0/bits/fs_fwd.h \
  C:/mingw64/include/c++/14.2.0/bits/chrono.h \
- C:/mingw64/include/c++/14.2.0/ratio C:/mingw64/include/c++/14.2.0/ctime \
+ C:/mingw64/include/c++/14.2.0/ratio C:/mingw64/include/c++/14.2.0/limits \
+ C:/mingw64/include/c++/14.2.0/ctime \
  C:/mingw64/include/c++/14.2.0/bits/parse_numbers.h \
  C:/mingw64/include/c++/14.2.0/bits/fs_path.h \
  C:/mingw64/include/c++/14.2.0/locale \
@@ -356,4 +331,29 @@ CMakeFiles/GameEngine.dir/src/gameEngine/UIManager.cpp.obj: \
  C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include/SFML/Audio/SoundBufferRecorder.hpp \
  C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include/SFML/Audio/SoundRecorder.hpp \
  C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include/SFML/Audio/SoundFileFactory.hpp \
- C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include/SFML/Audio/SoundFileFactory.inl
+ C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include/SFML/Audio/SoundFileFactory.inl \
+ C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/Deck.h \
+ C:/mingw64/include/c++/14.2.0/random C:/mingw64/include/c++/14.2.0/cmath \
+ C:/mingw64/x86_64-w64-mingw32/include/math.h \
+ C:/mingw64/include/c++/14.2.0/bits/specfun.h \
+ C:/mingw64/include/c++/14.2.0/tr1/gamma.tcc \
+ C:/mingw64/include/c++/14.2.0/tr1/special_function_util.h \
+ C:/mingw64/include/c++/14.2.0/tr1/bessel_function.tcc \
+ C:/mingw64/include/c++/14.2.0/tr1/beta_function.tcc \
+ C:/mingw64/include/c++/14.2.0/tr1/ell_integral.tcc \
+ C:/mingw64/include/c++/14.2.0/tr1/exp_integral.tcc \
+ C:/mingw64/include/c++/14.2.0/tr1/hypergeometric.tcc \
+ C:/mingw64/include/c++/14.2.0/tr1/legendre_function.tcc \
+ C:/mingw64/include/c++/14.2.0/tr1/modified_bessel_func.tcc \
+ C:/mingw64/include/c++/14.2.0/tr1/poly_hermite.tcc \
+ C:/mingw64/include/c++/14.2.0/tr1/poly_laguerre.tcc \
+ C:/mingw64/include/c++/14.2.0/tr1/riemann_zeta.tcc \
+ C:/mingw64/include/c++/14.2.0/bits/random.h \
+ C:/mingw64/include/c++/14.2.0/x86_64-w64-mingw32/bits/opt_random.h \
+ C:/mingw64/include/c++/14.2.0/bits/random.tcc \
+ C:/mingw64/include/c++/14.2.0/numeric \
+ C:/mingw64/include/c++/14.2.0/bits/stl_numeric.h \
+ C:/mingw64/include/c++/14.2.0/pstl/glue_numeric_defs.h \
+ C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/SkillDeck.h \
+ C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/Player.h \
+ C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/GameState.h

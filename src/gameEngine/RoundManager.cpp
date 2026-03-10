@@ -20,7 +20,7 @@ void RoundManager::updateGameState(PhaseName phase, int playerId){
         // };
         std::vector<Card> playerHand;
         for (int i = 0; i < player.getHandSize(); i++){
-            playerHand.push_back(player.getCardInHand(i));
+            playerHand.push_back(*player.getCardInHand(i));
         }
         
         PlayerInfo playerInfo{  
@@ -129,15 +129,15 @@ void RoundManager::changePhase(PhaseName newPhase){
 std::unique_ptr<Phase> RoundManager::createPhase(const PhaseName name){
     switch (name){
         case PhaseName::BLACKJACK_CHECK_PHASE:
-            return std::make_unique<BlackJackCheckPhase>(this->uiManager, *this, this->skillManager, this->gameState);
+            return std::make_unique<BlackJackCheckPhase>(this->uiManager,this->animationManager, *this, this->skillManager, this->gameState);
         case PhaseName::PLAYER_HIT_PHASE:
-            return std::make_unique<PlayerHitPhase>(this->uiManager, *this, this->skillManager, this->gameState);
+            return std::make_unique<PlayerHitPhase>(this->uiManager,this->animationManager, *this, this->skillManager, this->gameState);
         case PhaseName::HOST_HIT_PHASE:
-            return std::make_unique<HostHitPhase>(this->uiManager, *this, this->skillManager, this->gameState);
+            return std::make_unique<HostHitPhase>(this->uiManager,this->animationManager, *this, this->skillManager, this->gameState);
         case PhaseName::BATTLE_PHASE:
-            return std::make_unique<BattlePhase>(this->uiManager, *this, this->skillManager, this->gameState);
+            return std::make_unique<BattlePhase>(this->uiManager,this->animationManager, *this, this->skillManager, this->gameState);
         case PhaseName::ROUND_END:
-            return std::make_unique<RoundEndPhase>(this->uiManager, *this, this->skillManager, this->gameState);
+            return std::make_unique<RoundEndPhase>(this->uiManager,this->animationManager, *this, this->skillManager, this->gameState);
         case PhaseName::GAME_OVER:
             return nullptr;
     }

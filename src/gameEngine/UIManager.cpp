@@ -1,24 +1,5 @@
 #include "UIManager.h"
 #include <map>
-
-
-// ============================================================================
-// Layout Constants
-// ============================================================================
-namespace UILayout {
-    const sf::Color TABLE_GREEN    = sf::Color(34, 85, 34);
-    const sf::Color CARD_WHITE     = sf::Color(245, 245, 245);
-    const sf::Color CARD_HIGHLIGHT = sf::Color(255, 220, 50);
-    const sf::Color CARD_TARGET    = sf::Color(255, 80, 80);
-    const sf::Color BUTTON_NORMAL  = sf::Color(60, 60, 80);
-    const sf::Color BUTTON_HOVER   = sf::Color(90, 90, 120);
-    const sf::Color HUD_BG         = sf::Color(20, 20, 20, 180);
-
-    const sf::Vector2f CARD_SIZE   = {60.f, 90.f};
-    const sf::Vector2f BUTTON_SIZE = {120.f, 40.f};
-    const float CARD_SPACING       = 70.f;
-}
-
 // ============================================================================
 // Button
 // ============================================================================
@@ -49,34 +30,11 @@ void Button::draw(sf::RenderWindow& window) {
 bool Button::isClicked(sf::Vector2f mousePos) {
     return visible && shape.getGlobalBounds().contains(mousePos);
 }
-
-// ============================================================================
-// CardVisual
-// ============================================================================
-void CardVisual::draw(sf::RenderWindow& window) {
-    window.draw(cardSprite);
-}
-
-bool CardVisual::isClicked(sf::Vector2f mousePos) {
-    return cardSprite.getGlobalBounds().contains(mousePos);
-}
-
 // ============================================================================
 // UIManager
 // ============================================================================
-UIManager::UIManager(sf::RenderWindow& window, GameState& gameState)
-    : window(window), gameState(gameState) {
-
-    std::filesystem::path fontPath =            "../assets/fonts/PixeloidSans.ttf";
-    std::filesystem::path cardTexturePath =     "../assets/fonts/CuteCards.png";
-
-    if (!font.openFromFile(fontPath)) {
-        std::cerr << "[UIManager] Failed to load font from assets/fonts/PixeloidSans.ttf" << std::endl;
-    }
-
-    if (!cardTexture.loadFromFile(cardTexturePath)) {
-        std::cerr << "[UIManager] Failed to load card texture from assets/fonts/CuteCards.png" << std::endl;
-    }
+UIManager::UIManager(sf::RenderWindow& window, GameState& gameState, std::vector<CardVisual>& cardVisuals)
+    : window(window), gameState(gameState), cardVisuals(cardVisuals) {
 
     // Build action buttons (hidden by default)
     float btnY = window.getSize().y - 60.f;
@@ -179,7 +137,7 @@ void UIManager::handleEvent(const std::optional<sf::Event>& event) {
                             pendingTargeting = target;
                             cv.isTarget = true;
                     }
-                    else if ( pendingTargeting.targetCards.size() > 0 ){
+                    else if ( (int)pendingTargeting.targetCards.size() > 0 ){
                         if (cv.ownerId == pendingTargeting.targetCards.front().getOwnerId()
                             && cv.cardIndex == pendingTargeting.targetCards.front().getHandIndex()){
                                 
@@ -213,9 +171,9 @@ void UIManager::confirmTargeting() {
 // Render
 // ============================================================================
 void UIManager::render() {
-    buildCardVisuals();
+    //buildCardVisuals();
     renderTable();
-    renderHands();
+    renderCards();
     renderHUD();
     if (showActionMenu)      renderActionMenu();
     if (showTargetingOverlay_Deliverance) renderTargetingOverlay_Deliverance();
@@ -227,7 +185,7 @@ void UIManager::renderTable() {
     window.draw(table);
 }
 
-void UIManager::renderHands() {
+void UIManager::renderCards() {
     for (auto& cv : cardVisuals) {
         window.draw(cv.cardSprite);
     }
@@ -353,6 +311,27 @@ void UIManager::buildCardVisuals() {
 
             cardVisuals.emplace_back(player.playerId, card.getHandIndex(), std::move(sprite));
 
+            // Restore isTarget state
+            auto it = targetState.find({player.playerId, i});
+            if (it != targetState.end()) {
+                cardVisuals.back().isTarget = it->second;
+            }
+        }
+    }
+}
+
+void UIManager::targetStateHandler() {
+    // Save isTarget state before rebuilding
+    std::map<std::pair<int,int>, bool> targetState;
+    for (auto& cv : cardVisuals) {
+        targetState[{cv.ownerId, cv.cardIndex}] = cv.isTarget;
+    }
+    auto players = gameState.getAllPlayerInfo();
+    
+    //rebuild
+
+    for (auto& player : players) {
+        for (int i = 0; i < (int)player.cardsInHand.size(); i++) {
             // Restore isTarget state
             auto it = targetState.find({player.playerId, i});
             if (it != targetState.end()) {

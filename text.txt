@@ -17,7 +17,7 @@ RunGame
         |       handleNormalPlayerTurns ============> [hit] [stand] [skill] 
         |           |           
         |           |
-        |         Stand
+        |         [stand]
         |           |
         |           \/
         |       Host [hit] [stand] [skill] =====Stand===> Battle phase + [Skill]

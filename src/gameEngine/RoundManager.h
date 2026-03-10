@@ -25,7 +25,7 @@ class RoundManager {
 private:
     std::vector<Player>& players;
     Deck& deck;
-    SkillManager skillManager;
+    SkillManager& skillManager;
     GameState& gameState;
     UIManager& uiManager;
     AnimationManager& animationManager;
@@ -35,8 +35,20 @@ private:
 public:
 
 
-    RoundManager(std::vector<Player>& players, Deck& deck, SkillManager& skillManager, GameState& _gameState, UIManager& _uiManager, AnimationManager & _animationManager) 
-        : players(players), deck(deck), skillManager(skillManager), gameState(_gameState), uiManager(_uiManager), animationManager(_animationManager) {}
+    RoundManager(
+        std::vector<Player>& _players, 
+        Deck& _deck, 
+        SkillManager& _skillManager, 
+        GameState& _gameState, 
+        UIManager& _uiManager, 
+        AnimationManager& _animationManager) 
+        : 
+        players(_players), 
+        deck(_deck), 
+        skillManager(_skillManager), 
+        gameState(_gameState), 
+        uiManager(_uiManager), 
+        animationManager(_animationManager) {}
     //getters
     Deck& getDeck(){return deck;}
     SkillManager& getSkillManager(){return skillManager;}

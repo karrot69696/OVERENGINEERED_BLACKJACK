@@ -213,17 +213,17 @@ PhaseEngine/fast:
 .PHONY : PhaseEngine/fast
 
 #=============================================================================
-# Target rules for targets named MindJack
+# Target rules for targets named CrazyJack
 
 # Build rule for target.
-MindJack: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 MindJack
-.PHONY : MindJack
+CrazyJack: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 CrazyJack
+.PHONY : CrazyJack
 
 # fast build rule for target.
-MindJack/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\MindJack.dir\build.make CMakeFiles/MindJack.dir/build
-.PHONY : MindJack/fast
+CrazyJack/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\CrazyJack.dir\build.make CMakeFiles/CrazyJack.dir/build
+.PHONY : CrazyJack/fast
 
 #=============================================================================
 # Target rules for targets named copy_assets
@@ -430,12 +430,36 @@ src/lowLevelEntities/Player.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\LowLevelEntities.dir\build.make CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/Player.cpp.s
 .PHONY : src/lowLevelEntities/Player.cpp.s
 
+src/lowLevelEntities/VisualState.obj: src/lowLevelEntities/VisualState.cpp.obj
+.PHONY : src/lowLevelEntities/VisualState.obj
+
+# target to build an object file
+src/lowLevelEntities/VisualState.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\LowLevelEntities.dir\build.make CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/VisualState.cpp.obj
+.PHONY : src/lowLevelEntities/VisualState.cpp.obj
+
+src/lowLevelEntities/VisualState.i: src/lowLevelEntities/VisualState.cpp.i
+.PHONY : src/lowLevelEntities/VisualState.i
+
+# target to preprocess a source file
+src/lowLevelEntities/VisualState.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\LowLevelEntities.dir\build.make CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/VisualState.cpp.i
+.PHONY : src/lowLevelEntities/VisualState.cpp.i
+
+src/lowLevelEntities/VisualState.s: src/lowLevelEntities/VisualState.cpp.s
+.PHONY : src/lowLevelEntities/VisualState.s
+
+# target to generate assembly for a file
+src/lowLevelEntities/VisualState.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\LowLevelEntities.dir\build.make CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/VisualState.cpp.s
+.PHONY : src/lowLevelEntities/VisualState.cpp.s
+
 src/main.obj: src/main.cpp.obj
 .PHONY : src/main.obj
 
 # target to build an object file
 src/main.cpp.obj:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\MindJack.dir\build.make CMakeFiles/MindJack.dir/src/main.cpp.obj
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\CrazyJack.dir\build.make CMakeFiles/CrazyJack.dir/src/main.cpp.obj
 .PHONY : src/main.cpp.obj
 
 src/main.i: src/main.cpp.i
@@ -443,7 +467,7 @@ src/main.i: src/main.cpp.i
 
 # target to preprocess a source file
 src/main.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\MindJack.dir\build.make CMakeFiles/MindJack.dir/src/main.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\CrazyJack.dir\build.make CMakeFiles/CrazyJack.dir/src/main.cpp.i
 .PHONY : src/main.cpp.i
 
 src/main.s: src/main.cpp.s
@@ -451,7 +475,7 @@ src/main.s: src/main.cpp.s
 
 # target to generate assembly for a file
 src/main.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\MindJack.dir\build.make CMakeFiles/MindJack.dir/src/main.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\CrazyJack.dir\build.make CMakeFiles/CrazyJack.dir/src/main.cpp.s
 .PHONY : src/main.cpp.s
 
 src/phaseEngine/BattlePhase.obj: src/phaseEngine/BattlePhase.cpp.obj
@@ -635,9 +659,9 @@ help:
 	@echo ... list_install_components
 	@echo ... rebuild_cache
 	@echo ... copy_assets
+	@echo ... CrazyJack
 	@echo ... GameEngine
 	@echo ... LowLevelEntities
-	@echo ... MindJack
 	@echo ... PhaseEngine
 	@echo ... SkillEngine
 	@echo ... src/gameEngine/AnimationManager.obj
@@ -664,6 +688,9 @@ help:
 	@echo ... src/lowLevelEntities/Player.obj
 	@echo ... src/lowLevelEntities/Player.i
 	@echo ... src/lowLevelEntities/Player.s
+	@echo ... src/lowLevelEntities/VisualState.obj
+	@echo ... src/lowLevelEntities/VisualState.i
+	@echo ... src/lowLevelEntities/VisualState.s
 	@echo ... src/main.obj
 	@echo ... src/main.i
 	@echo ... src/main.s

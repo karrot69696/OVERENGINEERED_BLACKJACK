@@ -7,8 +7,7 @@
 #include <memory>
 #include <iostream>
 
-#include "../lowLevelEntities/GameState.h"
-#include "../lowLevelEntities/Player.h"
+#include "../lowLevelEntities/VisualState.h"
 
 #include <SFML/Graphics.hpp>
 #include <SFML/System.hpp>
@@ -28,8 +27,10 @@ private:
     std::vector<Animation> animations;
     sf::RenderWindow& window;
     GameState& gameState;
+    VisualState& visualState;
 public:
-    AnimationManager(sf::RenderWindow& window, GameState& gameState) : window(window), gameState(gameState) {}
+    AnimationManager(sf::RenderWindow& window, GameState& gameState, VisualState& visualState) : 
+    window(window), gameState(gameState), visualState(visualState) {}
     void add(Animation anim)
     {
         animations.push_back(anim);

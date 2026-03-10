@@ -66,7 +66,7 @@ all: CMakeFiles/LowLevelEntities.dir/all
 all: CMakeFiles/SkillEngine.dir/all
 all: CMakeFiles/GameEngine.dir/all
 all: CMakeFiles/PhaseEngine.dir/all
-all: CMakeFiles/MindJack.dir/all
+all: CMakeFiles/CrazyJack.dir/all
 all: CMakeFiles/copy_assets.dir/all
 .PHONY : all
 
@@ -75,7 +75,7 @@ codegen: CMakeFiles/LowLevelEntities.dir/codegen
 codegen: CMakeFiles/SkillEngine.dir/codegen
 codegen: CMakeFiles/GameEngine.dir/codegen
 codegen: CMakeFiles/PhaseEngine.dir/codegen
-codegen: CMakeFiles/MindJack.dir/codegen
+codegen: CMakeFiles/CrazyJack.dir/codegen
 codegen: CMakeFiles/copy_assets.dir/codegen
 .PHONY : codegen
 
@@ -88,7 +88,7 @@ clean: CMakeFiles/LowLevelEntities.dir/clean
 clean: CMakeFiles/SkillEngine.dir/clean
 clean: CMakeFiles/GameEngine.dir/clean
 clean: CMakeFiles/PhaseEngine.dir/clean
-clean: CMakeFiles/MindJack.dir/clean
+clean: CMakeFiles/CrazyJack.dir/clean
 clean: CMakeFiles/copy_assets.dir/clean
 .PHONY : clean
 
@@ -99,12 +99,12 @@ clean: CMakeFiles/copy_assets.dir/clean
 CMakeFiles/LowLevelEntities.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\LowLevelEntities.dir\build.make CMakeFiles/LowLevelEntities.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\LowLevelEntities.dir\build.make CMakeFiles/LowLevelEntities.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\build\debug\CMakeFiles --progress-num=6,7,8,9,10 "Built target LowLevelEntities"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\build\debug\CMakeFiles --progress-num=8,9,10,11,12,13 "Built target LowLevelEntities"
 .PHONY : CMakeFiles/LowLevelEntities.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/LowLevelEntities.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\build\debug\CMakeFiles 5
+	$(CMAKE_COMMAND) -E cmake_progress_start C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\build\debug\CMakeFiles 6
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 CMakeFiles/LowLevelEntities.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\build\debug\CMakeFiles 0
 .PHONY : CMakeFiles/LowLevelEntities.dir/rule
@@ -116,7 +116,7 @@ LowLevelEntities: CMakeFiles/LowLevelEntities.dir/rule
 # codegen rule for target.
 CMakeFiles/LowLevelEntities.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\LowLevelEntities.dir\build.make CMakeFiles/LowLevelEntities.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\build\debug\CMakeFiles --progress-num=6,7,8,9,10 "Finished codegen for target LowLevelEntities"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\build\debug\CMakeFiles --progress-num=8,9,10,11,12,13 "Finished codegen for target LowLevelEntities"
 .PHONY : CMakeFiles/LowLevelEntities.dir/codegen
 
 # clean rule for target.
@@ -131,12 +131,12 @@ CMakeFiles/LowLevelEntities.dir/clean:
 CMakeFiles/SkillEngine.dir/all: CMakeFiles/LowLevelEntities.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\SkillEngine.dir\build.make CMakeFiles/SkillEngine.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\SkillEngine.dir\build.make CMakeFiles/SkillEngine.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\build\debug\CMakeFiles --progress-num=20,21 "Built target SkillEngine"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\build\debug\CMakeFiles --progress-num=21,22 "Built target SkillEngine"
 .PHONY : CMakeFiles/SkillEngine.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/SkillEngine.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\build\debug\CMakeFiles 7
+	$(CMAKE_COMMAND) -E cmake_progress_start C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\build\debug\CMakeFiles 8
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 CMakeFiles/SkillEngine.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\build\debug\CMakeFiles 0
 .PHONY : CMakeFiles/SkillEngine.dir/rule
@@ -148,7 +148,7 @@ SkillEngine: CMakeFiles/SkillEngine.dir/rule
 # codegen rule for target.
 CMakeFiles/SkillEngine.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\SkillEngine.dir\build.make CMakeFiles/SkillEngine.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\build\debug\CMakeFiles --progress-num=20,21 "Finished codegen for target SkillEngine"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\build\debug\CMakeFiles --progress-num=21,22 "Finished codegen for target SkillEngine"
 .PHONY : CMakeFiles/SkillEngine.dir/codegen
 
 # clean rule for target.
@@ -164,12 +164,12 @@ CMakeFiles/GameEngine.dir/all: CMakeFiles/LowLevelEntities.dir/all
 CMakeFiles/GameEngine.dir/all: CMakeFiles/SkillEngine.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\GameEngine.dir\build.make CMakeFiles/GameEngine.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\GameEngine.dir\build.make CMakeFiles/GameEngine.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\build\debug\CMakeFiles --progress-num=1,2,3,4,5 "Built target GameEngine"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\build\debug\CMakeFiles --progress-num=3,4,5,6,7 "Built target GameEngine"
 .PHONY : CMakeFiles/GameEngine.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/GameEngine.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\build\debug\CMakeFiles 12
+	$(CMAKE_COMMAND) -E cmake_progress_start C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\build\debug\CMakeFiles 13
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 CMakeFiles/GameEngine.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\build\debug\CMakeFiles 0
 .PHONY : CMakeFiles/GameEngine.dir/rule
@@ -181,7 +181,7 @@ GameEngine: CMakeFiles/GameEngine.dir/rule
 # codegen rule for target.
 CMakeFiles/GameEngine.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\GameEngine.dir\build.make CMakeFiles/GameEngine.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\build\debug\CMakeFiles --progress-num=1,2,3,4,5 "Finished codegen for target GameEngine"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\build\debug\CMakeFiles --progress-num=3,4,5,6,7 "Finished codegen for target GameEngine"
 .PHONY : CMakeFiles/GameEngine.dir/codegen
 
 # clean rule for target.
@@ -197,12 +197,12 @@ CMakeFiles/PhaseEngine.dir/all: CMakeFiles/LowLevelEntities.dir/all
 CMakeFiles/PhaseEngine.dir/all: CMakeFiles/SkillEngine.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\PhaseEngine.dir\build.make CMakeFiles/PhaseEngine.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\PhaseEngine.dir\build.make CMakeFiles/PhaseEngine.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\build\debug\CMakeFiles --progress-num=13,14,15,16,17,18,19 "Built target PhaseEngine"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\build\debug\CMakeFiles --progress-num=14,15,16,17,18,19,20 "Built target PhaseEngine"
 .PHONY : CMakeFiles/PhaseEngine.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/PhaseEngine.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\build\debug\CMakeFiles 14
+	$(CMAKE_COMMAND) -E cmake_progress_start C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\build\debug\CMakeFiles 15
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 CMakeFiles/PhaseEngine.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\build\debug\CMakeFiles 0
 .PHONY : CMakeFiles/PhaseEngine.dir/rule
@@ -214,7 +214,7 @@ PhaseEngine: CMakeFiles/PhaseEngine.dir/rule
 # codegen rule for target.
 CMakeFiles/PhaseEngine.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\PhaseEngine.dir\build.make CMakeFiles/PhaseEngine.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\build\debug\CMakeFiles --progress-num=13,14,15,16,17,18,19 "Finished codegen for target PhaseEngine"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\build\debug\CMakeFiles --progress-num=14,15,16,17,18,19,20 "Finished codegen for target PhaseEngine"
 .PHONY : CMakeFiles/PhaseEngine.dir/codegen
 
 # clean rule for target.
@@ -223,39 +223,39 @@ CMakeFiles/PhaseEngine.dir/clean:
 .PHONY : CMakeFiles/PhaseEngine.dir/clean
 
 #=============================================================================
-# Target rules for target CMakeFiles/MindJack.dir
+# Target rules for target CMakeFiles/CrazyJack.dir
 
 # All Build rule for target.
-CMakeFiles/MindJack.dir/all: CMakeFiles/LowLevelEntities.dir/all
-CMakeFiles/MindJack.dir/all: CMakeFiles/SkillEngine.dir/all
-CMakeFiles/MindJack.dir/all: CMakeFiles/GameEngine.dir/all
-CMakeFiles/MindJack.dir/all: CMakeFiles/PhaseEngine.dir/all
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\MindJack.dir\build.make CMakeFiles/MindJack.dir/depend
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\MindJack.dir\build.make CMakeFiles/MindJack.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\build\debug\CMakeFiles --progress-num=11,12 "Built target MindJack"
-.PHONY : CMakeFiles/MindJack.dir/all
+CMakeFiles/CrazyJack.dir/all: CMakeFiles/LowLevelEntities.dir/all
+CMakeFiles/CrazyJack.dir/all: CMakeFiles/SkillEngine.dir/all
+CMakeFiles/CrazyJack.dir/all: CMakeFiles/GameEngine.dir/all
+CMakeFiles/CrazyJack.dir/all: CMakeFiles/PhaseEngine.dir/all
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\CrazyJack.dir\build.make CMakeFiles/CrazyJack.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\CrazyJack.dir\build.make CMakeFiles/CrazyJack.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\build\debug\CMakeFiles --progress-num=1,2 "Built target CrazyJack"
+.PHONY : CMakeFiles/CrazyJack.dir/all
 
 # Build rule for subdir invocation for target.
-CMakeFiles/MindJack.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\build\debug\CMakeFiles 21
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 CMakeFiles/MindJack.dir/all
+CMakeFiles/CrazyJack.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\build\debug\CMakeFiles 22
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 CMakeFiles/CrazyJack.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\build\debug\CMakeFiles 0
-.PHONY : CMakeFiles/MindJack.dir/rule
+.PHONY : CMakeFiles/CrazyJack.dir/rule
 
 # Convenience name for target.
-MindJack: CMakeFiles/MindJack.dir/rule
-.PHONY : MindJack
+CrazyJack: CMakeFiles/CrazyJack.dir/rule
+.PHONY : CrazyJack
 
 # codegen rule for target.
-CMakeFiles/MindJack.dir/codegen:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\MindJack.dir\build.make CMakeFiles/MindJack.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\build\debug\CMakeFiles --progress-num=11,12 "Finished codegen for target MindJack"
-.PHONY : CMakeFiles/MindJack.dir/codegen
+CMakeFiles/CrazyJack.dir/codegen:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\CrazyJack.dir\build.make CMakeFiles/CrazyJack.dir/codegen
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\build\debug\CMakeFiles --progress-num=1,2 "Finished codegen for target CrazyJack"
+.PHONY : CMakeFiles/CrazyJack.dir/codegen
 
 # clean rule for target.
-CMakeFiles/MindJack.dir/clean:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\MindJack.dir\build.make CMakeFiles/MindJack.dir/clean
-.PHONY : CMakeFiles/MindJack.dir/clean
+CMakeFiles/CrazyJack.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\CrazyJack.dir\build.make CMakeFiles/CrazyJack.dir/clean
+.PHONY : CMakeFiles/CrazyJack.dir/clean
 
 #=============================================================================
 # Target rules for target CMakeFiles/copy_assets.dir

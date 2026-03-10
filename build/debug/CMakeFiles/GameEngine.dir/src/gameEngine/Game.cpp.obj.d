@@ -156,79 +156,6 @@ CMakeFiles/GameEngine.dir/src/gameEngine/Game.cpp.obj: \
  C:/mingw64/include/c++/14.2.0/cerrno \
  C:/mingw64/include/c++/14.2.0/bits/charconv.h \
  C:/mingw64/include/c++/14.2.0/bits/basic_string.tcc \
- C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/Deck.h \
- C:/mingw64/include/c++/14.2.0/random C:/mingw64/include/c++/14.2.0/cmath \
- C:/mingw64/x86_64-w64-mingw32/include/math.h \
- C:/mingw64/include/c++/14.2.0/bits/specfun.h \
- C:/mingw64/include/c++/14.2.0/limits \
- C:/mingw64/include/c++/14.2.0/tr1/gamma.tcc \
- C:/mingw64/include/c++/14.2.0/tr1/special_function_util.h \
- C:/mingw64/include/c++/14.2.0/tr1/bessel_function.tcc \
- C:/mingw64/include/c++/14.2.0/tr1/beta_function.tcc \
- C:/mingw64/include/c++/14.2.0/tr1/ell_integral.tcc \
- C:/mingw64/include/c++/14.2.0/tr1/exp_integral.tcc \
- C:/mingw64/include/c++/14.2.0/tr1/hypergeometric.tcc \
- C:/mingw64/include/c++/14.2.0/tr1/legendre_function.tcc \
- C:/mingw64/include/c++/14.2.0/tr1/modified_bessel_func.tcc \
- C:/mingw64/include/c++/14.2.0/tr1/poly_hermite.tcc \
- C:/mingw64/include/c++/14.2.0/tr1/poly_laguerre.tcc \
- C:/mingw64/include/c++/14.2.0/tr1/riemann_zeta.tcc \
- C:/mingw64/include/c++/14.2.0/cstdint \
- C:/mingw64/include/c++/14.2.0/bits/random.h \
- C:/mingw64/include/c++/14.2.0/x86_64-w64-mingw32/bits/opt_random.h \
- C:/mingw64/include/c++/14.2.0/bits/random.tcc \
- C:/mingw64/include/c++/14.2.0/numeric \
- C:/mingw64/include/c++/14.2.0/bits/stl_numeric.h \
- C:/mingw64/include/c++/14.2.0/pstl/glue_numeric_defs.h \
- C:/mingw64/include/c++/14.2.0/iostream \
- C:/mingw64/include/c++/14.2.0/ostream C:/mingw64/include/c++/14.2.0/ios \
- C:/mingw64/include/c++/14.2.0/bits/ios_base.h \
- C:/mingw64/include/c++/14.2.0/bits/locale_classes.h \
- C:/mingw64/include/c++/14.2.0/bits/locale_classes.tcc \
- C:/mingw64/include/c++/14.2.0/system_error \
- C:/mingw64/include/c++/14.2.0/x86_64-w64-mingw32/bits/error_constants.h \
- C:/mingw64/include/c++/14.2.0/stdexcept \
- C:/mingw64/include/c++/14.2.0/streambuf \
- C:/mingw64/include/c++/14.2.0/bits/streambuf.tcc \
- C:/mingw64/include/c++/14.2.0/bits/basic_ios.h \
- C:/mingw64/include/c++/14.2.0/bits/locale_facets.h \
- C:/mingw64/include/c++/14.2.0/cwctype \
- C:/mingw64/x86_64-w64-mingw32/include/wctype.h \
- C:/mingw64/include/c++/14.2.0/x86_64-w64-mingw32/bits/ctype_base.h \
- C:/mingw64/include/c++/14.2.0/bits/streambuf_iterator.h \
- C:/mingw64/include/c++/14.2.0/x86_64-w64-mingw32/bits/ctype_inline.h \
- C:/mingw64/include/c++/14.2.0/bits/locale_facets.tcc \
- C:/mingw64/include/c++/14.2.0/bits/basic_ios.tcc \
- C:/mingw64/include/c++/14.2.0/bits/ostream.tcc \
- C:/mingw64/include/c++/14.2.0/istream \
- C:/mingw64/include/c++/14.2.0/bits/istream.tcc \
- C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/SkillDeck.h \
- C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/Player.h \
- C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/GameState.h \
- C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/skillEngine/Skill_Deliverance.h \
- C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/skillEngine/Skill_NeuralGambit.h \
- C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/Player.h \
- C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/Phase.h \
- C:/mingw64/include/c++/14.2.0/functional \
- C:/mingw64/include/c++/14.2.0/bits/std_function.h \
- C:/mingw64/include/c++/14.2.0/unordered_map \
- C:/mingw64/include/c++/14.2.0/bits/unordered_map.h \
- C:/mingw64/include/c++/14.2.0/bits/hashtable.h \
- C:/mingw64/include/c++/14.2.0/bits/hashtable_policy.h \
- C:/mingw64/include/c++/14.2.0/bits/node_handle.h \
- C:/mingw64/include/c++/14.2.0/bits/erase_if.h \
- C:/mingw64/include/c++/14.2.0/array \
- C:/mingw64/include/c++/14.2.0/compare \
- C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/Player.h \
- C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/BlackJackCheckPhase.h \
- C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/Phase.h \
- C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\src\gameEngine\RoundManager.h \
- C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/PlayerHitPhase.h \
- C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/HostHitPhase.h \
- C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/BattlePhase.h \
- C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/RoundEndPhase.h \
- C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\src\gameEngine\UIManager.h \
- C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/GameState.h \
  C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include/SFML/Graphics.hpp \
  C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include/SFML/Graphics/BlendMode.hpp \
  C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include/SFML/Graphics/Export.hpp \
@@ -236,6 +163,7 @@ CMakeFiles/GameEngine.dir/src/gameEngine/Game.cpp.obj: \
  C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include/SFML/Graphics/CircleShape.hpp \
  C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include/SFML/Graphics/Shape.hpp \
  C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include/SFML/Graphics/Color.hpp \
+ C:/mingw64/include/c++/14.2.0/cstdint \
  C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include/SFML/Graphics/Color.inl \
  C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include/SFML/Graphics/Drawable.hpp \
  C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include/SFML/Graphics/PrimitiveType.hpp \
@@ -252,6 +180,8 @@ CMakeFiles/GameEngine.dir/src/gameEngine/Game.cpp.obj: \
  C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include/SFML/Graphics/CoordinateType.hpp \
  C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include/SFML/Graphics/StencilMode.hpp \
  C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include/SFML/Graphics/Transform.hpp \
+ C:/mingw64/include/c++/14.2.0/array \
+ C:/mingw64/include/c++/14.2.0/compare \
  C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include/SFML/Graphics/Transform.inl \
  C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include/SFML/Graphics/Transformable.hpp \
  C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include/SFML/Graphics/VertexArray.hpp \
@@ -264,11 +194,27 @@ CMakeFiles/GameEngine.dir/src/gameEngine/Game.cpp.obj: \
  C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include/SFML/Window/Export.hpp \
  C:/mingw64/include/c++/14.2.0/filesystem \
  C:/mingw64/include/c++/14.2.0/bits/fs_fwd.h \
+ C:/mingw64/include/c++/14.2.0/system_error \
+ C:/mingw64/include/c++/14.2.0/x86_64-w64-mingw32/bits/error_constants.h \
+ C:/mingw64/include/c++/14.2.0/stdexcept \
  C:/mingw64/include/c++/14.2.0/bits/chrono.h \
- C:/mingw64/include/c++/14.2.0/ratio C:/mingw64/include/c++/14.2.0/ctime \
+ C:/mingw64/include/c++/14.2.0/ratio C:/mingw64/include/c++/14.2.0/limits \
+ C:/mingw64/include/c++/14.2.0/ctime \
  C:/mingw64/include/c++/14.2.0/bits/parse_numbers.h \
  C:/mingw64/include/c++/14.2.0/bits/fs_path.h \
  C:/mingw64/include/c++/14.2.0/locale \
+ C:/mingw64/include/c++/14.2.0/bits/locale_classes.h \
+ C:/mingw64/include/c++/14.2.0/bits/locale_classes.tcc \
+ C:/mingw64/include/c++/14.2.0/bits/locale_facets.h \
+ C:/mingw64/include/c++/14.2.0/cwctype \
+ C:/mingw64/x86_64-w64-mingw32/include/wctype.h \
+ C:/mingw64/include/c++/14.2.0/x86_64-w64-mingw32/bits/ctype_base.h \
+ C:/mingw64/include/c++/14.2.0/bits/ios_base.h \
+ C:/mingw64/include/c++/14.2.0/streambuf \
+ C:/mingw64/include/c++/14.2.0/bits/streambuf.tcc \
+ C:/mingw64/include/c++/14.2.0/bits/streambuf_iterator.h \
+ C:/mingw64/include/c++/14.2.0/x86_64-w64-mingw32/bits/ctype_inline.h \
+ C:/mingw64/include/c++/14.2.0/bits/locale_facets.tcc \
  C:/mingw64/include/c++/14.2.0/bits/locale_facets_nonio.h \
  C:/mingw64/include/c++/14.2.0/x86_64-w64-mingw32/bits/time_members.h \
  C:/mingw64/include/c++/14.2.0/x86_64-w64-mingw32/bits/messages_members.h \
@@ -278,10 +224,22 @@ CMakeFiles/GameEngine.dir/src/gameEngine/Game.cpp.obj: \
  C:/mingw64/include/c++/14.2.0/iomanip \
  C:/mingw64/include/c++/14.2.0/bits/quoted_string.h \
  C:/mingw64/include/c++/14.2.0/sstream \
+ C:/mingw64/include/c++/14.2.0/istream C:/mingw64/include/c++/14.2.0/ios \
+ C:/mingw64/include/c++/14.2.0/bits/basic_ios.h \
+ C:/mingw64/include/c++/14.2.0/bits/basic_ios.tcc \
+ C:/mingw64/include/c++/14.2.0/ostream \
+ C:/mingw64/include/c++/14.2.0/bits/ostream.tcc \
+ C:/mingw64/include/c++/14.2.0/bits/istream.tcc \
  C:/mingw64/include/c++/14.2.0/bits/sstream.tcc \
  C:/mingw64/include/c++/14.2.0/codecvt \
  C:/mingw64/include/c++/14.2.0/bits/fs_dir.h \
  C:/mingw64/include/c++/14.2.0/bits/fs_ops.h \
+ C:/mingw64/include/c++/14.2.0/unordered_map \
+ C:/mingw64/include/c++/14.2.0/bits/unordered_map.h \
+ C:/mingw64/include/c++/14.2.0/bits/hashtable.h \
+ C:/mingw64/include/c++/14.2.0/bits/hashtable_policy.h \
+ C:/mingw64/include/c++/14.2.0/bits/node_handle.h \
+ C:/mingw64/include/c++/14.2.0/bits/erase_if.h \
  C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include/SFML/Graphics/Image.hpp \
  C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include/SFML/Graphics/RectangleShape.hpp \
  C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include/SFML/Graphics/RenderTarget.hpp \
@@ -362,6 +320,8 @@ CMakeFiles/GameEngine.dir/src/gameEngine/Game.cpp.obj: \
  C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include/SFML/Audio/SoundStream.hpp \
  C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include/SFML/Audio/SoundSource.hpp \
  C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include/SFML/Audio/AudioResource.hpp \
+ C:/mingw64/include/c++/14.2.0/functional \
+ C:/mingw64/include/c++/14.2.0/bits/std_function.h \
  C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include/SFML/Audio/OutputSoundFile.hpp \
  C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include/SFML/Audio/SoundFileWriter.hpp \
  C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include/SFML/Audio/PlaybackDevice.hpp \
@@ -372,4 +332,45 @@ CMakeFiles/GameEngine.dir/src/gameEngine/Game.cpp.obj: \
  C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include/SFML/Audio/SoundBufferRecorder.hpp \
  C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include/SFML/Audio/SoundRecorder.hpp \
  C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include/SFML/Audio/SoundFileFactory.hpp \
- C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include/SFML/Audio/SoundFileFactory.inl
+ C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include/SFML/Audio/SoundFileFactory.inl \
+ C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/Deck.h \
+ C:/mingw64/include/c++/14.2.0/random C:/mingw64/include/c++/14.2.0/cmath \
+ C:/mingw64/x86_64-w64-mingw32/include/math.h \
+ C:/mingw64/include/c++/14.2.0/bits/specfun.h \
+ C:/mingw64/include/c++/14.2.0/tr1/gamma.tcc \
+ C:/mingw64/include/c++/14.2.0/tr1/special_function_util.h \
+ C:/mingw64/include/c++/14.2.0/tr1/bessel_function.tcc \
+ C:/mingw64/include/c++/14.2.0/tr1/beta_function.tcc \
+ C:/mingw64/include/c++/14.2.0/tr1/ell_integral.tcc \
+ C:/mingw64/include/c++/14.2.0/tr1/exp_integral.tcc \
+ C:/mingw64/include/c++/14.2.0/tr1/hypergeometric.tcc \
+ C:/mingw64/include/c++/14.2.0/tr1/legendre_function.tcc \
+ C:/mingw64/include/c++/14.2.0/tr1/modified_bessel_func.tcc \
+ C:/mingw64/include/c++/14.2.0/tr1/poly_hermite.tcc \
+ C:/mingw64/include/c++/14.2.0/tr1/poly_laguerre.tcc \
+ C:/mingw64/include/c++/14.2.0/tr1/riemann_zeta.tcc \
+ C:/mingw64/include/c++/14.2.0/bits/random.h \
+ C:/mingw64/include/c++/14.2.0/x86_64-w64-mingw32/bits/opt_random.h \
+ C:/mingw64/include/c++/14.2.0/bits/random.tcc \
+ C:/mingw64/include/c++/14.2.0/numeric \
+ C:/mingw64/include/c++/14.2.0/bits/stl_numeric.h \
+ C:/mingw64/include/c++/14.2.0/pstl/glue_numeric_defs.h \
+ C:/mingw64/include/c++/14.2.0/iostream \
+ C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/SkillDeck.h \
+ C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/Player.h \
+ C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/GameState.h \
+ C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/skillEngine/Skill_Deliverance.h \
+ C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/skillEngine/Skill_NeuralGambit.h \
+ C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/Player.h \
+ C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/Phase.h \
+ C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/Player.h \
+ C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/BlackJackCheckPhase.h \
+ C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/Phase.h \
+ C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\src\gameEngine\RoundManager.h \
+ C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/PlayerHitPhase.h \
+ C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/HostHitPhase.h \
+ C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/BattlePhase.h \
+ C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/RoundEndPhase.h \
+ C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\src\gameEngine\UIManager.h \
+ C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/GameState.h \
+ C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\src\gameEngine\AnimationManager.h

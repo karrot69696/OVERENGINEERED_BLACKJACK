@@ -25,7 +25,8 @@ int Phase::getCurrentPlayerId(){
     return gameState.getCurrentPlayerId();
 }
 void Phase::incrementCurrentPlayerId(){
-    gameState.incrementCurrentPlayerId(players.size());
+    std::cout <<"[Phase] To next player..." << std::endl;
+    gameState.incrementCurrentPlayerId((int)players.size());
 }
 
 bool Phase::turnHandler(Player& player, Player& opponent){
@@ -50,8 +51,8 @@ bool Phase::turnHandler(Player& player, Player& opponent){
         case PlayerAction::SKILL_REQUEST:
         
             //wait until target exists, then process skill in skillHandler
-            if(gameState.pendingTarget.targetPlayerIds.size() > 0 || 
-            gameState.pendingTarget.targetCards.size() > 0){
+            if((int)gameState.pendingTarget.targetPlayerIds.size() > 0 || 
+            (int)gameState.pendingTarget.targetCards.size() > 0){
                 std::cout << "[Phase][turnHandler] Processing skill for player " << player.getId() << std::endl;
                 skillHandler(player);
 
@@ -99,12 +100,16 @@ void Phase::skillHandler(Player& player){
     }
 
     for (Card card : gameState.pendingTarget.targetCards) {
-        for (auto& p : players) {
-            for (int i = 0; i < p.getHandSize(); i++) {
-                Card* c = p.getCardAddr(i);
-                if (c->getSuit() == card.getSuit() && c->getRank() == card.getRank()) {
-                    std::cout << "[skillHandler] Found target card: " << c->getRankAsString() << c->getSuitAsString() << " in player " << p.getId() << "'s hand." << std::endl;
-                    actualTargetCards.push_back(c); 
+        for (auto& player : players) {
+            for (int i = 0; i < player.getHandSize(); i++) {
+                Card* playerCard = player.getCardInHand(i);
+                if (playerCard->getSuit() == card.getSuit() && playerCard->getRank() == card.getRank()) {
+                    std::cout << "[skillHandler] Found target card: " 
+                    << playerCard->getRankAsString() 
+                    << playerCard->getSuitAsString() 
+                    << " in player " 
+                    << player.getId() << "'s hand." << std::endl;
+                    actualTargetCards.push_back(playerCard); 
                 }
             }
         }

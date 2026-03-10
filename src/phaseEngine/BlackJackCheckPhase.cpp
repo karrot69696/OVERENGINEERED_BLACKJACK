@@ -7,11 +7,11 @@ void BlackJackCheckPhase::onEnter() {
     Player& currentPlayer = getCurrentPlayer();
     roundManager.updateGameState(PhaseName::BLACKJACK_CHECK_PHASE,currentPlayer.getId());
 
-    auto func = [&](float t) { 
-        currentPlayer.flipAllCardsFaceUp(); 
-    };
-    Animation phaseTransitionAnimation = { func, 0, 1 };
-    animationManager.add(phaseTransitionAnimation);
+    // auto func = [&](float t) { 
+    //     currentPlayer.flipAllCardsFaceUp(); 
+    // };
+    // Animation phaseTransitionAnimation = { func, 0, 1 };
+    // animationManager.add(phaseTransitionAnimation);
 
 }
 
@@ -25,7 +25,7 @@ std::optional<PhaseName> BlackJackCheckPhase::onUpdate(){
         if (currentPlayer.getHost() == 1){
 
             std::cout << "[BlackJackCheckPhase] Host player has Black Jack! Host player wins the round!" << std::endl;
-            currentPlayer.gainPoint(players.size()-1);
+            currentPlayer.gainPoint((int)players.size()-1);
             roundManager.updateGameState(PhaseName::ROUND_END, currentPlayer.getId());
             return PhaseName::ROUND_END;
         }

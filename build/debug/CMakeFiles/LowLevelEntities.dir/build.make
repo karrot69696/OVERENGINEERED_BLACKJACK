@@ -131,12 +131,28 @@ CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/Player.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/Player.cpp.s"
 	C:\mingw64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\src\lowLevelEntities\Player.cpp -o CMakeFiles\LowLevelEntities.dir\src\lowLevelEntities\Player.cpp.s
 
+CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/VisualState.cpp.obj: CMakeFiles/LowLevelEntities.dir/flags.make
+CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/VisualState.cpp.obj: CMakeFiles/LowLevelEntities.dir/includes_CXX.rsp
+CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/VisualState.cpp.obj: C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/VisualState.cpp
+CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/VisualState.cpp.obj: CMakeFiles/LowLevelEntities.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\build\debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/VisualState.cpp.obj"
+	C:\mingw64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/VisualState.cpp.obj -MF CMakeFiles\LowLevelEntities.dir\src\lowLevelEntities\VisualState.cpp.obj.d -o CMakeFiles\LowLevelEntities.dir\src\lowLevelEntities\VisualState.cpp.obj -c C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\src\lowLevelEntities\VisualState.cpp
+
+CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/VisualState.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/VisualState.cpp.i"
+	C:\mingw64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\src\lowLevelEntities\VisualState.cpp > CMakeFiles\LowLevelEntities.dir\src\lowLevelEntities\VisualState.cpp.i
+
+CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/VisualState.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/VisualState.cpp.s"
+	C:\mingw64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\src\lowLevelEntities\VisualState.cpp -o CMakeFiles\LowLevelEntities.dir\src\lowLevelEntities\VisualState.cpp.s
+
 # Object files for target LowLevelEntities
 LowLevelEntities_OBJECTS = \
 "CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/Card.cpp.obj" \
 "CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/Deck.cpp.obj" \
 "CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/GameState.cpp.obj" \
-"CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/Player.cpp.obj"
+"CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/Player.cpp.obj" \
+"CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/VisualState.cpp.obj"
 
 # External object files for target LowLevelEntities
 LowLevelEntities_EXTERNAL_OBJECTS =
@@ -145,9 +161,10 @@ lib/libLowLevelEntities.a: CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/
 lib/libLowLevelEntities.a: CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/Deck.cpp.obj
 lib/libLowLevelEntities.a: CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/GameState.cpp.obj
 lib/libLowLevelEntities.a: CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/Player.cpp.obj
+lib/libLowLevelEntities.a: CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/VisualState.cpp.obj
 lib/libLowLevelEntities.a: CMakeFiles/LowLevelEntities.dir/build.make
 lib/libLowLevelEntities.a: CMakeFiles/LowLevelEntities.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\build\debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Linking CXX static library lib\libLowLevelEntities.a"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\build\debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Linking CXX static library lib\libLowLevelEntities.a"
 	$(CMAKE_COMMAND) -P CMakeFiles\LowLevelEntities.dir\cmake_clean_target.cmake
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles\LowLevelEntities.dir\link.txt --verbose=$(VERBOSE)
 

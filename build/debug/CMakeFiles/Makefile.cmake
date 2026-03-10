@@ -71,6 +71,6 @@ set(CMAKE_DEPEND_INFO_FILES
   "CMakeFiles/SkillEngine.dir/DependInfo.cmake"
   "CMakeFiles/GameEngine.dir/DependInfo.cmake"
   "CMakeFiles/PhaseEngine.dir/DependInfo.cmake"
-  "CMakeFiles/MindJack.dir/DependInfo.cmake"
+  "CMakeFiles/CrazyJack.dir/DependInfo.cmake"
   "CMakeFiles/copy_assets.dir/DependInfo.cmake"
   )

@@ -5,8 +5,7 @@ int main() {
     std::cout << "Time to cook!" << std::endl;
     sf::VideoMode desktop = sf::VideoMode::getDesktopMode();
     sf::RenderWindow window(desktop, "Game", sf::State::Fullscreen);
-    GameState gameState;
-    Game newGame(window, gameState);
+    Game newGame(window);
     newGame.SetupGame();
     newGame.RunGame();
     return 0;

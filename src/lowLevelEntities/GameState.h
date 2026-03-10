@@ -27,6 +27,11 @@ enum class PhaseName{
     ROUND_END,
     GAME_OVER
 };
+enum class CardLocation{
+    HAND,
+    DECK,
+    DISCARD_PILE
+};
 struct PlayerInfo {
     int playerId;
     std::vector<Card> cardsInHand;

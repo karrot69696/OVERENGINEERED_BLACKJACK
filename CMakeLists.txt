@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 
 # Project definition
-project(MindJack
+project(CrazyJack
     VERSION 1.0.0
     DESCRIPTION "An overengineered blackjack game with skill system"
     LANGUAGES CXX
@@ -36,6 +36,7 @@ set(LOW_LEVEL_SOURCES
     src/lowLevelEntities/Deck.cpp
     src/lowLevelEntities/GameState.cpp
     src/lowLevelEntities/Player.cpp
+    src/lowLevelEntities/VisualState.cpp
 )
 
 set(LOW_LEVEL_HEADERS
@@ -44,6 +45,7 @@ set(LOW_LEVEL_HEADERS
     src/lowLevelEntities/GameState.h
     src/lowLevelEntities/Player.h
     src/lowLevelEntities/SkillDeck.h
+    src/lowLevelEntities/VisualState.h
 )
 
 set(SKILL_ENGINE_SOURCES
@@ -152,18 +154,18 @@ target_link_libraries(PhaseEngine
 
 # Main executable (assumes there's a main.cpp somewhere)
 # Uncomment and adjust when you have your main entry point
-add_executable(MindJack
+add_executable(CrazyJack
     src/main.cpp
 )
 
 # copy src/assets to build directory
-add_custom_command(TARGET MindJack POST_BUILD
+add_custom_command(TARGET CrazyJack POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
     "C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/bin"
-    $<TARGET_FILE_DIR:MindJack>
+    $<TARGET_FILE_DIR:CrazyJack>
 )
 
-target_link_libraries(MindJack
+target_link_libraries(CrazyJack
     PRIVATE
         GameEngine
         SkillEngine

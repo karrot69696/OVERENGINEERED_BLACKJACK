@@ -10,7 +10,7 @@ std::optional<PhaseName> RoundEndPhase::onUpdate(){
 
     roundManager.incrementRound();
 
-    if (roundManager.getRound() >= players.size()){
+    if (roundManager.getRound() >= (int)players.size()){
         std::cout << "[RoundEndPhase] Maximum rounds reached. Ending game..." << std::endl;
         roundManager.updateGameState(PhaseName::GAME_OVER, 0);
         return PhaseName::GAME_OVER;

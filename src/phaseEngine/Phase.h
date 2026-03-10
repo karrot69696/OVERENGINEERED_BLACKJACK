@@ -9,11 +9,10 @@
 #include <iostream>
 
 #include "../lowLevelEntities/Player.h"
-
 class UIManager;
 class RoundManager;
 class SkillManager;
-
+class AnimationManager;
 class Phase {
     protected:
         UIManager& uiManager;

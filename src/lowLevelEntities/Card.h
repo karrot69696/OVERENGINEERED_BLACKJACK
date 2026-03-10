@@ -1,6 +1,11 @@
 #ifndef CARD_H
 #define CARD_H
 #include <string>
+#include <SFML/Graphics.hpp>
+#include <SFML/System.hpp>
+#include <SFML/Window.hpp>
+#include <SFML/Network.hpp>
+#include <SFML/Audio.hpp>
 enum class Suit{
     Hearts,
     Diamonds,

@@ -7,8 +7,7 @@
 #include <memory>
 #include <iostream>
 
-#include "../lowLevelEntities/GameState.h"
-#include "../lowLevelEntities/Player.h"
+#include "../lowLevelEntities/VisualState.h"
 
 #include <SFML/Graphics.hpp>
 #include <SFML/System.hpp>
@@ -32,71 +31,56 @@ struct Button {
 };
 
 // ============================================================================
-// Card Visual
-// ============================================================================
-struct CardVisual {
-    CardVisual(int ownerId, int cardIndex, sf::Sprite sprite)
-        : ownerId(ownerId), cardIndex(cardIndex), cardSprite(std::move(sprite)) {}
-    sf::Sprite cardSprite;
-    int cardIndex;      // index in player's hand
-    int ownerId;
-    bool highlighted = false;
-    bool isTarget = false;
-    bool faceUp = true;
-
-    void draw(sf::RenderWindow& window);
-    bool isClicked(sf::Vector2f mousePos);
-};
-
-// ============================================================================
 // UIManager
 // ============================================================================
 class UIManager {
-public:
-    UIManager(sf::RenderWindow& window, GameState& gameState);
+    private:
 
-    // Call once per frame
-    void handleEvent(const std::optional<sf::Event>& event);
-    void render();
-    int cheatOn = 1;
-    // Called by game logic to tell UI what input is needed
-    void requestActionInput(int playerId);                          // show Hit/Stand/Skill buttons
-    void requestTargetInput(int playerId);                          // show card targeting overlay
-    void clearInput();                                              // hide all overlays
+        sf::RenderWindow& window;
+        GameState& gameState;
+        std::vector<CardVisual>& cardVisuals;
 
-    // Callbacks — set these from RoundManager
-    std::function<void(PlayerAction)> onActionChosen;
-    std::function<void(PlayerTargeting)> onTargetChosen;
+        // Action menu buttons
+        std::vector<Button> actionButtons;
+        bool showActionMenu = false;
+        bool showTargetingOverlay_Deliverance = false;
+        int activePlayerId = -1;
+        sf::Font font;
+        sf::Texture cardTexture;
 
-private:
-    sf::RenderWindow& window;
-    GameState& gameState;
-    sf::Font font;
-    sf::Texture cardTexture;
+    public:
 
-    // Sub-renderers
-    void renderTable();
-    void renderHands();
-    void renderHUD();
-    void renderActionMenu();
-    void renderTargetingOverlay_Deliverance();
+        UIManager(sf::RenderWindow& window, GameState& gameState, std::vector<CardVisual>& cardVisuals);
 
-    // Action menu buttons
-    std::vector<Button> actionButtons;
-    bool showActionMenu = false;
-    bool showTargetingOverlay_Deliverance = false;
-    int activePlayerId = -1;
-    // Card visuals built each frame from GameState
-    std::vector<CardVisual> cardVisuals;
-    void buildCardVisuals();
+        // Call once per frame
+        void handleEvent(const std::optional<sf::Event>& event);
+        void render();
+        int cheatOn = 1;
+        // Called by game logic to tell UI what input is needed
+        void requestActionInput(int playerId);                          // show Hit/Stand/Skill buttons
+        void requestTargetInput(int playerId);                          // show card targeting overlay
+        void clearInput();                                              // hide all overlays
+        void buildCardVisuals();
+        void targetStateHandler();
 
-    // Targeting state
-    PlayerTargeting pendingTargeting;
-    void confirmTargeting();
+        // Targeting state
+        PlayerTargeting pendingTargeting;
+        void confirmTargeting();
 
-    // Layout helpers
-    sf::Vector2f getPlayerSeatPos(int playerId, int totalPlayers);
-    sf::Color getPhaseNameColor();
+        // Layout helpers
+        sf::Vector2f getPlayerSeatPos(int playerId, int totalPlayers);
+        sf::Color getPhaseNameColor();
+
+        // Callbacks — set these from RoundManager
+        std::function<void(PlayerAction)> onActionChosen;
+        std::function<void(PlayerTargeting)> onTargetChosen;
+        
+        // Sub-renderers
+        void renderTable();
+        void renderCards();
+        void renderHUD();
+        void renderActionMenu();
+        void renderTargetingOverlay_Deliverance();
 };
 
 #endif

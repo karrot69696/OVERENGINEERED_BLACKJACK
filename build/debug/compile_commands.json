@@ -25,6 +25,12 @@
 },
 {
   "directory": "C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/build/debug",
+  "command": "C:\\mingw64\\bin\\g++.exe  @CMakeFiles/LowLevelEntities.dir/includes_CXX.rsp -g -O0 -Wall -Wextra -g -std=c++17 -Wall -Wextra -Wpedantic -I C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include -o CMakeFiles\\LowLevelEntities.dir\\src\\lowLevelEntities\\VisualState.cpp.obj -c C:\\Users\\minhk\\OneDrive\\Desktop\\OVERENGINEERED_BLACKJACK\\src\\lowLevelEntities\\VisualState.cpp",
+  "file": "C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/VisualState.cpp",
+  "output": "CMakeFiles/LowLevelEntities.dir/src/lowLevelEntities/VisualState.cpp.obj"
+},
+{
+  "directory": "C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/build/debug",
   "command": "C:\\mingw64\\bin\\g++.exe  @CMakeFiles/SkillEngine.dir/includes_CXX.rsp -g -O0 -Wall -Wextra -g -std=c++17 -Wall -Wextra -Wpedantic -I C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include -o CMakeFiles\\SkillEngine.dir\\src\\skillEngine\\skillManager.cpp.obj -c C:\\Users\\minhk\\OneDrive\\Desktop\\OVERENGINEERED_BLACKJACK\\src\\skillEngine\\skillManager.cpp",
   "file": "C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/skillEngine/skillManager.cpp",
   "output": "CMakeFiles/SkillEngine.dir/src/skillEngine/skillManager.cpp.obj"
@@ -91,8 +97,8 @@
 },
 {
   "directory": "C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/build/debug",
-  "command": "C:\\mingw64\\bin\\g++.exe  @CMakeFiles/MindJack.dir/includes_CXX.rsp -g -O0 -Wall -Wextra -g -std=c++17 -Wall -Wextra -Wpedantic -I C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include -o CMakeFiles\\MindJack.dir\\src\\main.cpp.obj -c C:\\Users\\minhk\\OneDrive\\Desktop\\OVERENGINEERED_BLACKJACK\\src\\main.cpp",
+  "command": "C:\\mingw64\\bin\\g++.exe  @CMakeFiles/CrazyJack.dir/includes_CXX.rsp -g -O0 -Wall -Wextra -g -std=c++17 -Wall -Wextra -Wpedantic -I C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include -o CMakeFiles\\CrazyJack.dir\\src\\main.cpp.obj -c C:\\Users\\minhk\\OneDrive\\Desktop\\OVERENGINEERED_BLACKJACK\\src\\main.cpp",
   "file": "C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/main.cpp",
-  "output": "CMakeFiles/MindJack.dir/src/main.cpp.obj"
+  "output": "CMakeFiles/CrazyJack.dir/src/main.cpp.obj"
 }
 ]
