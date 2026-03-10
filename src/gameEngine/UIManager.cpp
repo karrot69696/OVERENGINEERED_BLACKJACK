@@ -273,73 +273,73 @@ static int cardSpriteRow(Suit suit) {
     }
 }
 
-void UIManager::buildCardVisuals() {
-    // Save isTarget state before rebuilding
-    std::map<std::pair<int,int>, bool> targetState;
-    for (auto& cv : cardVisuals) {
-        targetState[{cv.ownerId, cv.cardIndex}] = cv.isTarget;
-    }
+// void UIManager::buildCardVisuals() {
+//     // Save isTarget state before rebuilding
+//     std::map<std::pair<int,int>, bool> targetState;
+//     for (auto& cv : cardVisuals) {
+//         targetState[{cv.ownerId, cv.cardIndex}] = cv.isTarget;
+//     }
 
-    cardVisuals.clear();
-    auto players = gameState.getAllPlayerInfo();
+//     cardVisuals.clear();
+//     auto players = gameState.getAllPlayerInfo();
 
-    sf::Vector2u texSize = cardTexture.getSize();
-    int cellW = (int)texSize.x / 15;
-    int cellH = (int)texSize.y / 4;
-    float scaleX = UILayout::CARD_SIZE.x / cellW;
-    float scaleY = UILayout::CARD_SIZE.y / cellH;
+//     sf::Vector2u texSize = cardTexture.getSize();
+//     int cellW = (int)texSize.x / 15;
+//     int cellH = (int)texSize.y / 4;
+//     float scaleX = UILayout::CARD_SIZE.x / cellW;
+//     float scaleY = UILayout::CARD_SIZE.y / cellH;
 
-    for (auto& player : players) {
-        sf::Vector2f seatPos = getPlayerSeatPos(player.playerId, (int)players.size());
+//     for (auto& player : players) {
+//         sf::Vector2f seatPos = getPlayerSeatPos(player.playerId, (int)players.size());
 
-        for (int i = 0; i < (int)player.cardsInHand.size(); i++) {
-            const Card& card = player.cardsInHand[i];
-            bool showFace = cheatOn || card.isFaceUp();
+//         for (int i = 0; i < (int)player.cardsInHand.size(); i++) {
+//             const Card& card = player.cardsInHand[i];
+//             bool showFace = cheatOn || card.isFaceUp();
 
-            int col, row;
-            if (showFace) {
-                col = cardSpriteCol(card.getRank());
-                row = cardSpriteRow(card.getSuit());
-            } else {
-                col = 14; row = 2; // black striped card back
-            }
+//             int col, row;
+//             if (showFace) {
+//                 col = cardSpriteCol(card.getRank());
+//                 row = cardSpriteRow(card.getSuit());
+//             } else {
+//                 col = 14; row = 2; // black striped card back
+//             }
 
-            sf::Sprite sprite(cardTexture);
-            sprite.setTextureRect(sf::IntRect({col * cellW, row * cellH}, {cellW, cellH}));
-            sprite.setScale({scaleX, scaleY});
-            sprite.setPosition({ seatPos.x + i * UILayout::CARD_SPACING, seatPos.y });
+//             sf::Sprite sprite(cardTexture);
+//             sprite.setTextureRect(sf::IntRect({col * cellW, row * cellH}, {cellW, cellH}));
+//             sprite.setScale({scaleX, scaleY});
+//             sprite.setPosition({ seatPos.x + i * UILayout::CARD_SPACING, seatPos.y });
 
-            cardVisuals.emplace_back(player.playerId, card.getHandIndex(), std::move(sprite));
+//             cardVisuals.emplace_back(player.playerId, card.getHandIndex(), std::move(sprite));
 
-            // Restore isTarget state
-            auto it = targetState.find({player.playerId, i});
-            if (it != targetState.end()) {
-                cardVisuals.back().isTarget = it->second;
-            }
-        }
-    }
-}
+//             // Restore isTarget state
+//             auto it = targetState.find({player.playerId, i});
+//             if (it != targetState.end()) {
+//                 cardVisuals.back().isTarget = it->second;
+//             }
+//         }
+//     }
+// }
 
-void UIManager::targetStateHandler() {
-    // Save isTarget state before rebuilding
-    std::map<std::pair<int,int>, bool> targetState;
-    for (auto& cv : cardVisuals) {
-        targetState[{cv.ownerId, cv.cardIndex}] = cv.isTarget;
-    }
-    auto players = gameState.getAllPlayerInfo();
+// void UIManager::targetStateHandler() {
+//     // Save isTarget state before rebuilding
+//     std::map<std::pair<int,int>, bool> targetState;
+//     for (auto& cv : cardVisuals) {
+//         targetState[{cv.ownerId, cv.cardIndex}] = cv.isTarget;
+//     }
+//     auto players = gameState.getAllPlayerInfo();
     
-    //rebuild
+//     //rebuild
 
-    for (auto& player : players) {
-        for (int i = 0; i < (int)player.cardsInHand.size(); i++) {
-            // Restore isTarget state
-            auto it = targetState.find({player.playerId, i});
-            if (it != targetState.end()) {
-                cardVisuals.back().isTarget = it->second;
-            }
-        }
-    }
-}
+//     for (auto& player : players) {
+//         for (int i = 0; i < (int)player.cardsInHand.size(); i++) {
+//             // Restore isTarget state
+//             auto it = targetState.find({player.playerId, i});
+//             if (it != targetState.end()) {
+//                 cardVisuals.back().isTarget = it->second;
+//             }
+//         }
+//     }
+// }
 // ============================================================================
 // Layout Helpers
 // ============================================================================

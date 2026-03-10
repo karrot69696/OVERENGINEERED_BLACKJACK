@@ -60,8 +60,8 @@ class UIManager {
         void requestActionInput(int playerId);                          // show Hit/Stand/Skill buttons
         void requestTargetInput(int playerId);                          // show card targeting overlay
         void clearInput();                                              // hide all overlays
-        void buildCardVisuals();
-        void targetStateHandler();
+        //void buildCardVisuals();
+        //void targetStateHandler();
 
         // Targeting state
         PlayerTargeting pendingTargeting;

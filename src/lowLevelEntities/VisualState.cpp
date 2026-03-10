@@ -12,6 +12,19 @@ bool CardVisual::isClicked(sf::Vector2f mousePos) {
 // ============================================================================
 // VisualState
 // ============================================================================
+// Sprite sheet: 15 columns (A,2..10,J,Q,K,Joker,Back), 4 rows (Spades,Diamonds,Clubs,Hearts)
+static int cardSpriteCol(Rank rank) {
+    return static_cast<int>(rank) - 1; // Ace=1 -> col 0, King=13 -> col 12
+}
+static int cardSpriteRow(Suit suit) {
+    switch (suit) {
+        case Suit::Spades:   return 0;
+        case Suit::Diamonds: return 1;
+        case Suit::Clubs:    return 2;
+        case Suit::Hearts:   return 3;
+        default:             return 0;
+    }
+}
 VisualState::VisualState(GameState& gameState, Deck& deck, std::vector<Player>& players)
     : gameState(gameState) {
 
@@ -25,7 +38,6 @@ VisualState::VisualState(GameState& gameState, Deck& deck, std::vector<Player>& 
     if (!cardTexture.loadFromFile(cardTexturePath)) {
         std::cerr << "[UIManager] Failed to load card texture from assets/fonts/CuteCards.png" << std::endl;
     }
-    auto players = gameState.getAllPlayerInfo();
 
     sf::Vector2u texSize = cardTexture.getSize();
     int cellW = (int)texSize.x / 15;
@@ -64,16 +76,3 @@ VisualState::VisualState(GameState& gameState, Deck& deck, std::vector<Player>& 
     }
 }
 
-// Sprite sheet: 15 columns (A,2..10,J,Q,K,Joker,Back), 4 rows (Spades,Diamonds,Clubs,Hearts)
-static int cardSpriteCol(Rank rank) {
-    return static_cast<int>(rank) - 1; // Ace=1 -> col 0, King=13 -> col 12
-}
-static int cardSpriteRow(Suit suit) {
-    switch (suit) {
-        case Suit::Spades:   return 0;
-        case Suit::Diamonds: return 1;
-        case Suit::Clubs:    return 2;
-        case Suit::Hearts:   return 3;
-        default:             return 0;
-    }
-}

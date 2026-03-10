@@ -372,5 +372,6 @@ CMakeFiles/GameEngine.dir/src/gameEngine/Game.cpp.obj: \
  C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/BattlePhase.h \
  C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/RoundEndPhase.h \
  C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\src\gameEngine\UIManager.h \
- C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/GameState.h \
+ C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/VisualState.h \
+ C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/Player.h \
  C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\src\gameEngine\AnimationManager.h
