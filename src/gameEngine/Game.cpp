@@ -53,27 +53,33 @@ void Game::SetupGame(){
     players.front().setHost();
     std::cout << "Player " << players.front().getId() << " is the host." << std::endl;
     
-    //deal initial cards to players
-    dealInitialCards(initialCardCount);
+
 }   
 
 void Game::RunGame(){
     std::cout << "\n=== GAME START ===\n" << std::endl;
     SkillManager skillManager;
-    RoundManager roundManager(players, deck, skillManager, this->gameState, this->uiManager);
+    RoundManager roundManager(players, deck, skillManager, this->gameState, this->uiManager, this->animationManager);
     roundManager.createSkills();
     roundManager.updateGameState(PhaseName::BLACKJACK_CHECK_PHASE, 0);
     roundManager.changePhase(PhaseName::BLACKJACK_CHECK_PHASE);
+    sf::Clock clock;
 
+    //deal initial cards to players
+    dealInitialCards(initialCardCount);
     while (window.isOpen()){
+
+        float deltaTime = clock.restart().asSeconds();
 
         while (std::optional event = this->window.pollEvent()){
             eventHandler(event);
         }
 
         roundManager.update();
+        animationManager.update(deltaTime);
 
         window.clear();
+
         uiManager.render();
         window.display();
         

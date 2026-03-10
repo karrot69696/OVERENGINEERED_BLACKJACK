@@ -28,15 +28,15 @@ private:
     SkillManager skillManager;
     GameState& gameState;
     UIManager& uiManager;
-
+    AnimationManager& animationManager;
     //NEW PHASE SYSTEM
     std::unique_ptr<Phase> currentPhase; 
     int round = 0;
 public:
 
 
-    RoundManager(std::vector<Player>& players, Deck& deck, SkillManager& skillManager, GameState& _gameState, UIManager& _uiManager) 
-        : players(players), deck(deck), skillManager(skillManager), gameState(_gameState), uiManager(_uiManager) {}
+    RoundManager(std::vector<Player>& players, Deck& deck, SkillManager& skillManager, GameState& _gameState, UIManager& _uiManager, AnimationManager & _animationManager) 
+        : players(players), deck(deck), skillManager(skillManager), gameState(_gameState), uiManager(_uiManager), animationManager(_animationManager) {}
     //getters
     Deck& getDeck(){return deck;}
     SkillManager& getSkillManager(){return skillManager;}

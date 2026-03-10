@@ -3,7 +3,7 @@
 	"artifacts" : 
 	[
 		{
-			"path" : "lib/libGameEngine.a"
+			"path" : "lib/libSkillEngine.a"
 		}
 	],
 	"backtrace" : 1,
@@ -29,19 +29,19 @@
 			{
 				"command" : 0,
 				"file" : 0,
-				"line" : 118,
+				"line" : 104,
 				"parent" : 0
 			},
 			{
 				"command" : 1,
 				"file" : 0,
-				"line" : 183,
+				"line" : 185,
 				"parent" : 0
 			},
 			{
 				"command" : 2,
 				"file" : 0,
-				"line" : 128,
+				"line" : 114,
 				"parent" : 0
 			},
 			{
@@ -59,7 +59,7 @@
 			{
 				"command" : 4,
 				"file" : 0,
-				"line" : 123,
+				"line" : 109,
 				"parent" : 0
 			}
 		]
@@ -74,10 +74,6 @@
 		{
 			"backtrace" : 3,
 			"id" : "LowLevelEntities::@6890427a1f51a3e7e1df"
-		},
-		{
-			"backtrace" : 3,
-			"id" : "SkillEngine::@6890427a1f51a3e7e1df"
 		}
 	],
 	"compileGroups" : 
@@ -127,9 +123,7 @@
 			},
 			"sourceIndexes" : 
 			[
-				0,
-				1,
-				2
+				0
 			]
 		}
 	],
@@ -138,13 +132,9 @@
 		{
 			"backtrace" : 3,
 			"id" : "LowLevelEntities::@6890427a1f51a3e7e1df"
-		},
-		{
-			"backtrace" : 3,
-			"id" : "SkillEngine::@6890427a1f51a3e7e1df"
 		}
 	],
-	"id" : "GameEngine::@6890427a1f51a3e7e1df",
+	"id" : "SkillEngine::@6890427a1f51a3e7e1df",
 	"install" : 
 	{
 		"destinations" : 
@@ -164,10 +154,6 @@
 		{
 			"backtrace" : 3,
 			"id" : "LowLevelEntities::@6890427a1f51a3e7e1df"
-		},
-		{
-			"backtrace" : 3,
-			"id" : "SkillEngine::@6890427a1f51a3e7e1df"
 		}
 	],
 	"interfaceLinkLibraries" : 
@@ -175,10 +161,6 @@
 		{
 			"backtrace" : 3,
 			"id" : "LowLevelEntities::@6890427a1f51a3e7e1df"
-		},
-		{
-			"backtrace" : 3,
-			"id" : "SkillEngine::@6890427a1f51a3e7e1df"
 		}
 	],
 	"linkLibraries" : 
@@ -186,14 +168,10 @@
 		{
 			"backtrace" : 3,
 			"id" : "LowLevelEntities::@6890427a1f51a3e7e1df"
-		},
-		{
-			"backtrace" : 3,
-			"id" : "SkillEngine::@6890427a1f51a3e7e1df"
 		}
 	],
-	"name" : "GameEngine",
-	"nameOnDisk" : "libGameEngine.a",
+	"name" : "SkillEngine",
+	"nameOnDisk" : "libSkillEngine.a",
 	"paths" : 
 	{
 		"build" : ".",
@@ -205,18 +183,17 @@
 			"name" : "Source Files",
 			"sourceIndexes" : 
 			[
-				0,
-				1,
-				2
+				0
 			]
 		},
 		{
 			"name" : "Header Files",
 			"sourceIndexes" : 
 			[
+				1,
+				2,
 				3,
-				4,
-				5
+				4
 			]
 		}
 	],
@@ -225,34 +202,27 @@
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/gameEngine/Game.cpp",
+			"path" : "src/skillEngine/skillManager.cpp",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
-			"compileGroupIndex" : 0,
-			"path" : "src/gameEngine/UIManager.cpp",
-			"sourceGroupIndex" : 0
-		},
-		{
-			"backtrace" : 1,
-			"compileGroupIndex" : 0,
-			"path" : "src/gameEngine/RoundManager.cpp",
-			"sourceGroupIndex" : 0
-		},
-		{
-			"backtrace" : 1,
-			"path" : "src/gameEngine/Game.h",
+			"path" : "src/skillEngine/Skill.h",
 			"sourceGroupIndex" : 1
 		},
 		{
 			"backtrace" : 1,
-			"path" : "src/gameEngine/UIManager.h",
+			"path" : "src/skillEngine/SkillManager.h",
 			"sourceGroupIndex" : 1
 		},
 		{
 			"backtrace" : 1,
-			"path" : "src/gameEngine/RoundManager.h",
+			"path" : "src/skillEngine/Skill_Deliverance.h",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 1,
+			"path" : "src/skillEngine/Skill_NeuralGambit.h",
 			"sourceGroupIndex" : 1
 		}
 	],

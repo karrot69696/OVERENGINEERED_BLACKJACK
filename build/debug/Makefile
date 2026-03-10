@@ -238,6 +238,30 @@ copy_assets/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\copy_assets.dir\build.make CMakeFiles/copy_assets.dir/build
 .PHONY : copy_assets/fast
 
+src/gameEngine/AnimationManager.obj: src/gameEngine/AnimationManager.cpp.obj
+.PHONY : src/gameEngine/AnimationManager.obj
+
+# target to build an object file
+src/gameEngine/AnimationManager.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\GameEngine.dir\build.make CMakeFiles/GameEngine.dir/src/gameEngine/AnimationManager.cpp.obj
+.PHONY : src/gameEngine/AnimationManager.cpp.obj
+
+src/gameEngine/AnimationManager.i: src/gameEngine/AnimationManager.cpp.i
+.PHONY : src/gameEngine/AnimationManager.i
+
+# target to preprocess a source file
+src/gameEngine/AnimationManager.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\GameEngine.dir\build.make CMakeFiles/GameEngine.dir/src/gameEngine/AnimationManager.cpp.i
+.PHONY : src/gameEngine/AnimationManager.cpp.i
+
+src/gameEngine/AnimationManager.s: src/gameEngine/AnimationManager.cpp.s
+.PHONY : src/gameEngine/AnimationManager.s
+
+# target to generate assembly for a file
+src/gameEngine/AnimationManager.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\GameEngine.dir\build.make CMakeFiles/GameEngine.dir/src/gameEngine/AnimationManager.cpp.s
+.PHONY : src/gameEngine/AnimationManager.cpp.s
+
 src/gameEngine/Game.obj: src/gameEngine/Game.cpp.obj
 .PHONY : src/gameEngine/Game.obj
 
@@ -616,6 +640,9 @@ help:
 	@echo ... MindJack
 	@echo ... PhaseEngine
 	@echo ... SkillEngine
+	@echo ... src/gameEngine/AnimationManager.obj
+	@echo ... src/gameEngine/AnimationManager.i
+	@echo ... src/gameEngine/AnimationManager.s
 	@echo ... src/gameEngine/Game.obj
 	@echo ... src/gameEngine/Game.i
 	@echo ... src/gameEngine/Game.s

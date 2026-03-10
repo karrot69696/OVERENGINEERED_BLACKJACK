@@ -6,6 +6,13 @@ void BlackJackCheckPhase::onEnter() {
     std::cout << "ROUND: " << roundManager.getRound() << std::endl;
     Player& currentPlayer = getCurrentPlayer();
     roundManager.updateGameState(PhaseName::BLACKJACK_CHECK_PHASE,currentPlayer.getId());
+
+    auto func = [&](float t) { 
+        currentPlayer.flipAllCardsFaceUp(); 
+    };
+    Animation phaseTransitionAnimation = { func, 0, 1 };
+    animationManager.add(phaseTransitionAnimation);
+
 }
 
 

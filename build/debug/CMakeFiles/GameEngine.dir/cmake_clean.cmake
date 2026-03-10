@@ -1,4 +1,6 @@
 file(REMOVE_RECURSE
+  "CMakeFiles/GameEngine.dir/src/gameEngine/AnimationManager.cpp.obj"
+  "CMakeFiles/GameEngine.dir/src/gameEngine/AnimationManager.cpp.obj.d"
   "CMakeFiles/GameEngine.dir/src/gameEngine/Game.cpp.obj"
   "CMakeFiles/GameEngine.dir/src/gameEngine/Game.cpp.obj.d"
   "CMakeFiles/GameEngine.dir/src/gameEngine/RoundManager.cpp.obj"

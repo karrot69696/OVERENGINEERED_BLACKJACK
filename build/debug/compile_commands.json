@@ -49,6 +49,12 @@
 },
 {
   "directory": "C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/build/debug",
+  "command": "C:\\mingw64\\bin\\g++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp -g -O0 -Wall -Wextra -g -std=c++17 -Wall -Wextra -Wpedantic -I C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include -o CMakeFiles\\GameEngine.dir\\src\\gameEngine\\AnimationManager.cpp.obj -c C:\\Users\\minhk\\OneDrive\\Desktop\\OVERENGINEERED_BLACKJACK\\src\\gameEngine\\AnimationManager.cpp",
+  "file": "C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/gameEngine/AnimationManager.cpp",
+  "output": "CMakeFiles/GameEngine.dir/src/gameEngine/AnimationManager.cpp.obj"
+},
+{
+  "directory": "C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/build/debug",
   "command": "C:\\mingw64\\bin\\g++.exe  @CMakeFiles/PhaseEngine.dir/includes_CXX.rsp -g -O0 -Wall -Wextra -g -std=c++17 -Wall -Wextra -Wpedantic -I C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include -o CMakeFiles\\PhaseEngine.dir\\src\\phaseEngine\\Phase.cpp.obj -c C:\\Users\\minhk\\OneDrive\\Desktop\\OVERENGINEERED_BLACKJACK\\src\\phaseEngine\\Phase.cpp",
   "file": "C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/Phase.cpp",
   "output": "CMakeFiles/PhaseEngine.dir/src/phaseEngine/Phase.cpp.obj"

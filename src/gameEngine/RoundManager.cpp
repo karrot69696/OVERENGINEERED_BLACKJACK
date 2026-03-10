@@ -108,7 +108,7 @@ void RoundManager::update(){
 
     //game loop
     auto next = currentPhase->onUpdate();
-
+    
     if (next)
         changePhase(*next);
 }

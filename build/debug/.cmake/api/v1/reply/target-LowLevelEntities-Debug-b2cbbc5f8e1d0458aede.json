@@ -3,7 +3,7 @@
 	"artifacts" : 
 	[
 		{
-			"path" : "lib/libSkillEngine.a"
+			"path" : "lib/libLowLevelEntities.a"
 		}
 	],
 	"backtrace" : 1,
@@ -13,7 +13,6 @@
 		[
 			"add_library",
 			"install",
-			"target_link_libraries",
 			"add_compile_options",
 			"target_include_directories"
 		],
@@ -29,37 +28,31 @@
 			{
 				"command" : 0,
 				"file" : 0,
-				"line" : 102,
+				"line" : 93,
 				"parent" : 0
 			},
 			{
 				"command" : 1,
 				"file" : 0,
-				"line" : 183,
+				"line" : 185,
 				"parent" : 0
 			},
 			{
 				"command" : 2,
 				"file" : 0,
-				"line" : 112,
-				"parent" : 0
-			},
-			{
-				"command" : 3,
-				"file" : 0,
 				"line" : 31,
 				"parent" : 0
 			},
 			{
-				"command" : 3,
+				"command" : 2,
 				"file" : 0,
 				"line" : 32,
 				"parent" : 0
 			},
 			{
-				"command" : 4,
+				"command" : 3,
 				"file" : 0,
-				"line" : 107,
+				"line" : 98,
 				"parent" : 0
 			}
 		]
@@ -69,13 +62,6 @@
 		"major" : 2,
 		"minor" : 9
 	},
-	"compileDependencies" : 
-	[
-		{
-			"backtrace" : 3,
-			"id" : "LowLevelEntities::@6890427a1f51a3e7e1df"
-		}
-	],
 	"compileGroups" : 
 	[
 		{
@@ -85,30 +71,30 @@
 					"fragment" : "-g -O0 -Wall -Wextra -g -std=c++17"
 				},
 				{
-					"backtrace" : 4,
+					"backtrace" : 3,
 					"fragment" : "-Wall"
 				},
 				{
-					"backtrace" : 4,
+					"backtrace" : 3,
 					"fragment" : "-Wextra"
 				},
 				{
-					"backtrace" : 4,
+					"backtrace" : 3,
 					"fragment" : "-Wpedantic"
 				},
 				{
-					"backtrace" : 5,
+					"backtrace" : 4,
 					"fragment" : "-I"
 				},
 				{
-					"backtrace" : 5,
+					"backtrace" : 4,
 					"fragment" : "C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include"
 				}
 			],
 			"includes" : 
 			[
 				{
-					"backtrace" : 6,
+					"backtrace" : 5,
 					"path" : "C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src"
 				}
 			],
@@ -123,18 +109,14 @@
 			},
 			"sourceIndexes" : 
 			[
-				0
+				0,
+				1,
+				2,
+				3
 			]
 		}
 	],
-	"dependencies" : 
-	[
-		{
-			"backtrace" : 3,
-			"id" : "LowLevelEntities::@6890427a1f51a3e7e1df"
-		}
-	],
-	"id" : "SkillEngine::@6890427a1f51a3e7e1df",
+	"id" : "LowLevelEntities::@6890427a1f51a3e7e1df",
 	"install" : 
 	{
 		"destinations" : 
@@ -149,29 +131,8 @@
 			"path" : "C:/Program Files (x86)/MindJack"
 		}
 	},
-	"interfaceCompileDependencies" : 
-	[
-		{
-			"backtrace" : 3,
-			"id" : "LowLevelEntities::@6890427a1f51a3e7e1df"
-		}
-	],
-	"interfaceLinkLibraries" : 
-	[
-		{
-			"backtrace" : 3,
-			"id" : "LowLevelEntities::@6890427a1f51a3e7e1df"
-		}
-	],
-	"linkLibraries" : 
-	[
-		{
-			"backtrace" : 3,
-			"id" : "LowLevelEntities::@6890427a1f51a3e7e1df"
-		}
-	],
-	"name" : "SkillEngine",
-	"nameOnDisk" : "libSkillEngine.a",
+	"name" : "LowLevelEntities",
+	"nameOnDisk" : "libLowLevelEntities.a",
 	"paths" : 
 	{
 		"build" : ".",
@@ -183,17 +144,21 @@
 			"name" : "Source Files",
 			"sourceIndexes" : 
 			[
-				0
+				0,
+				1,
+				2,
+				3
 			]
 		},
 		{
 			"name" : "Header Files",
 			"sourceIndexes" : 
 			[
-				1,
-				2,
-				3,
-				4
+				4,
+				5,
+				6,
+				7,
+				8
 			]
 		}
 	],
@@ -202,27 +167,50 @@
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/skillEngine/skillManager.cpp",
+			"path" : "src/lowLevelEntities/Card.cpp",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
-			"path" : "src/skillEngine/Skill.h",
+			"compileGroupIndex" : 0,
+			"path" : "src/lowLevelEntities/Deck.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "src/lowLevelEntities/GameState.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "src/lowLevelEntities/Player.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"path" : "src/lowLevelEntities/Card.h",
 			"sourceGroupIndex" : 1
 		},
 		{
 			"backtrace" : 1,
-			"path" : "src/skillEngine/SkillManager.h",
+			"path" : "src/lowLevelEntities/Deck.h",
 			"sourceGroupIndex" : 1
 		},
 		{
 			"backtrace" : 1,
-			"path" : "src/skillEngine/Skill_Deliverance.h",
+			"path" : "src/lowLevelEntities/GameState.h",
 			"sourceGroupIndex" : 1
 		},
 		{
 			"backtrace" : 1,
-			"path" : "src/skillEngine/Skill_NeuralGambit.h",
+			"path" : "src/lowLevelEntities/Player.h",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 1,
+			"path" : "src/lowLevelEntities/SkillDeck.h",
 			"sourceGroupIndex" : 1
 		}
 	],

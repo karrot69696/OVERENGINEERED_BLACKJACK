@@ -13,8 +13,10 @@
 #include "../phaseEngine/Phase.h"
 #include "../phaseEngine/BlackJackCheckPhase.h"
 
+
 #include "RoundManager.h"
 #include "UIManager.h"
+#include "AnimationManager.h"
 
 #define maxNumPlayer 7
 #define initialCardCount 2
@@ -27,9 +29,10 @@ private:
     std::vector<Player> players; 
     GameState& gameState;
     UIManager uiManager;
+    AnimationManager animationManager;
 public:
     Game(sf::RenderWindow& window, GameState& _gameState) 
-        : window(window), gameState(_gameState), uiManager(window, gameState) {}
+        : window(window), gameState(_gameState), uiManager(window, gameState), animationManager(window, gameState) {}
     ~Game(){}
     void dealInitialCards(int numCards);  
     void displayPoints();

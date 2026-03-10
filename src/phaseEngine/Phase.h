@@ -17,6 +17,7 @@ class SkillManager;
 class Phase {
     protected:
         UIManager& uiManager;
+        AnimationManager& animationManager;
         RoundManager& roundManager;
         SkillManager& skillManager;
         GameState& gameState;
@@ -24,9 +25,10 @@ class Phase {
         Deck& deck;
     public:
         Phase(UIManager& uiManager,
-          RoundManager& roundManager,
-          SkillManager& skillManager,
-          GameState& gameState);
+            AnimationManager& animationManager,
+            RoundManager& roundManager,
+            SkillManager& skillManager,
+            GameState& gameState);
 
         virtual ~Phase() = default;
         virtual void onEnter(){};

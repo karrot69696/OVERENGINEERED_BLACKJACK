@@ -61,12 +61,14 @@ set(GAME_ENGINE_SOURCES
     src/gameEngine/Game.cpp
     src/gameEngine/UIManager.cpp
     src/gameEngine/RoundManager.cpp
+    src/gameEngine/AnimationManager.cpp
 )
 
 set(GAME_ENGINE_HEADERS
     src/gameEngine/Game.h
     src/gameEngine/UIManager.h
     src/gameEngine/RoundManager.h
+    src/gameEngine/AnimationManager.h
 )
 
 set(PHASE_ENGINE_SOURCES

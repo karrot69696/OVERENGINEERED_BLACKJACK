@@ -116,11 +116,27 @@ CMakeFiles/GameEngine.dir/src/gameEngine/RoundManager.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/GameEngine.dir/src/gameEngine/RoundManager.cpp.s"
 	C:\mingw64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\src\gameEngine\RoundManager.cpp -o CMakeFiles\GameEngine.dir\src\gameEngine\RoundManager.cpp.s
 
+CMakeFiles/GameEngine.dir/src/gameEngine/AnimationManager.cpp.obj: CMakeFiles/GameEngine.dir/flags.make
+CMakeFiles/GameEngine.dir/src/gameEngine/AnimationManager.cpp.obj: CMakeFiles/GameEngine.dir/includes_CXX.rsp
+CMakeFiles/GameEngine.dir/src/gameEngine/AnimationManager.cpp.obj: C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/gameEngine/AnimationManager.cpp
+CMakeFiles/GameEngine.dir/src/gameEngine/AnimationManager.cpp.obj: CMakeFiles/GameEngine.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\build\debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/GameEngine.dir/src/gameEngine/AnimationManager.cpp.obj"
+	C:\mingw64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/GameEngine.dir/src/gameEngine/AnimationManager.cpp.obj -MF CMakeFiles\GameEngine.dir\src\gameEngine\AnimationManager.cpp.obj.d -o CMakeFiles\GameEngine.dir\src\gameEngine\AnimationManager.cpp.obj -c C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\src\gameEngine\AnimationManager.cpp
+
+CMakeFiles/GameEngine.dir/src/gameEngine/AnimationManager.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/GameEngine.dir/src/gameEngine/AnimationManager.cpp.i"
+	C:\mingw64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\src\gameEngine\AnimationManager.cpp > CMakeFiles\GameEngine.dir\src\gameEngine\AnimationManager.cpp.i
+
+CMakeFiles/GameEngine.dir/src/gameEngine/AnimationManager.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/GameEngine.dir/src/gameEngine/AnimationManager.cpp.s"
+	C:\mingw64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\src\gameEngine\AnimationManager.cpp -o CMakeFiles\GameEngine.dir\src\gameEngine\AnimationManager.cpp.s
+
 # Object files for target GameEngine
 GameEngine_OBJECTS = \
 "CMakeFiles/GameEngine.dir/src/gameEngine/Game.cpp.obj" \
 "CMakeFiles/GameEngine.dir/src/gameEngine/UIManager.cpp.obj" \
-"CMakeFiles/GameEngine.dir/src/gameEngine/RoundManager.cpp.obj"
+"CMakeFiles/GameEngine.dir/src/gameEngine/RoundManager.cpp.obj" \
+"CMakeFiles/GameEngine.dir/src/gameEngine/AnimationManager.cpp.obj"
 
 # External object files for target GameEngine
 GameEngine_EXTERNAL_OBJECTS =
@@ -128,9 +144,10 @@ GameEngine_EXTERNAL_OBJECTS =
 lib/libGameEngine.a: CMakeFiles/GameEngine.dir/src/gameEngine/Game.cpp.obj
 lib/libGameEngine.a: CMakeFiles/GameEngine.dir/src/gameEngine/UIManager.cpp.obj
 lib/libGameEngine.a: CMakeFiles/GameEngine.dir/src/gameEngine/RoundManager.cpp.obj
+lib/libGameEngine.a: CMakeFiles/GameEngine.dir/src/gameEngine/AnimationManager.cpp.obj
 lib/libGameEngine.a: CMakeFiles/GameEngine.dir/build.make
 lib/libGameEngine.a: CMakeFiles/GameEngine.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\build\debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Linking CXX static library lib\libGameEngine.a"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\build\debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Linking CXX static library lib\libGameEngine.a"
 	$(CMAKE_COMMAND) -P CMakeFiles\GameEngine.dir\cmake_clean_target.cmake
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles\GameEngine.dir\link.txt --verbose=$(VERBOSE)
 

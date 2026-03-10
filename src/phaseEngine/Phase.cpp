@@ -2,10 +2,12 @@
 #include "../gameEngine/Game.h"
 
 Phase::Phase(UIManager& uiManager,
+             AnimationManager& animationManager,
              RoundManager& roundManager,
              SkillManager& skillManager,
              GameState& gameState)
     : uiManager(uiManager),
+    animationManager(animationManager),
       roundManager(roundManager),
       skillManager(skillManager),
       gameState(gameState),
@@ -25,8 +27,6 @@ int Phase::getCurrentPlayerId(){
 void Phase::incrementCurrentPlayerId(){
     gameState.incrementCurrentPlayerId(players.size());
 }
-
-
 
 bool Phase::turnHandler(Player& player, Player& opponent){
     
