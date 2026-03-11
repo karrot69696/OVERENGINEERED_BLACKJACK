@@ -33,6 +33,7 @@ enum class Color {
 };
 class Card {
     private:
+        int id=-1;
         Suit suit;
         Rank rank;
         Color color;
@@ -53,6 +54,8 @@ class Card {
                 color = Color::Black;
             }
         };
+        //getters
+        int getId() const{return id;}
         int getOwnerId() const;
         int getHandIndex() const;
         Suit getSuit() const;
@@ -87,6 +90,7 @@ class Card {
         Color getColor() const;
         bool isFaceUp() const;
         //setters
+        void setId(int _id);
         void flip();
         void setOwnerId(int id);
         void setHandIndex(int id);

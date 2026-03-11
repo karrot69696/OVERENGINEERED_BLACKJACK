@@ -27,3 +27,7 @@ void Card::setOwnerId(int id) {
 void Card::setHandIndex(int id){
     handIndex = id;
 }
+
+void Card::setId(int _id){
+    this->id=_id;
+}

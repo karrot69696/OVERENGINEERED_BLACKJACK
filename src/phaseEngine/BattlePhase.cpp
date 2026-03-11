@@ -11,6 +11,8 @@ void BattlePhase::onEnter() {
 
 std::optional<PhaseName> BattlePhase::onUpdate(){
 
+    
+
     //get host player and current player
     Player& host = roundManager.getHostPlayer();
     Player& opponent = getCurrentPlayer();

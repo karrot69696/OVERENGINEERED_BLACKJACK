@@ -3,8 +3,15 @@
 
 void BlackJackCheckPhase::onEnter() {
     std::cout << "\n=== ENTERING BLACKJACK CHECK PHASE ===\n" << std::endl;
+    
     std::cout << "ROUND: " << roundManager.getRound() << std::endl;
     Player& currentPlayer = getCurrentPlayer();
+
+
+    //spawn text
+    std::string turnText = "BLACKJACK CHECK";
+    animationManager.spawnPhaseText(turnText, AnimConfig::PHASE_TEXT_DURATION);
+
     roundManager.updateGameState(PhaseName::BLACKJACK_CHECK_PHASE,currentPlayer.getId());
 
     // auto func = [&](float t) { 
@@ -17,6 +24,8 @@ void BlackJackCheckPhase::onEnter() {
 
 
 std::optional<PhaseName> BlackJackCheckPhase::onUpdate(){
+
+    
 
     Player& currentPlayer = getCurrentPlayer();
 

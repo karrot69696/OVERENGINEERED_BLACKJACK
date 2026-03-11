@@ -116,8 +116,10 @@ CMakeFiles/CrazyJack.dir/src/main.cpp.obj: C:/Users/minhk/OneDrive/Desktop/OVERE
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/GameState.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/Player.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/SkillDeck.h \
+  C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/VisualState.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/BattlePhase.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/BlackJackCheckPhase.h \
+  C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/GameStartPhase.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/HostHitPhase.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/Phase.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/PlayerHitPhase.h \
@@ -633,6 +635,8 @@ C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include/SFML/System/Vector2
 
 C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include/SFML/System/Vector3.hpp:
 
+C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/GameStartPhase.h:
+
 C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include/SFML/System/Vector3.inl:
 
 C:/mingw64/include/c++/14.2.0/bits/fs_path.h:
@@ -700,6 +704,12 @@ C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/Ga
 C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/Player.h:
 
 C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/SkillDeck.h:
+
+C:/mingw64/include/c++/14.2.0/iomanip:
+
+C:/mingw64/include/c++/14.2.0/bits/functional_hash.h:
+
+C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/VisualState.h:
 
 C:/mingw64/include/c++/14.2.0/bits/codecvt.h:
 
@@ -792,10 +802,6 @@ C:/mingw64/include/c++/14.2.0/bits/fs_dir.h:
 C:/mingw64/include/c++/14.2.0/bits/fs_ops.h:
 
 C:/mingw64/include/c++/14.2.0/bits/functexcept.h:
-
-C:/mingw64/include/c++/14.2.0/iomanip:
-
-C:/mingw64/include/c++/14.2.0/bits/functional_hash.h:
 
 C:/mingw64/include/c++/14.2.0/bits/hashtable.h:
 

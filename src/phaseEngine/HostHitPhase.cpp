@@ -4,9 +4,18 @@
 void HostHitPhase::onEnter() {
     std::cout << "\n=== ENTERING HOST HIT PHASE ===\n" << std::endl;
 
+
     //get host player and current player
     Player& hostPlayer = roundManager.getHostPlayer();
     Player& currentPlayer = getCurrentPlayer();
+
+    //spawn text
+    std::string turnText = 
+    "HOST " + std::to_string(hostPlayer.getId()) 
+    + " VS PLAYER " 
+    + std::to_string(currentPlayer.getId());
+
+    animationManager.spawnPhaseText(turnText,AnimConfig::PHASE_TEXT_DURATION);
 
     //set callback for host action input during host hit phase
     uiManager.onActionChosen = [&](PlayerAction chosenAction){
@@ -57,6 +66,8 @@ void HostHitPhase::onEnter() {
 }
 
 std::optional<PhaseName> HostHitPhase::onUpdate() {
+
+
 
     //get host player and current player
     Player& hostPlayer = roundManager.getHostPlayer();

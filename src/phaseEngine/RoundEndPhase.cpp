@@ -3,10 +3,13 @@
 
 void RoundEndPhase::onEnter() {
     std::cout << "\n=== ENTERING ROUND END PHASE ===\n" << std::endl;
+    animationManager.spawnPhaseText("ROUND END",AnimConfig::PHASE_TEXT_DURATION);
 }
 
 
 std::optional<PhaseName> RoundEndPhase::onUpdate(){
+
+    
 
     roundManager.incrementRound();
 

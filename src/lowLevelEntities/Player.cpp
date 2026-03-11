@@ -63,8 +63,10 @@ void Player::addCardToHand(Card* card){
     card->setHandIndex((int)cardsInHand.size());
     cardsInHand.push_back(card);
     
-    std::cout << "[Player] Card owned by Player "<< card->getOwnerId() 
-    << " at index "<<card->getHandIndex()
+    std::cout << "[Player] Card " << card->getRankAsString() 
+    << " of " << card->getSuitAsString()
+    << " owned by Player "<< card->getOwnerId() 
+    << " at index "<< card->getHandIndex()
     <<std::endl;
 }
 

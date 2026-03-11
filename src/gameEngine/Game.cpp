@@ -6,21 +6,11 @@
 Game::Game(sf::RenderWindow& window)
     : 
         window(window),
-        gameState(),
-        visualState(gameState, this->deck, this->players),
-        uiManager(window, gameState, visualState.getCardVisuals()),
-        animationManager(window, gameState, visualState)
-{}
-
-void Game::dealInitialCards(int numCards){
-    for (int i = 0; i < numCards; i++){
-        for (auto& player: players){
-            player.addCardToHand(deck.draw());
-        }
-    }
-}
-
-void Game::SetupGame(){
+        gameState(), deck(), players(), skillDeck(),
+        visualState(this->window, this->gameState),
+        uiManager(this->window, this->gameState,this->visualState, this->visualState.getCardVisuals()),
+        animationManager(this->window,this->gameState, this->visualState)
+{
     //initialize card container
     for (int s = 0; s < 4; s++) {
         for ( int r = 1; r <= 13; r++) {
@@ -31,19 +21,27 @@ void Game::SetupGame(){
         }
     }
     //initialize deck 
-    for (auto& card : this->allCards) {
-        deck.addCard(card.get());
+    for (int i=0;i<allCards.size();i++){
+        Card* card = allCards[i].get();
+        card->setId(i); //every card has a unique ID
+        deck.addCard(card);
     }
-    skillDeck = SkillDeck();
+
+    visualState.buildCardVisuals(deck, players);
+            
+}
+
+void Game::SetupGame(){
+
     //skillDeck.shuffle();
     
     //get inputs
-    int numPlayers;
-    int numBots;
-    std::cout << "Enter number of players: ";
-    std::cin >> numPlayers;
-    std::cout << "Enter number of bots: ";
-    std::cin >> numBots; 
+    int numPlayers = 3;
+    int numBots = 2;
+    // std::cout << "Enter number of players: ";
+    // std::cin >> numPlayers;
+    // std::cout << "Enter number of bots: ";
+    // std::cin >> numBots; 
     // Validate input
     if (numPlayers <= 1 || numBots < 0 ) {
         std::cout << "Invalid input. Using defaults (2 bots, 1 players)." << std::endl;
@@ -77,15 +75,19 @@ void Game::SetupGame(){
 
 void Game::RunGame(){
     std::cout << "\n=== GAME START ===\n" << std::endl;
-    SkillManager skillManager;
-    RoundManager roundManager(players, deck, skillManager, this->gameState, this->uiManager, this->animationManager);
+    RoundManager roundManager(
+        this->players, 
+        this->deck,
+        this->gameState,
+        this->visualState, 
+        this->uiManager, 
+        this->animationManager
+    );
     roundManager.createSkills();
-    roundManager.updateGameState(PhaseName::BLACKJACK_CHECK_PHASE, 0);
-    roundManager.changePhase(PhaseName::BLACKJACK_CHECK_PHASE);
+    roundManager.updateGameState(PhaseName::GAME_START_PHASE, 0);
+    roundManager.changePhase(PhaseName::GAME_START_PHASE);
     sf::Clock clock;
 
-    //deal initial cards to players
-    dealInitialCards(initialCardCount);
     while (window.isOpen()){
 
         float deltaTime = clock.restart().asSeconds();
@@ -100,6 +102,8 @@ void Game::RunGame(){
         window.clear();
 
         uiManager.render();
+        animationManager.renderFloatingTexts();
+        animationManager.renderPhaseText();
         window.display();
         
     }

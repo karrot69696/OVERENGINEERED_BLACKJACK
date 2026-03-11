@@ -121,6 +121,7 @@ CMakeFiles/GameEngine.dir/src/gameEngine/Game.cpp.obj: C:/Users/minhk/OneDrive/D
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/VisualState.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/BattlePhase.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/BlackJackCheckPhase.h \
+  C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/GameStartPhase.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/HostHitPhase.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/Phase.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/PlayerHitPhase.h \
@@ -494,8 +495,10 @@ CMakeFiles/GameEngine.dir/src/gameEngine/RoundManager.cpp.obj: C:/Users/minhk/On
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/GameState.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/Player.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/SkillDeck.h \
+  C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/VisualState.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/BattlePhase.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/BlackJackCheckPhase.h \
+  C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/GameStartPhase.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/HostHitPhase.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/Phase.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/PlayerHitPhase.h \
@@ -1379,6 +1382,8 @@ C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include/SFML/System/Utf.inl
 C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include/SFML/System/Vector2.inl:
 
 C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include/SFML/System/Vector3.hpp:
+
+C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/GameStartPhase.h:
 
 C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include/SFML/System/Vector3.inl:
 

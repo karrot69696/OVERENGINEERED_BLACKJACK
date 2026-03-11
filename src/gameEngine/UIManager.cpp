@@ -33,9 +33,11 @@ bool Button::isClicked(sf::Vector2f mousePos) {
 // ============================================================================
 // UIManager
 // ============================================================================
-UIManager::UIManager(sf::RenderWindow& window, GameState& gameState, std::vector<CardVisual>& cardVisuals)
-    : window(window), gameState(gameState), cardVisuals(cardVisuals) {
+UIManager::UIManager(sf::RenderWindow& window, GameState& gameState,VisualState& visualState, std::vector<CardVisual>& cardVisuals)
+    : window(window), gameState(gameState),visualState(visualState), cardVisuals(cardVisuals) {
 
+    font = visualState.getFont();
+    
     // Build action buttons (hidden by default)
     float btnY = window.getSize().y - 60.f;
     float btnStartX = window.getSize().x / 2.f - 190.f;
@@ -56,6 +58,11 @@ UIManager::UIManager(sf::RenderWindow& window, GameState& gameState, std::vector
         showActionMenu = false;
         showTargetingOverlay_Deliverance = true;
     };
+
+    std::filesystem::path tableTexturePath = "../assets/images/crazyJackBG.png";
+    if (!tableTexture.loadFromFile(tableTexturePath)) {
+        std::cerr << "[UIManager] Failed to load tableTexture from assets/images/crazyJackBG.png" << std::endl;
+    }
 
     clearInput();
 }
@@ -109,42 +116,36 @@ void UIManager::handleEvent(const std::optional<sf::Event>& event) {
         if (showTargetingOverlay_Deliverance) {
             for (auto& cv : cardVisuals) {
 
-                if (    cv.ownerId == activePlayerId 
-                        && cv.isClicked(mousePos) 
-                        //if one card exists clicking won't work
+                if (    cv.ownerId == activePlayerId
+                        && cv.isClicked(mousePos)
                        ) {
 
                     std::cout << "[UIManager] Card has been clicked: ownerId=" << cv.ownerId << ", cardIndex=" << cv.cardIndex << std::endl;
-                    //if not targetted and no pendingTarget
-                    if (!cv.isTarget && pendingTargeting.targetCards.empty()) {
-                        // Create the exact copy of the card chosen and store it in target.targetCards
-                            PlayerTargeting target;
-                            Card chosenCard(
-                                gameState.getCardSuit(activePlayerId, cv.cardIndex),
-                                gameState.getCardRank(activePlayerId, cv.cardIndex),
-                                gameState.isCardFaceUp(activePlayerId, cv.cardIndex)
-                            );
 
-                            chosenCard.setOwnerId(cv.ownerId);
-                            chosenCard.setHandIndex(cv.cardIndex);
-
-                            target.targetCards.push_back(chosenCard);
-                            
-                        //store the ownerId
-                            target.targetPlayerIds.push_back(cv.ownerId);
-
-                        //finish one target
-                            pendingTargeting = target;
-                            cv.isTarget = true;
+                    // Clicking the already-targeted card: deselect
+                    if (cv.isTarget) {
+                        cv.isTarget = false;
+                        pendingTargeting = {};
+                        return;
                     }
-                    else if ( (int)pendingTargeting.targetCards.size() > 0 ){
-                        if (cv.ownerId == pendingTargeting.targetCards.front().getOwnerId()
-                            && cv.cardIndex == pendingTargeting.targetCards.front().getHandIndex()){
-                                
-                                pendingTargeting= {};
-                                cv.isTarget = false;
-                            }
-                    }
+
+                    // Deselect any previously targeted card
+                    for (auto& other : cardVisuals) other.isTarget = false;
+                    pendingTargeting = {};
+
+                    // Select clicked card
+                    PlayerTargeting target;
+                    Card chosenCard(
+                        gameState.getCardSuit(activePlayerId, cv.cardIndex),
+                        gameState.getCardRank(activePlayerId, cv.cardIndex),
+                        gameState.isCardFaceUp(activePlayerId, cv.cardIndex)
+                    );
+                    chosenCard.setOwnerId(cv.ownerId);
+                    chosenCard.setHandIndex(cv.cardIndex);
+                    target.targetCards.push_back(chosenCard);
+                    target.targetPlayerIds.push_back(cv.ownerId);
+                    pendingTargeting = target;
+                    cv.isTarget = true;
                     return;
                 }
             }
@@ -180,8 +181,12 @@ void UIManager::render() {
 }
 
 void UIManager::renderTable() {
-    sf::RectangleShape table({ (float)window.getSize().x, (float)window.getSize().y });
-    table.setFillColor(UILayout::TABLE_GREEN);
+    sf::Sprite table(tableTexture);
+    float w = window.getSize().x;
+    float h = window.getSize().y;
+    float scaleX = w / tableTexture.getSize().x;
+    float scaleY = h / tableTexture.getSize().y;
+    table.setScale({scaleX,scaleY});
     window.draw(table);
 }
 

@@ -28,7 +28,6 @@ namespace UILayout {
 
     const sf::Vector2f CARD_SIZE   = {60.f, 90.f};
     const sf::Vector2f BUTTON_SIZE = {120.f, 40.f};
-    const sf::Vector2f DECK_POSITION = {10.f, 10.f};
     const float CARD_SPACING       = 70.f;
 }
 // ============================================================================
@@ -38,6 +37,7 @@ struct CardVisual {
     CardVisual(sf::Sprite sprite)
         : cardSprite(std::move(sprite)) {}
     sf::Sprite cardSprite;
+    int cardId=-1;
     int cardIndex=-1;      // index in player's hand
     int ownerId=-1;
     CardLocation location;
@@ -53,14 +53,41 @@ struct CardVisual {
 // ============================================================================
 class VisualState {
     private:
+        sf::RenderWindow& window;
         GameState& gameState;
         std::vector<CardVisual> cardVisuals;
         sf::Texture cardTexture;
         sf::Font font;
         bool cheatOn=1;
     public:
-        VisualState(GameState& gameState, Deck& deck, std::vector<Player>& players);
+        VisualState(sf::RenderWindow& window, GameState& gameState);
         std::vector<CardVisual>& getCardVisuals() { return cardVisuals; }
+        //setters
+        void buildCardVisuals(Deck& deck, std::vector<Player>& players);
+        //getters
+        sf::Font& getFont() { return font; }
+
+        CardVisual& getCardVisual(int cardId) { 
+            for (auto& card : cardVisuals) {
+                if (card.cardId == cardId) {
+                    return card;
+                }
+            }
+            return cardVisuals[0];
+        }
+        sf::Vector2f getPlayerSeatPos(int playerId, int totalPlayers) {
+            // Spread players evenly along the bottom, host at top center
+            float w = window.getSize().x;
+            float h = window.getSize().y;
+
+            if (playerId == 0) {
+                // Host sits at top
+                return { w / 2.f - 100.f, 60.f };
+            }
+
+            float spacing = w / (float)(totalPlayers);
+            return { spacing * playerId - 30.f, h - 200.f };
+        }
 };
 
 #endif

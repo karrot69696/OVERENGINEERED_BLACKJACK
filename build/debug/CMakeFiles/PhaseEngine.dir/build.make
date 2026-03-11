@@ -86,11 +86,26 @@ CMakeFiles/PhaseEngine.dir/src/phaseEngine/Phase.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/PhaseEngine.dir/src/phaseEngine/Phase.cpp.s"
 	C:\mingw64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\src\phaseEngine\Phase.cpp -o CMakeFiles\PhaseEngine.dir\src\phaseEngine\Phase.cpp.s
 
+CMakeFiles/PhaseEngine.dir/src/phaseEngine/GameStartPhase.cpp.obj: CMakeFiles/PhaseEngine.dir/flags.make
+CMakeFiles/PhaseEngine.dir/src/phaseEngine/GameStartPhase.cpp.obj: CMakeFiles/PhaseEngine.dir/includes_CXX.rsp
+CMakeFiles/PhaseEngine.dir/src/phaseEngine/GameStartPhase.cpp.obj: C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/GameStartPhase.cpp
+CMakeFiles/PhaseEngine.dir/src/phaseEngine/GameStartPhase.cpp.obj: CMakeFiles/PhaseEngine.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\build\debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/PhaseEngine.dir/src/phaseEngine/GameStartPhase.cpp.obj"
+	C:\mingw64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/PhaseEngine.dir/src/phaseEngine/GameStartPhase.cpp.obj -MF CMakeFiles\PhaseEngine.dir\src\phaseEngine\GameStartPhase.cpp.obj.d -o CMakeFiles\PhaseEngine.dir\src\phaseEngine\GameStartPhase.cpp.obj -c C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\src\phaseEngine\GameStartPhase.cpp
+
+CMakeFiles/PhaseEngine.dir/src/phaseEngine/GameStartPhase.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/PhaseEngine.dir/src/phaseEngine/GameStartPhase.cpp.i"
+	C:\mingw64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\src\phaseEngine\GameStartPhase.cpp > CMakeFiles\PhaseEngine.dir\src\phaseEngine\GameStartPhase.cpp.i
+
+CMakeFiles/PhaseEngine.dir/src/phaseEngine/GameStartPhase.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/PhaseEngine.dir/src/phaseEngine/GameStartPhase.cpp.s"
+	C:\mingw64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\src\phaseEngine\GameStartPhase.cpp -o CMakeFiles\PhaseEngine.dir\src\phaseEngine\GameStartPhase.cpp.s
+
 CMakeFiles/PhaseEngine.dir/src/phaseEngine/PlayerHitPhase.cpp.obj: CMakeFiles/PhaseEngine.dir/flags.make
 CMakeFiles/PhaseEngine.dir/src/phaseEngine/PlayerHitPhase.cpp.obj: CMakeFiles/PhaseEngine.dir/includes_CXX.rsp
 CMakeFiles/PhaseEngine.dir/src/phaseEngine/PlayerHitPhase.cpp.obj: C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/PlayerHitPhase.cpp
 CMakeFiles/PhaseEngine.dir/src/phaseEngine/PlayerHitPhase.cpp.obj: CMakeFiles/PhaseEngine.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\build\debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/PhaseEngine.dir/src/phaseEngine/PlayerHitPhase.cpp.obj"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\build\debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/PhaseEngine.dir/src/phaseEngine/PlayerHitPhase.cpp.obj"
 	C:\mingw64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/PhaseEngine.dir/src/phaseEngine/PlayerHitPhase.cpp.obj -MF CMakeFiles\PhaseEngine.dir\src\phaseEngine\PlayerHitPhase.cpp.obj.d -o CMakeFiles\PhaseEngine.dir\src\phaseEngine\PlayerHitPhase.cpp.obj -c C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\src\phaseEngine\PlayerHitPhase.cpp
 
 CMakeFiles/PhaseEngine.dir/src/phaseEngine/PlayerHitPhase.cpp.i: cmake_force
@@ -105,7 +120,7 @@ CMakeFiles/PhaseEngine.dir/src/phaseEngine/HostHitPhase.cpp.obj: CMakeFiles/Phas
 CMakeFiles/PhaseEngine.dir/src/phaseEngine/HostHitPhase.cpp.obj: CMakeFiles/PhaseEngine.dir/includes_CXX.rsp
 CMakeFiles/PhaseEngine.dir/src/phaseEngine/HostHitPhase.cpp.obj: C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/HostHitPhase.cpp
 CMakeFiles/PhaseEngine.dir/src/phaseEngine/HostHitPhase.cpp.obj: CMakeFiles/PhaseEngine.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\build\debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/PhaseEngine.dir/src/phaseEngine/HostHitPhase.cpp.obj"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\build\debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/PhaseEngine.dir/src/phaseEngine/HostHitPhase.cpp.obj"
 	C:\mingw64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/PhaseEngine.dir/src/phaseEngine/HostHitPhase.cpp.obj -MF CMakeFiles\PhaseEngine.dir\src\phaseEngine\HostHitPhase.cpp.obj.d -o CMakeFiles\PhaseEngine.dir\src\phaseEngine\HostHitPhase.cpp.obj -c C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\src\phaseEngine\HostHitPhase.cpp
 
 CMakeFiles/PhaseEngine.dir/src/phaseEngine/HostHitPhase.cpp.i: cmake_force
@@ -120,7 +135,7 @@ CMakeFiles/PhaseEngine.dir/src/phaseEngine/BattlePhase.cpp.obj: CMakeFiles/Phase
 CMakeFiles/PhaseEngine.dir/src/phaseEngine/BattlePhase.cpp.obj: CMakeFiles/PhaseEngine.dir/includes_CXX.rsp
 CMakeFiles/PhaseEngine.dir/src/phaseEngine/BattlePhase.cpp.obj: C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/BattlePhase.cpp
 CMakeFiles/PhaseEngine.dir/src/phaseEngine/BattlePhase.cpp.obj: CMakeFiles/PhaseEngine.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\build\debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/PhaseEngine.dir/src/phaseEngine/BattlePhase.cpp.obj"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\build\debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/PhaseEngine.dir/src/phaseEngine/BattlePhase.cpp.obj"
 	C:\mingw64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/PhaseEngine.dir/src/phaseEngine/BattlePhase.cpp.obj -MF CMakeFiles\PhaseEngine.dir\src\phaseEngine\BattlePhase.cpp.obj.d -o CMakeFiles\PhaseEngine.dir\src\phaseEngine\BattlePhase.cpp.obj -c C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\src\phaseEngine\BattlePhase.cpp
 
 CMakeFiles/PhaseEngine.dir/src/phaseEngine/BattlePhase.cpp.i: cmake_force
@@ -135,7 +150,7 @@ CMakeFiles/PhaseEngine.dir/src/phaseEngine/BlackJackCheckPhase.cpp.obj: CMakeFil
 CMakeFiles/PhaseEngine.dir/src/phaseEngine/BlackJackCheckPhase.cpp.obj: CMakeFiles/PhaseEngine.dir/includes_CXX.rsp
 CMakeFiles/PhaseEngine.dir/src/phaseEngine/BlackJackCheckPhase.cpp.obj: C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/BlackJackCheckPhase.cpp
 CMakeFiles/PhaseEngine.dir/src/phaseEngine/BlackJackCheckPhase.cpp.obj: CMakeFiles/PhaseEngine.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\build\debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/PhaseEngine.dir/src/phaseEngine/BlackJackCheckPhase.cpp.obj"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\build\debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/PhaseEngine.dir/src/phaseEngine/BlackJackCheckPhase.cpp.obj"
 	C:\mingw64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/PhaseEngine.dir/src/phaseEngine/BlackJackCheckPhase.cpp.obj -MF CMakeFiles\PhaseEngine.dir\src\phaseEngine\BlackJackCheckPhase.cpp.obj.d -o CMakeFiles\PhaseEngine.dir\src\phaseEngine\BlackJackCheckPhase.cpp.obj -c C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\src\phaseEngine\BlackJackCheckPhase.cpp
 
 CMakeFiles/PhaseEngine.dir/src/phaseEngine/BlackJackCheckPhase.cpp.i: cmake_force
@@ -150,7 +165,7 @@ CMakeFiles/PhaseEngine.dir/src/phaseEngine/RoundEndPhase.cpp.obj: CMakeFiles/Pha
 CMakeFiles/PhaseEngine.dir/src/phaseEngine/RoundEndPhase.cpp.obj: CMakeFiles/PhaseEngine.dir/includes_CXX.rsp
 CMakeFiles/PhaseEngine.dir/src/phaseEngine/RoundEndPhase.cpp.obj: C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/RoundEndPhase.cpp
 CMakeFiles/PhaseEngine.dir/src/phaseEngine/RoundEndPhase.cpp.obj: CMakeFiles/PhaseEngine.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\build\debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/PhaseEngine.dir/src/phaseEngine/RoundEndPhase.cpp.obj"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\build\debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/PhaseEngine.dir/src/phaseEngine/RoundEndPhase.cpp.obj"
 	C:\mingw64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/PhaseEngine.dir/src/phaseEngine/RoundEndPhase.cpp.obj -MF CMakeFiles\PhaseEngine.dir\src\phaseEngine\RoundEndPhase.cpp.obj.d -o CMakeFiles\PhaseEngine.dir\src\phaseEngine\RoundEndPhase.cpp.obj -c C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\src\phaseEngine\RoundEndPhase.cpp
 
 CMakeFiles/PhaseEngine.dir/src/phaseEngine/RoundEndPhase.cpp.i: cmake_force
@@ -164,6 +179,7 @@ CMakeFiles/PhaseEngine.dir/src/phaseEngine/RoundEndPhase.cpp.s: cmake_force
 # Object files for target PhaseEngine
 PhaseEngine_OBJECTS = \
 "CMakeFiles/PhaseEngine.dir/src/phaseEngine/Phase.cpp.obj" \
+"CMakeFiles/PhaseEngine.dir/src/phaseEngine/GameStartPhase.cpp.obj" \
 "CMakeFiles/PhaseEngine.dir/src/phaseEngine/PlayerHitPhase.cpp.obj" \
 "CMakeFiles/PhaseEngine.dir/src/phaseEngine/HostHitPhase.cpp.obj" \
 "CMakeFiles/PhaseEngine.dir/src/phaseEngine/BattlePhase.cpp.obj" \
@@ -174,6 +190,7 @@ PhaseEngine_OBJECTS = \
 PhaseEngine_EXTERNAL_OBJECTS =
 
 lib/libPhaseEngine.a: CMakeFiles/PhaseEngine.dir/src/phaseEngine/Phase.cpp.obj
+lib/libPhaseEngine.a: CMakeFiles/PhaseEngine.dir/src/phaseEngine/GameStartPhase.cpp.obj
 lib/libPhaseEngine.a: CMakeFiles/PhaseEngine.dir/src/phaseEngine/PlayerHitPhase.cpp.obj
 lib/libPhaseEngine.a: CMakeFiles/PhaseEngine.dir/src/phaseEngine/HostHitPhase.cpp.obj
 lib/libPhaseEngine.a: CMakeFiles/PhaseEngine.dir/src/phaseEngine/BattlePhase.cpp.obj
@@ -181,7 +198,7 @@ lib/libPhaseEngine.a: CMakeFiles/PhaseEngine.dir/src/phaseEngine/BlackJackCheckP
 lib/libPhaseEngine.a: CMakeFiles/PhaseEngine.dir/src/phaseEngine/RoundEndPhase.cpp.obj
 lib/libPhaseEngine.a: CMakeFiles/PhaseEngine.dir/build.make
 lib/libPhaseEngine.a: CMakeFiles/PhaseEngine.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\build\debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Linking CXX static library lib\libPhaseEngine.a"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\build\debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Linking CXX static library lib\libPhaseEngine.a"
 	$(CMAKE_COMMAND) -P CMakeFiles\PhaseEngine.dir\cmake_clean_target.cmake
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles\PhaseEngine.dir\link.txt --verbose=$(VERBOSE)
 

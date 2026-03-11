@@ -25,28 +25,48 @@ static int cardSpriteRow(Suit suit) {
         default:             return 0;
     }
 }
-VisualState::VisualState(GameState& gameState, Deck& deck, std::vector<Player>& players)
-    : gameState(gameState) {
+
+VisualState::VisualState(sf::RenderWindow& window, GameState& gameState)
+    : window(window), gameState(gameState) {
 
     std::filesystem::path fontPath =            "../assets/fonts/PixeloidSans.ttf";
-    std::filesystem::path cardTexturePath =     "../assets/fonts/CuteCards.png";
+    std::filesystem::path cardTexturePath =     "../assets/images/CuteCards.png";
 
     if (!font.openFromFile(fontPath)) {
         std::cerr << "[UIManager] Failed to load font from assets/fonts/PixeloidSans.ttf" << std::endl;
     }
 
     if (!cardTexture.loadFromFile(cardTexturePath)) {
-        std::cerr << "[UIManager] Failed to load card texture from assets/fonts/CuteCards.png" << std::endl;
+        std::cerr << "[UIManager] Failed to load card texture from assets/images/CuteCards.png" << std::endl;
     }
+    
+}
 
+void VisualState::buildCardVisuals(Deck& deck, std::vector<Player>& players){
+    //coordinates for sprite creation
     sf::Vector2u texSize = cardTexture.getSize();
     int cellW = (int)texSize.x / 15;
     int cellH = (int)texSize.y / 4;
     float scaleX = UILayout::CARD_SIZE.x / cellW;
     float scaleY = UILayout::CARD_SIZE.y / cellH;
+
+    //card coordinates on screen
+
+
+    float spacing = cellW * scaleX * 0.004f;   // overlap spacing
+    float cardWidth = cellW * scaleX;
+
+    int totalCards = deck.getCards().size();
+
+    float startX = 50.f;  // left side
+    auto winSize = window.getSize();
+    float windowH = static_cast<float>(winSize.y);
+    float y = windowH / 2.f;  // middle vertically
+
     int i = 0 ;
-    //build cardVisuals based on cards in deck
-    for (auto* card : deck.getCards()){
+        //build cardVisuals based on cards in deck
+    for (auto* card : deck.getCards()) {
+
         bool showFace = cheatOn || card->isFaceUp();
 
         int col, row;
@@ -55,24 +75,27 @@ VisualState::VisualState(GameState& gameState, Deck& deck, std::vector<Player>& 
             col = cardSpriteCol(card->getRank());
             row = cardSpriteRow(card->getSuit());
         } else {
-            col = 14; row = 2; // black striped card back
+            col = 14;
+            row = 2;
         }
 
         sf::Sprite sprite(cardTexture);
         sprite.setTextureRect(sf::IntRect({col * cellW, row * cellH}, {cellW, cellH}));
         sprite.setScale({scaleX, scaleY});
-        //sprite.setPosition(UILayout::DECK_POSITION);
-        sprite.setPosition( {i * UILayout::CARD_SPACING , 10.0f} );
 
-        CardVisual cardVisual(std::move(sprite));
+        sprite.setPosition({startX + i * 0.03f, y + i * 0.03f});
+
+        CardVisual cardVisual(sprite);
+        cardVisual.cardId=card->getId();
         cardVisual.cardIndex = card->getHandIndex();
-        cardVisual.ownerId= card->getOwnerId();
+        cardVisual.ownerId = card->getOwnerId();
         cardVisual.location = CardLocation::DECK;
         cardVisual.highlighted = false;
         cardVisual.isTarget = false;
         cardVisual.faceUp = showFace;
+
         cardVisuals.emplace_back(cardVisual);
+
         i++;
     }
 }
-

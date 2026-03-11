@@ -13,13 +13,14 @@ namespace GameConfig {
     constexpr int ACE_LOW_VALUE = 1;
     constexpr int FACE_CARD_VALUE = 10;
     constexpr int CARD_RANKS = 13;
-    
+    constexpr int HAND_START_VALUE = 2;
     // Bot behavior constants
     constexpr double BURST_RISK_WEIGHT = 0.5;
     constexpr double OPPONENT_PRESSURE_WEIGHT = 0.70;
     constexpr double LOSING_PRESSURE_WEIGHT = 0.15;
 }
 enum class PhaseName{
+    GAME_START_PHASE,
     BLACKJACK_CHECK_PHASE,
     PLAYER_HIT_PHASE,
     HOST_HIT_PHASE,

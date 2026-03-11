@@ -5,12 +5,12 @@ Phase::Phase(UIManager& uiManager,
              AnimationManager& animationManager,
              RoundManager& roundManager,
              SkillManager& skillManager,
-             GameState& gameState)
+             GameState& gameState, VisualState& visualState)
     : uiManager(uiManager),
     animationManager(animationManager),
       roundManager(roundManager),
       skillManager(skillManager),
-      gameState(gameState),
+      gameState(gameState), visualState(visualState),
       deck(roundManager.getDeck()),
       players(roundManager.getPlayers())
 {}
@@ -37,16 +37,28 @@ bool Phase::turnHandler(Player& player, Player& opponent){
 
     //if action is taken, resolve it
     switch (player.getPendingAction()){
-        case PlayerAction::HIT:
-            player.addCardToHand(deck.draw());
-            //the currentID of the gameState = player.getId() when normal hit phase, 
+        case PlayerAction::HIT: {
+            Card* drawnCard = deck.draw();
+            player.addCardToHand(drawnCard);
+
+            // Draw animation
+            CardVisual& cardVisual = visualState.getCardVisual(drawnCard->getId());
+            sf::Vector2f startPos = cardVisual.cardSprite.getPosition();
+            animationManager.addDrawAnimation(
+                player.getId(),
+                player.getHandSize() - 1,
+                drawnCard->getId(),
+                startPos
+            );
+
+            //the currentID of the gameState = player.getId() when normal hit phase,
             //but it has to be equal to opponent.getId() when host hit phase
             roundManager.updateGameState(
                 player.getHost() ? PhaseName::HOST_HIT_PHASE : PhaseName::PLAYER_HIT_PHASE,
                 player.getHost() ? opponent.getId() : player.getId()
             );
             player.setPendingAction(PlayerAction::IDLE);
-        break;
+        } break;
 
         case PlayerAction::SKILL_REQUEST:
         
@@ -130,8 +142,25 @@ void Phase::skillHandler(Player& player){
         gameState
     };
 
+    // Capture card IDs before skill may move them
+    std::vector<int> targetCardIds;
+    for (Card* card : actualTargetCards) {
+        targetCardIds.push_back(card->getId());
+    }
+
     if(!skillManager.processSkill(context)){
         std::cout << "[skillHandler] Skill processing failed for player " << player.getId() << std::endl;
+    } else {
+        // Animate cards that were returned to deck (ownerId reset to -1)
+        for (int cardId : targetCardIds) {
+            // Check if card was returned (ownerId == -1 means it's back in deck)
+            for (auto* card : deck.getCards()) {
+                if (card->getId() == cardId && card->getOwnerId() == -1) {
+                    animationManager.addReturnToDeckAnimation(cardId);
+                    break;
+                }
+            }
+        }
     }
 
     gameState.pendingTarget = {}; //reset pending target after processing skill

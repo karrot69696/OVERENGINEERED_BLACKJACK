@@ -3,6 +3,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/PhaseEngine.dir/src/phaseEngine/BattlePhase.cpp.obj.d"
   "CMakeFiles/PhaseEngine.dir/src/phaseEngine/BlackJackCheckPhase.cpp.obj"
   "CMakeFiles/PhaseEngine.dir/src/phaseEngine/BlackJackCheckPhase.cpp.obj.d"
+  "CMakeFiles/PhaseEngine.dir/src/phaseEngine/GameStartPhase.cpp.obj"
+  "CMakeFiles/PhaseEngine.dir/src/phaseEngine/GameStartPhase.cpp.obj.d"
   "CMakeFiles/PhaseEngine.dir/src/phaseEngine/HostHitPhase.cpp.obj"
   "CMakeFiles/PhaseEngine.dir/src/phaseEngine/HostHitPhase.cpp.obj.d"
   "CMakeFiles/PhaseEngine.dir/src/phaseEngine/Phase.cpp.obj"

@@ -24,24 +24,20 @@
 class Game {
 private:
 
-
+    sf::RenderWindow& window;
     std::vector<std::unique_ptr<Card>> allCards;
     Deck deck;
     SkillDeck skillDeck;
     std::vector<Player> players; 
 
-
     GameState gameState;
     VisualState visualState;
-    sf::RenderWindow& window;
 
     UIManager uiManager;
     AnimationManager animationManager;
 public:
     Game(sf::RenderWindow& window);
     ~Game(){}
-    void dealInitialCards(int numCards);  
-    void displayPoints();
     void SetupGame();
     void RunGame();
     void eventHandler(const std::optional<sf::Event>& event);

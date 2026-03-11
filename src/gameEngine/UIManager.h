@@ -38,6 +38,7 @@ class UIManager {
 
         sf::RenderWindow& window;
         GameState& gameState;
+        VisualState& visualState;
         std::vector<CardVisual>& cardVisuals;
 
         // Action menu buttons
@@ -47,10 +48,10 @@ class UIManager {
         int activePlayerId = -1;
         sf::Font font;
         sf::Texture cardTexture;
+        sf::Texture tableTexture;
 
     public:
-
-        UIManager(sf::RenderWindow& window, GameState& gameState, std::vector<CardVisual>& cardVisuals);
+        UIManager(sf::RenderWindow& window, GameState& gameState,VisualState& visualState, std::vector<CardVisual>& cardVisuals);
 
         // Call once per frame
         void handleEvent(const std::optional<sf::Event>& event);

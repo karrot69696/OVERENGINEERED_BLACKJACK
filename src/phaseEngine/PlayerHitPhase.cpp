@@ -9,6 +9,10 @@ void PlayerHitPhase::onEnter() {
     //get current player
     Player& currentPlayer = getCurrentPlayer();
 
+    //spawn text
+    std::string turnText = "PLAYER " + std::to_string(currentPlayer.getId());
+    animationManager.spawnPhaseText(turnText,AnimConfig::PHASE_TEXT_DURATION);
+
     //update player info in game state
     roundManager.updateGameState(PhaseName::PLAYER_HIT_PHASE,currentPlayer.getId());
 
@@ -46,9 +50,11 @@ void PlayerHitPhase::onEnter() {
 ////////////////////////////////////////////////
 std::optional<PhaseName> PlayerHitPhase::onUpdate() {
 
+    
+
     //get current player
     Player& currentPlayer = getCurrentPlayer();
-    std::cout<<"[PlayerHitPhase] Player "<<currentPlayer.getId()<<std::endl;
+ 
     // skip player that is not host or blackjacked
     if (currentPlayer.getHost() == 1 || currentPlayer.getBlackJacked() == 1){
 

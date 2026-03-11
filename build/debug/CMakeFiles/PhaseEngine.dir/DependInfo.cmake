@@ -10,6 +10,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/BattlePhase.cpp" "CMakeFiles/PhaseEngine.dir/src/phaseEngine/BattlePhase.cpp.obj" "gcc" "CMakeFiles/PhaseEngine.dir/src/phaseEngine/BattlePhase.cpp.obj.d"
   "C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/BlackJackCheckPhase.cpp" "CMakeFiles/PhaseEngine.dir/src/phaseEngine/BlackJackCheckPhase.cpp.obj" "gcc" "CMakeFiles/PhaseEngine.dir/src/phaseEngine/BlackJackCheckPhase.cpp.obj.d"
+  "C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/GameStartPhase.cpp" "CMakeFiles/PhaseEngine.dir/src/phaseEngine/GameStartPhase.cpp.obj" "gcc" "CMakeFiles/PhaseEngine.dir/src/phaseEngine/GameStartPhase.cpp.obj.d"
   "C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/HostHitPhase.cpp" "CMakeFiles/PhaseEngine.dir/src/phaseEngine/HostHitPhase.cpp.obj" "gcc" "CMakeFiles/PhaseEngine.dir/src/phaseEngine/HostHitPhase.cpp.obj.d"
   "C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/Phase.cpp" "CMakeFiles/PhaseEngine.dir/src/phaseEngine/Phase.cpp.obj" "gcc" "CMakeFiles/PhaseEngine.dir/src/phaseEngine/Phase.cpp.obj.d"
   "C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/PlayerHitPhase.cpp" "CMakeFiles/PhaseEngine.dir/src/phaseEngine/PlayerHitPhase.cpp.obj" "gcc" "CMakeFiles/PhaseEngine.dir/src/phaseEngine/PlayerHitPhase.cpp.obj.d"

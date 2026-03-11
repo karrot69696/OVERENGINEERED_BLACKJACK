@@ -185,6 +185,7 @@ CMakeFiles/PhaseEngine.dir/src/phaseEngine/RoundEndPhase.cpp.obj: \
  C:/mingw64/include/c++/14.2.0/bits/ostream.tcc \
  C:/mingw64/include/c++/14.2.0/istream \
  C:/mingw64/include/c++/14.2.0/bits/istream.tcc \
+ C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/VisualState.h \
  C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/Player.h \
  C:/mingw64/include/c++/14.2.0/random C:/mingw64/include/c++/14.2.0/cmath \
  C:/mingw64/x86_64-w64-mingw32/include/math.h \
@@ -373,7 +374,7 @@ CMakeFiles/PhaseEngine.dir/src/phaseEngine/RoundEndPhase.cpp.obj: \
  C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/HostHitPhase.h \
  C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/BattlePhase.h \
  C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/RoundEndPhase.h \
+ C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/GameStartPhase.h \
  C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/gameEngine/UIManager.h \
  C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/VisualState.h \
- C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/Player.h \
  C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/gameEngine/AnimationManager.h

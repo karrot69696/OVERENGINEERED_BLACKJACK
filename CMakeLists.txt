@@ -75,6 +75,7 @@ set(GAME_ENGINE_HEADERS
 
 set(PHASE_ENGINE_SOURCES
     src/phaseEngine/Phase.cpp
+    src/phaseEngine/GameStartPhase.cpp
     src/phaseEngine/PlayerHitPhase.cpp
     src/phaseEngine/HostHitPhase.cpp
     src/phaseEngine/BattlePhase.cpp
@@ -84,6 +85,7 @@ set(PHASE_ENGINE_SOURCES
 
 set(PHASE_ENGINE_HEADERS
     src/phaseEngine/Phase.h
+    src/phaseEngine/GameStartPhase.h
     src/phaseEngine/PlayerHitPhase.h
     src/phaseEngine/HostHitPhase.h
     src/phaseEngine/BattlePhase.h

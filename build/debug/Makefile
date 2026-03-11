@@ -526,6 +526,30 @@ src/phaseEngine/BlackJackCheckPhase.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\PhaseEngine.dir\build.make CMakeFiles/PhaseEngine.dir/src/phaseEngine/BlackJackCheckPhase.cpp.s
 .PHONY : src/phaseEngine/BlackJackCheckPhase.cpp.s
 
+src/phaseEngine/GameStartPhase.obj: src/phaseEngine/GameStartPhase.cpp.obj
+.PHONY : src/phaseEngine/GameStartPhase.obj
+
+# target to build an object file
+src/phaseEngine/GameStartPhase.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\PhaseEngine.dir\build.make CMakeFiles/PhaseEngine.dir/src/phaseEngine/GameStartPhase.cpp.obj
+.PHONY : src/phaseEngine/GameStartPhase.cpp.obj
+
+src/phaseEngine/GameStartPhase.i: src/phaseEngine/GameStartPhase.cpp.i
+.PHONY : src/phaseEngine/GameStartPhase.i
+
+# target to preprocess a source file
+src/phaseEngine/GameStartPhase.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\PhaseEngine.dir\build.make CMakeFiles/PhaseEngine.dir/src/phaseEngine/GameStartPhase.cpp.i
+.PHONY : src/phaseEngine/GameStartPhase.cpp.i
+
+src/phaseEngine/GameStartPhase.s: src/phaseEngine/GameStartPhase.cpp.s
+.PHONY : src/phaseEngine/GameStartPhase.s
+
+# target to generate assembly for a file
+src/phaseEngine/GameStartPhase.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\PhaseEngine.dir\build.make CMakeFiles/PhaseEngine.dir/src/phaseEngine/GameStartPhase.cpp.s
+.PHONY : src/phaseEngine/GameStartPhase.cpp.s
+
 src/phaseEngine/HostHitPhase.obj: src/phaseEngine/HostHitPhase.cpp.obj
 .PHONY : src/phaseEngine/HostHitPhase.obj
 
@@ -700,6 +724,9 @@ help:
 	@echo ... src/phaseEngine/BlackJackCheckPhase.obj
 	@echo ... src/phaseEngine/BlackJackCheckPhase.i
 	@echo ... src/phaseEngine/BlackJackCheckPhase.s
+	@echo ... src/phaseEngine/GameStartPhase.obj
+	@echo ... src/phaseEngine/GameStartPhase.i
+	@echo ... src/phaseEngine/GameStartPhase.s
 	@echo ... src/phaseEngine/HostHitPhase.obj
 	@echo ... src/phaseEngine/HostHitPhase.i
 	@echo ... src/phaseEngine/HostHitPhase.s

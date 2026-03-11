@@ -8,7 +8,7 @@
 #include <memory>
 #include <iostream>
 
-#include "../lowLevelEntities/Player.h"
+#include "../lowLevelEntities/VisualState.h"
 class UIManager;
 class RoundManager;
 class SkillManager;
@@ -20,6 +20,7 @@ class Phase {
         RoundManager& roundManager;
         SkillManager& skillManager;
         GameState& gameState;
+        VisualState& visualState;
         std::vector<Player>& players;
         Deck& deck;
     public:
@@ -27,7 +28,7 @@ class Phase {
             AnimationManager& animationManager,
             RoundManager& roundManager,
             SkillManager& skillManager,
-            GameState& gameState);
+            GameState& gameState, VisualState& visualState);
 
         virtual ~Phase() = default;
         virtual void onEnter(){};

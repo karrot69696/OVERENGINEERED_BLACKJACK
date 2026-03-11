@@ -11,7 +11,7 @@ Card* Deck::draw() {
 
     cards.pop_back();
     std::cout   << "[deck.draw()] card drawn: " << dealtCard->getRankAsString() 
-                << " of " << dealtCard->getSuitAsString() << std::endl;
+                << " of " << dealtCard->getSuitAsString() << " id "<< dealtCard->getId() << std::endl;
     return dealtCard;
 }
 
