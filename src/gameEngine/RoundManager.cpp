@@ -111,7 +111,6 @@ void RoundManager::update(){
     
     //check for game end | invalid currentPhase | animation playing (blocking)
     if(gameState.getPhaseName() == PhaseName::GAME_OVER){
-        std::cout<<"Game Over. Thanks for playing"<<std::endl;
         return;
     }
     else if (!currentPhase){

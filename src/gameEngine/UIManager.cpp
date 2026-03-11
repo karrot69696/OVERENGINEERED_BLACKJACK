@@ -65,6 +65,27 @@ UIManager::UIManager(sf::RenderWindow& window, GameState& gameState,VisualState&
     }
 
     clearInput();
+
+    std::filesystem::path playerIconPath = "../assets/images/playerIcon.png";
+    if (!playerIcon.loadFromFile(playerIconPath)) {
+        std::cerr << "[UIManager] Failed to load playerIcon from assets/images/playerIcon.png" << std::endl;
+    }
+
+    // Player 0: start x=288 y=160, crop 96x96
+    sf::Vector2i cropSize = { 195, 195 };
+    sf::Sprite p0(playerIcon);
+    p0.setTextureRect(sf::IntRect({772, 194},cropSize));
+    playerSprite.push_back(p0);
+
+    // Player 1: start x=64 y=224, crop 96x96
+    sf::Sprite p1(playerIcon);
+    p1.setTextureRect(sf::IntRect({62, 212}, cropSize));
+    playerSprite.push_back(p1);
+
+    // Player 2: start x=512 y=224, crop 96x96
+    sf::Sprite p2(playerIcon);
+    p2.setTextureRect(sf::IntRect({536, 240}, cropSize));
+    playerSprite.push_back(p2);
 }
 
 // ============================================================================
@@ -199,14 +220,22 @@ void UIManager::renderCards() {
 void UIManager::renderHUD() {
     // PhaseName label top-left
     sf::Text phaseText(font, gameState.phaseToString(gameState.getPhaseName()), 16);
-    phaseText.setFillColor(sf::Color::White);
+    phaseText.setFillColor(getPhaseNameColor());
     phaseText.setPosition({10.f, 10.f});
     window.draw(phaseText);
 
-    // Per-player points + seat label
-    auto players = gameState.getAllPlayerInfo(); // you'll add this getter (see notes)
+    // Per-player icon + points + seat label
+    auto players = gameState.getAllPlayerInfo();
     for (auto& info : players) {
-        sf::Vector2f seatPos = getPlayerSeatPos(info.playerId, (int)players.size());
+        sf::Vector2f seatPos = visualState.getPlayerSeatPos(info.playerId, (int)players.size());
+
+        // Draw player icon
+        sf::Vector2f iconScale = {0.37f, 0.37f};
+        if (info.playerId < (int)playerSprite.size()) {
+            playerSprite[info.playerId].setPosition({ seatPos.x - 86.f, seatPos.y - 26.f });
+            playerSprite[info.playerId].setScale(iconScale);
+            window.draw(playerSprite[info.playerId]);
+        }
 
         std::string label = "P" + std::to_string(info.playerId)
                           + "  " + std::to_string(info.points) + "pts"
@@ -239,8 +268,9 @@ void UIManager::renderTargetingOverlay_Deliverance() {
     // Highlight cards belonging to the active player
     for (auto& cv : cardVisuals) {
         if (cv.ownerId == activePlayerId) {
-            sf::RectangleShape highlight(UILayout::CARD_SIZE + sf::Vector2f{6.f, 6.f});
-            highlight.setPosition(cv.cardSprite.getPosition() - sf::Vector2f{3.f, 3.f});
+            auto cardBounds = cv.cardSprite.getGlobalBounds();
+            sf::RectangleShape highlight({cardBounds.size.x + 2.f, cardBounds.size.y + 2.f});
+            highlight.setPosition({cardBounds.position.x - 1.f, cardBounds.position.y - 1.f});
             highlight.setFillColor(sf::Color::Transparent);
             highlight.setOutlineThickness(2.f);
             highlight.setOutlineColor(cv.isTarget ? UILayout::CARD_TARGET : UILayout::CARD_HIGHLIGHT);
@@ -260,107 +290,9 @@ void UIManager::renderTargetingOverlay_Deliverance() {
     prompt.setPosition({ 10.f, (float)window.getSize().y - 65.f });
     window.draw(prompt);
 }
-
-// ============================================================================
-// Card Visual Builder
-// ============================================================================
-// Sprite sheet: 15 columns (A,2..10,J,Q,K,Joker,Back), 4 rows (Spades,Diamonds,Clubs,Hearts)
-static int cardSpriteCol(Rank rank) {
-    return static_cast<int>(rank) - 1; // Ace=1 -> col 0, King=13 -> col 12
-}
-static int cardSpriteRow(Suit suit) {
-    switch (suit) {
-        case Suit::Spades:   return 0;
-        case Suit::Diamonds: return 1;
-        case Suit::Clubs:    return 2;
-        case Suit::Hearts:   return 3;
-        default:             return 0;
-    }
-}
-
-// void UIManager::buildCardVisuals() {
-//     // Save isTarget state before rebuilding
-//     std::map<std::pair<int,int>, bool> targetState;
-//     for (auto& cv : cardVisuals) {
-//         targetState[{cv.ownerId, cv.cardIndex}] = cv.isTarget;
-//     }
-
-//     cardVisuals.clear();
-//     auto players = gameState.getAllPlayerInfo();
-
-//     sf::Vector2u texSize = cardTexture.getSize();
-//     int cellW = (int)texSize.x / 15;
-//     int cellH = (int)texSize.y / 4;
-//     float scaleX = UILayout::CARD_SIZE.x / cellW;
-//     float scaleY = UILayout::CARD_SIZE.y / cellH;
-
-//     for (auto& player : players) {
-//         sf::Vector2f seatPos = getPlayerSeatPos(player.playerId, (int)players.size());
-
-//         for (int i = 0; i < (int)player.cardsInHand.size(); i++) {
-//             const Card& card = player.cardsInHand[i];
-//             bool showFace = cheatOn || card.isFaceUp();
-
-//             int col, row;
-//             if (showFace) {
-//                 col = cardSpriteCol(card.getRank());
-//                 row = cardSpriteRow(card.getSuit());
-//             } else {
-//                 col = 14; row = 2; // black striped card back
-//             }
-
-//             sf::Sprite sprite(cardTexture);
-//             sprite.setTextureRect(sf::IntRect({col * cellW, row * cellH}, {cellW, cellH}));
-//             sprite.setScale({scaleX, scaleY});
-//             sprite.setPosition({ seatPos.x + i * UILayout::CARD_SPACING, seatPos.y });
-
-//             cardVisuals.emplace_back(player.playerId, card.getHandIndex(), std::move(sprite));
-
-//             // Restore isTarget state
-//             auto it = targetState.find({player.playerId, i});
-//             if (it != targetState.end()) {
-//                 cardVisuals.back().isTarget = it->second;
-//             }
-//         }
-//     }
-// }
-
-// void UIManager::targetStateHandler() {
-//     // Save isTarget state before rebuilding
-//     std::map<std::pair<int,int>, bool> targetState;
-//     for (auto& cv : cardVisuals) {
-//         targetState[{cv.ownerId, cv.cardIndex}] = cv.isTarget;
-//     }
-//     auto players = gameState.getAllPlayerInfo();
-    
-//     //rebuild
-
-//     for (auto& player : players) {
-//         for (int i = 0; i < (int)player.cardsInHand.size(); i++) {
-//             // Restore isTarget state
-//             auto it = targetState.find({player.playerId, i});
-//             if (it != targetState.end()) {
-//                 cardVisuals.back().isTarget = it->second;
-//             }
-//         }
-//     }
-// }
 // ============================================================================
 // Layout Helpers
 // ============================================================================
-sf::Vector2f UIManager::getPlayerSeatPos(int playerId, int totalPlayers) {
-    // Spread players evenly along the bottom, host at top center
-    float w = window.getSize().x;
-    float h = window.getSize().y;
-
-    if (playerId == 0) {
-        // Host sits at top
-        return { w / 2.f - 100.f, 60.f };
-    }
-
-    float spacing = w / (float)(totalPlayers);
-    return { spacing * playerId - 30.f, h - 200.f };
-}
 
 sf::Color UIManager::getPhaseNameColor() {
     switch (gameState.getPhaseName()) {

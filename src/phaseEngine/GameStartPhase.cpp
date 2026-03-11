@@ -20,13 +20,10 @@ std::optional<PhaseName> GameStartPhase::onUpdate(){
         roundManager.updateGameState(PhaseName::GAME_START_PHASE, player.getId());
 
         //graphic
-        CardVisual& cardVisual = visualState.getCardVisual(drawnCard->getId());
-        sf::Vector2f startPosition = cardVisual.cardSprite.getPosition();
         animationManager.addDrawAnimation(
             player.getId(),
             player.getHandSize() - 1,
-            drawnCard->getId(),
-            startPosition
+            drawnCard->getId()
         );
 
         // advance to next player, wrap to next round

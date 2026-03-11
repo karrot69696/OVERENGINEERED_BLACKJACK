@@ -49,7 +49,9 @@ class UIManager {
         sf::Font font;
         sf::Texture cardTexture;
         sf::Texture tableTexture;
-
+        sf::Texture playerIcon;
+        std::vector<sf::Sprite> playerSprite;
+        
     public:
         UIManager(sf::RenderWindow& window, GameState& gameState,VisualState& visualState, std::vector<CardVisual>& cardVisuals);
 
@@ -69,7 +71,6 @@ class UIManager {
         void confirmTargeting();
 
         // Layout helpers
-        sf::Vector2f getPlayerSeatPos(int playerId, int totalPlayers);
         sf::Color getPhaseNameColor();
 
         // Callbacks — set these from RoundManager

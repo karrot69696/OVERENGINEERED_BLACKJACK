@@ -15,8 +15,8 @@
 #include <SFML/Network.hpp>
 #include <SFML/Audio.hpp>
 namespace AnimConfig {
-    inline constexpr float PHASE_TEXT_DURATION = 1.0f;
-    inline constexpr float CARD_DRAW_DURATION = 0.8f;
+    inline constexpr float PHASE_TEXT_DURATION = 0.9f;
+    inline constexpr float CARD_DRAW_DURATION = 0.4f;
 }
 struct Animation
 {
@@ -75,10 +75,10 @@ public:
     {
         return !animations.empty();
     }
-    void addDrawAnimation(int playerId, int handIndex, int cardId, sf::Vector2f startPosition){
+    void addDrawAnimation(int playerId, int handIndex, int cardId){
 
         CardVisual& card = visualState.getCardVisual(cardId);
-
+        sf::Vector2f startPosition = card.cardSprite.getPosition();
         card.location = CardLocation::HAND;
         card.ownerId = playerId;
         card.cardIndex = handIndex;
@@ -149,6 +149,54 @@ public:
         Animation returnAnim = {func, 0, AnimConfig::CARD_DRAW_DURATION};
         add(returnAnim);
 
+    }
+    void repositionHand(int playerId){
+        // Update cardIndex on each CardVisual to match the Card's actual handIndex,
+        // then animate sliding to the correct position
+        int totalPlayers = (int)gameState.getAllPlayerInfo().size();
+        sf::Vector2f seatPos = visualState.getPlayerSeatPos(playerId, totalPlayers);
+
+        for (auto& cv : visualState.getCardVisuals()) {
+            if (cv.ownerId != playerId) continue;
+
+            // Find the Card's current handIndex by matching cardId
+            int newIndex = -1;
+            for (auto& info : gameState.getAllPlayerInfo()) {
+                if (info.playerId == playerId) {
+                    for (int i = 0; i < (int)info.cardsInHand.size(); i++) {
+                        if (info.cardsInHand[i].getId() == cv.cardId) {
+                            newIndex = i;
+                            break;
+                        }
+                    }
+                    break;
+                }
+            }
+            if (newIndex == -1 || newIndex == cv.cardIndex) continue;
+
+            cv.cardIndex = newIndex;
+
+            // Compute center-based target position
+            auto bounds = cv.cardSprite.getLocalBounds();
+            sf::Vector2f localCenter = {bounds.size.x / 2.f, bounds.size.y / 2.f};
+            sf::Vector2f scale = cv.cardSprite.getScale();
+            sf::Vector2f worldOffset = {localCenter.x * scale.x, localCenter.y * scale.y};
+
+            sf::Vector2f startPos = cv.cardSprite.getPosition();
+            sf::Vector2f endPos = {
+                seatPos.x + newIndex * UILayout::CARD_SPACING + worldOffset.x,
+                seatPos.y + worldOffset.y
+            };
+
+            auto func = [&cv, startPos, endPos](float t){
+                float eased = t * (2.f - t);
+                sf::Vector2f pos = startPos + (endPos - startPos) * eased;
+                cv.cardSprite.setPosition(pos);
+            };
+
+            Animation slideAnim = {func, 0, 0.3f};
+            add(slideAnim);
+        }
     }
     void spawnPhaseText(std::string text, float duration){
 

@@ -38,17 +38,16 @@ bool Phase::turnHandler(Player& player, Player& opponent){
     //if action is taken, resolve it
     switch (player.getPendingAction()){
         case PlayerAction::HIT: {
+            // Logic
             Card* drawnCard = deck.draw();
             player.addCardToHand(drawnCard);
 
             // Draw animation
             CardVisual& cardVisual = visualState.getCardVisual(drawnCard->getId());
-            sf::Vector2f startPos = cardVisual.cardSprite.getPosition();
             animationManager.addDrawAnimation(
                 player.getId(),
                 player.getHandSize() - 1,
-                drawnCard->getId(),
-                startPos
+                drawnCard->getId()
             );
 
             //the currentID of the gameState = player.getId() when normal hit phase,
@@ -152,14 +151,19 @@ void Phase::skillHandler(Player& player){
         std::cout << "[skillHandler] Skill processing failed for player " << player.getId() << std::endl;
     } else {
         // Animate cards that were returned to deck (ownerId reset to -1)
+        bool anyReturned = false;
         for (int cardId : targetCardIds) {
-            // Check if card was returned (ownerId == -1 means it's back in deck)
             for (auto* card : deck.getCards()) {
                 if (card->getId() == cardId && card->getOwnerId() == -1) {
                     animationManager.addReturnToDeckAnimation(cardId);
+                    anyReturned = true;
                     break;
                 }
             }
+        }
+        // Slide remaining cards to close the gap
+        if (anyReturned) {
+            animationManager.repositionHand(player.getId());
         }
     }
 
