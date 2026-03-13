@@ -18,7 +18,7 @@
 namespace AnimConfig {
     inline constexpr float PHASE_TEXT_DURATION = 0.9f;
     inline constexpr float CARD_DRAW_DURATION = 0.4f;
-    inline constexpr float CARD_RETURN_DURATION = 0.1f;
+    inline constexpr float CARD_RETURN_DURATION = 0.2f;
     inline constexpr float POINT_CHANGE_DURATION = 1.7f;
 }
 struct Animation
@@ -148,7 +148,7 @@ public:
         add(drawAnim);
 
     }
-    void addReturnToDeckAnimation(int cardId){
+    void addReturnToDeckAnimation(int cardId, std::function<void()> onFinish = nullptr){
 
         CardVisual& card = visualState.getCardVisual(cardId);
 
@@ -179,7 +179,7 @@ public:
             card.cardSprite.setRotation(sf::degrees(-360.f * eased));
         };
 
-        Animation returnAnim = {func, nullptr, 0, AnimConfig::CARD_RETURN_DURATION};
+        Animation returnAnim = {func, std::move(onFinish), 0, AnimConfig::CARD_RETURN_DURATION};
         add(returnAnim);
 
     }

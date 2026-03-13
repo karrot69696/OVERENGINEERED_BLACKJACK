@@ -157,11 +157,14 @@ void Phase::skillHandler(Player& player){
             for (auto* card : deck.getCards()) {
                 if (card->getId() == cardId && card->getOwnerId() == -1) {
 
-                    // Spin first, then return to deck when spin finishes
+                    // Chain: spin → return to deck → reposition hand
                     CardVisual& cardvisual = visualState.getCardVisual(cardId);
+                    int playerId = player.getId();
                     animationManager.playDeliveranceEffect(cardvisual.cardSprite.getPosition());
-                    animationManager.addSpinAnimation(cardId, [this, cardId](){
-                        animationManager.addReturnToDeckAnimation(cardId);
+                    animationManager.addSpinAnimation(cardId, [this, cardId, playerId](){
+                        animationManager.addReturnToDeckAnimation(cardId, [this, playerId](){
+                            animationManager.repositionHand(playerId);
+                        });
                     });
 
                     anyReturned = true;
@@ -169,10 +172,6 @@ void Phase::skillHandler(Player& player){
 
                 }
             }
-        }
-        // Slide remaining cards to close the gap
-        if (anyReturned) {
-            animationManager.repositionHand(player.getId());
         }
     }
 
