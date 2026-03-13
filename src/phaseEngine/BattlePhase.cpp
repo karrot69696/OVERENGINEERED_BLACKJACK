@@ -33,25 +33,14 @@ std::optional<PhaseName> BattlePhase::onUpdate(){
     std::cout << "[BattlePhase] HOST [" << hostHandValue
                 << "] vs Player " << opponent.getId() <<" [" << opponentHandValue <<"]"<< std::endl;
 
-    //helper to get text position offset from seat
-    auto getTextPos = [&](Player& p) -> sf::Vector2f {
-        sf::Vector2f seat = visualState.getPlayerSeatPos(p.getId(), players.size());
-        return {seat.x - 90.f, seat.y - 40.f};
-    };
-    auto getSeatPos = [&](Player& p) -> sf::Vector2f {
-        sf::Vector2f seat = visualState.getPlayerSeatPos(p.getId(), players.size());
-        return {seat.x - 50.f, seat.y - 10.f};
-    };
-    sf::Color textColor(245, 224, 32);
-
-    //helper: award win to winner, loss to loser, play animations
+    //helper: award win to winner, loss to loser, emit events
     auto resolveWin = [&](Player& winner, Player& loser, const std::string& msg){
         std::cout << "[BattlePhase] " << msg << std::endl;
         winner.gainPoint();
         loser.gainLoss();
-        animationManager.spawnFloatingText("+1 POINT", getTextPos(winner), textColor, AnimConfig::POINT_CHANGE_DURATION);
-        animationManager.playShockAnimation(winner.getId(), loser.getId(), 0.7f);
-        animationManager.playExplosionAnimation(getSeatPos(loser),3.0f, 0.8f);
+        eventQueue.push({GameEventType::POINT_CHANGED, PointChangedEvent{winner.getId(), "+1 POINT"}});
+        eventQueue.push({GameEventType::SHOCK_EFFECT, ShockEffectEvent{winner.getId(), loser.getId(), 0.7f}});
+        eventQueue.push({GameEventType::EXPLOSION_EFFECT, ExplosionEffectEvent{loser.getId(), 3.0f, 0.8f}});
     };
 
     //determine outcome
@@ -69,8 +58,8 @@ std::optional<PhaseName> BattlePhase::onUpdate(){
     } else {
         std::cout << "[BattlePhase] TIE " << opponent.getId() << std::endl;
         host.gainLoss();
-        animationManager.spawnFloatingText("+0", getTextPos(opponent), textColor, AnimConfig::POINT_CHANGE_DURATION);
-        animationManager.spawnFloatingText("+0", getTextPos(host), textColor, AnimConfig::POINT_CHANGE_DURATION);
+        eventQueue.push({GameEventType::POINT_CHANGED, PointChangedEvent{opponent.getId(), "+0"}});
+        eventQueue.push({GameEventType::POINT_CHANGED, PointChangedEvent{host.getId(), "+0"}});
     }
     host.gainBattleCount();
     opponent.gainBattleCount();

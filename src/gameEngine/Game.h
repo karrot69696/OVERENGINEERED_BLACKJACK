@@ -17,6 +17,8 @@
 #include "RoundManager.h"
 #include "UIManager.h"
 #include "AnimationManager.h"
+#include "EventQueue.h"
+#include "PresentationLayer.h"
 
 #define maxNumPlayer 7
 #define initialCardCount 2
@@ -28,13 +30,15 @@ private:
     std::vector<std::unique_ptr<Card>> allCards;
     Deck deck;
     SkillDeck skillDeck;
-    std::vector<Player> players; 
+    std::vector<Player> players;
 
     GameState gameState;
     VisualState visualState;
 
     UIManager uiManager;
     AnimationManager animationManager;
+    EventQueue eventQueue;
+    PresentationLayer presentationLayer;
 public:
     Game(sf::RenderWindow& window);
     ~Game(){}

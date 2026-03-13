@@ -46,6 +46,7 @@ set(LOW_LEVEL_HEADERS
     src/lowLevelEntities/Player.h
     src/lowLevelEntities/SkillDeck.h
     src/lowLevelEntities/VisualState.h
+    src/lowLevelEntities/GameEvent.h
 )
 
 set(SKILL_ENGINE_SOURCES
@@ -64,6 +65,7 @@ set(GAME_ENGINE_SOURCES
     src/gameEngine/UIManager.cpp
     src/gameEngine/RoundManager.cpp
     src/gameEngine/AnimationManager.cpp
+    src/gameEngine/PresentationLayer.cpp
 )
 
 set(GAME_ENGINE_HEADERS
@@ -71,6 +73,8 @@ set(GAME_ENGINE_HEADERS
     src/gameEngine/UIManager.h
     src/gameEngine/RoundManager.h
     src/gameEngine/AnimationManager.h
+    src/gameEngine/EventQueue.h
+    src/gameEngine/PresentationLayer.h
 )
 
 set(PHASE_ENGINE_SOURCES

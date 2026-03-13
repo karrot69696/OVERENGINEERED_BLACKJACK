@@ -3,6 +3,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/GameEngine.dir/src/gameEngine/AnimationManager.cpp.obj.d"
   "CMakeFiles/GameEngine.dir/src/gameEngine/Game.cpp.obj"
   "CMakeFiles/GameEngine.dir/src/gameEngine/Game.cpp.obj.d"
+  "CMakeFiles/GameEngine.dir/src/gameEngine/PresentationLayer.cpp.obj"
+  "CMakeFiles/GameEngine.dir/src/gameEngine/PresentationLayer.cpp.obj.d"
   "CMakeFiles/GameEngine.dir/src/gameEngine/RoundManager.cpp.obj"
   "CMakeFiles/GameEngine.dir/src/gameEngine/RoundManager.cpp.obj.d"
   "CMakeFiles/GameEngine.dir/src/gameEngine/UIManager.cpp.obj"

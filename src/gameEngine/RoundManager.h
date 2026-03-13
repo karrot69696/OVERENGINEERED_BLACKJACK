@@ -18,6 +18,7 @@
 #include "../phaseEngine/RoundEndPhase.h"
 #include "../phaseEngine/GameStartPhase.h"
 #include "UIManager.h"
+#include "EventQueue.h"
 
 class Game;
 
@@ -29,7 +30,7 @@ private:
     GameState& gameState;
     VisualState& visualState;
     UIManager& uiManager;
-    AnimationManager& animationManager;
+    EventQueue& eventQueue;
     //NEW PHASE SYSTEM
     std::unique_ptr<Phase> currentPhase; 
     int round = 0;
@@ -37,11 +38,11 @@ public:
 
 
     RoundManager(
-        std::vector<Player>& _players, 
-        Deck& _deck, 
-        GameState& _gameState, VisualState& _visualState, 
-        UIManager& _uiManager, 
-        AnimationManager& _animationManager);
+        std::vector<Player>& _players,
+        Deck& _deck,
+        GameState& _gameState, VisualState& _visualState,
+        UIManager& _uiManager,
+        EventQueue& _eventQueue);
     //getters
     Deck& getDeck(){return deck;}
     SkillManager& getSkillManager(){return skillManager;}

@@ -2,12 +2,12 @@
 #include "../gameEngine/Game.h"
 
 Phase::Phase(UIManager& uiManager,
-             AnimationManager& animationManager,
+             EventQueue& eventQueue,
              RoundManager& roundManager,
              SkillManager& skillManager,
              GameState& gameState, VisualState& visualState)
     : uiManager(uiManager),
-    animationManager(animationManager),
+      eventQueue(eventQueue),
       roundManager(roundManager),
       skillManager(skillManager),
       gameState(gameState), visualState(visualState),
@@ -16,7 +16,6 @@ Phase::Phase(UIManager& uiManager,
 {}
 
 Player& Phase::getCurrentPlayer(){
-    //grabs current player    
     int currentPlayerIndex = gameState.getCurrentPlayerId();
     Player& currentPlayer = players[currentPlayerIndex];
     return currentPlayer;
@@ -30,28 +29,23 @@ void Phase::incrementCurrentPlayerId(){
 }
 
 bool Phase::turnHandler(Player& player, Player& opponent){
-    
+
     if(player._isBot()){
        player.setPendingAction(player.botMode(gameState));
     }
 
-    //if action is taken, resolve it
     switch (player.getPendingAction()){
         case PlayerAction::HIT: {
-            // Logic
             Card* drawnCard = deck.draw();
             player.addCardToHand(drawnCard);
 
-            // Draw animation
-            CardVisual& cardVisual = visualState.getCardVisual(drawnCard->getId());
-            animationManager.addDrawAnimation(
+            // Emit event — PresentationLayer handles visual state + animation
+            eventQueue.push({GameEventType::CARD_DRAWN, CardDrawnEvent{
                 player.getId(),
                 player.getHandSize() - 1,
                 drawnCard->getId()
-            );
+            }});
 
-            //the currentID of the gameState = player.getId() when normal hit phase,
-            //but it has to be equal to opponent.getId() when host hit phase
             roundManager.updateGameState(
                 player.getHost() ? PhaseName::HOST_HIT_PHASE : PhaseName::PLAYER_HIT_PHASE,
                 player.getHost() ? opponent.getId() : player.getId()
@@ -60,9 +54,8 @@ bool Phase::turnHandler(Player& player, Player& opponent){
         } break;
 
         case PlayerAction::SKILL_REQUEST:
-        
-            //wait until target exists, then process skill in skillHandler
-            if((int)gameState.pendingTarget.targetPlayerIds.size() > 0 || 
+
+            if((int)gameState.pendingTarget.targetPlayerIds.size() > 0 ||
             (int)gameState.pendingTarget.targetCards.size() > 0){
                 std::cout << "[Phase][turnHandler] Processing skill for player " << player.getId() << std::endl;
                 skillHandler(player);
@@ -80,32 +73,25 @@ bool Phase::turnHandler(Player& player, Player& opponent){
                 player.getHost() ? opponent.getId() : player.getId()
             );
             player.setPendingAction(PlayerAction::IDLE);
-            return false;   
+            return false;
         break;
 
         case PlayerAction::IDLE:
         break;
     }
-    
+
     return true;
 }
 
 void Phase::skillHandler(Player& player){
-    
-    //PlayerTargeting targets = player.targetAndConfirm(gameState);
-    // struct PlayerTargeting{
-    //     std::vector<int> targetPlayerIds;
-    //     std::vector<Card*> targetCards;
-    // };
 
-    //grab ACTUAL players and cards from the given ids.
     std::vector<Player*> actualTargets;
     std::vector<Card*> actualTargetCards;
 
     for (int id : gameState.pendingTarget.targetPlayerIds) {
         for (auto& p : players) {
             if (p.getId() == id) {
-                actualTargets.push_back(&p); //*pointerToObject = &object
+                actualTargets.push_back(&p);
             }
         }
     }
@@ -115,23 +101,21 @@ void Phase::skillHandler(Player& player){
             for (int i = 0; i < player.getHandSize(); i++) {
                 Card* playerCard = player.getCardInHand(i);
                 if (playerCard->getSuit() == card.getSuit() && playerCard->getRank() == card.getRank()) {
-                    std::cout << "[skillHandler] Found target card: " 
-                    << playerCard->getRankAsString() 
-                    << playerCard->getSuitAsString() 
-                    << " in player " 
+                    std::cout << "[skillHandler] Found target card: "
+                    << playerCard->getRankAsString()
+                    << playerCard->getSuitAsString()
+                    << " in player "
                     << player.getId() << "'s hand." << std::endl;
-                    actualTargetCards.push_back(playerCard); 
+                    actualTargetCards.push_back(playerCard);
                 }
             }
         }
     }
-    // struct SkillContext {
-    //     Player& user;
-    //     std::vector<Player*> targetPlayers;
-    //     std::vector<Card*> targetCards;
-    //     Deck& deck;
-    //     GameState& state;        // read/write if needed
-    // };
+
+    std::vector<int> targetCardIds;
+    for (Card* card : actualTargetCards) {
+        targetCardIds.push_back(card->getId());
+    }
 
     SkillContext context{
         player,
@@ -141,41 +125,25 @@ void Phase::skillHandler(Player& player){
         gameState
     };
 
-    // Capture card IDs before skill may move them
-    std::vector<int> targetCardIds;
-    for (Card* card : actualTargetCards) {
-        targetCardIds.push_back(card->getId());
-    }
-
     if(!skillManager.processSkill(context)){
         std::cout << "[skillHandler] Skill processing failed for player " << player.getId() << std::endl;
     } else {
-        // Animate cards that were returned to deck (ownerId reset to -1)
         roundManager.updateGameState(gameState.getPhaseName(), player.getId());
-        bool anyReturned = false;
         for (int cardId : targetCardIds) {
             for (auto* card : deck.getCards()) {
                 if (card->getId() == cardId && card->getOwnerId() == -1) {
-
-                    // Chain: spin → return to deck → reposition hand
-                    CardVisual& cardvisual = visualState.getCardVisual(cardId);
-                    int playerId = player.getId();
-                    animationManager.playDeliveranceEffect(cardvisual.cardSprite.getPosition());
-                    animationManager.addSpinAnimation(cardId, [this, cardId, playerId](){
-                        animationManager.addReturnToDeckAnimation(cardId, [this, playerId](){
-                            animationManager.repositionHand(playerId);
-                        });
-                    });
-
-                    anyReturned = true;
+                    // Emit spin event — PresentationLayer handles the full chain:
+                    // deliverance effect + spin → return to deck → reposition
+                    eventQueue.push({GameEventType::CARD_SPIN, CardSpinEvent{
+                        cardId, player.getId()
+                    }});
                     break;
-
                 }
             }
         }
     }
 
-    gameState.pendingTarget = {}; //reset pending target after processing skill
-    uiManager.requestActionInput(player.getId());
+    gameState.pendingTarget = {};
+    eventQueue.push({GameEventType::REQUEST_ACTION_INPUT, RequestActionInputEvent{player.getId()}});
     player.setPendingAction(PlayerAction::IDLE);
 }

@@ -365,6 +365,12 @@ CMakeFiles/CrazyJack.dir/src/main.cpp.obj: \
  C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/Phase.h \
  C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/VisualState.h \
  C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/Player.h \
+ C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/gameEngine/EventQueue.h \
+ C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/GameEvent.h \
+ C:/mingw64/include/c++/14.2.0/queue C:/mingw64/include/c++/14.2.0/deque \
+ C:/mingw64/include/c++/14.2.0/bits/stl_deque.h \
+ C:/mingw64/include/c++/14.2.0/bits/deque.tcc \
+ C:/mingw64/include/c++/14.2.0/bits/stl_queue.h \
  C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/BlackJackCheckPhase.h \
  C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/Phase.h \
  C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\src\gameEngine/RoundManager.h \
@@ -375,4 +381,6 @@ CMakeFiles/CrazyJack.dir/src/main.cpp.obj: \
  C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/GameStartPhase.h \
  C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\src\gameEngine/UIManager.h \
  C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/VisualState.h \
- C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\src\gameEngine/AnimationManager.h
+ C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\src\gameEngine/EventQueue.h \
+ C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\src\gameEngine/AnimationManager.h \
+ C:\Users\minhk\OneDrive\Desktop\OVERENGINEERED_BLACKJACK\src\gameEngine/PresentationLayer.h

@@ -358,6 +358,12 @@ CMakeFiles/PhaseEngine.dir/src/phaseEngine/BlackJackCheckPhase.cpp.obj: \
  C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include/SFML/Audio/SoundFileFactory.inl \
  C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/Deck.h \
  C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/SkillDeck.h \
+ C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/gameEngine/EventQueue.h \
+ C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/GameEvent.h \
+ C:/mingw64/include/c++/14.2.0/queue C:/mingw64/include/c++/14.2.0/deque \
+ C:/mingw64/include/c++/14.2.0/bits/stl_deque.h \
+ C:/mingw64/include/c++/14.2.0/bits/deque.tcc \
+ C:/mingw64/include/c++/14.2.0/bits/stl_queue.h \
  C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/gameEngine/Game.h \
  C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/skillEngine/SkillManager.h \
  C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/skillEngine/Skill.h \
@@ -377,4 +383,6 @@ CMakeFiles/PhaseEngine.dir/src/phaseEngine/BlackJackCheckPhase.cpp.obj: \
  C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/GameStartPhase.h \
  C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/gameEngine/UIManager.h \
  C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/VisualState.h \
- C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/gameEngine/AnimationManager.h
+ C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/gameEngine/EventQueue.h \
+ C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/gameEngine/AnimationManager.h \
+ C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/gameEngine/PresentationLayer.h

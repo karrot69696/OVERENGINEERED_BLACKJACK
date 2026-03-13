@@ -11,7 +11,7 @@ void PlayerHitPhase::onEnter() {
 
     //spawn text
     std::string turnText = "PLAYER " + std::to_string(currentPlayer.getId());
-    animationManager.spawnPhaseText(turnText,AnimConfig::PHASE_TEXT_DURATION);
+    eventQueue.push({GameEventType::PHASE_ANNOUNCED, PhaseAnnouncedEvent{turnText, AnimConfig::PHASE_TEXT_DURATION}});
 
     //update player info in game state
     roundManager.updateGameState(PhaseName::PLAYER_HIT_PHASE,currentPlayer.getId());

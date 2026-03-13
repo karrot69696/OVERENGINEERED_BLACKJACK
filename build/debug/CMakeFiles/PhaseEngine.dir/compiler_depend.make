@@ -112,11 +112,14 @@ CMakeFiles/PhaseEngine.dir/src/phaseEngine/BattlePhase.cpp.obj: C:/Users/minhk/O
   C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include/SFML/Window/WindowEnums.hpp \
   C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include/SFML/Window/WindowHandle.hpp \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/gameEngine/AnimationManager.h \
+  C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/gameEngine/EventQueue.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/gameEngine/Game.h \
+  C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/gameEngine/PresentationLayer.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/gameEngine/RoundManager.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/gameEngine/UIManager.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/Card.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/Deck.h \
+  C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/GameEvent.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/GameState.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/Player.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/SkillDeck.h \
@@ -156,6 +159,7 @@ CMakeFiles/PhaseEngine.dir/src/phaseEngine/BattlePhase.cpp.obj: C:/Users/minhk/O
   C:/mingw64/include/c++/14.2.0/bits/cpp_type_traits.h \
   C:/mingw64/include/c++/14.2.0/bits/cxxabi_forced.h \
   C:/mingw64/include/c++/14.2.0/bits/cxxabi_init_exception.h \
+  C:/mingw64/include/c++/14.2.0/bits/deque.tcc \
   C:/mingw64/include/c++/14.2.0/bits/enable_special_members.h \
   C:/mingw64/include/c++/14.2.0/bits/erase_if.h \
   C:/mingw64/include/c++/14.2.0/bits/exception.h \
@@ -210,6 +214,7 @@ CMakeFiles/PhaseEngine.dir/src/phaseEngine/BattlePhase.cpp.obj: C:/Users/minhk/O
   C:/mingw64/include/c++/14.2.0/bits/stl_algobase.h \
   C:/mingw64/include/c++/14.2.0/bits/stl_bvector.h \
   C:/mingw64/include/c++/14.2.0/bits/stl_construct.h \
+  C:/mingw64/include/c++/14.2.0/bits/stl_deque.h \
   C:/mingw64/include/c++/14.2.0/bits/stl_function.h \
   C:/mingw64/include/c++/14.2.0/bits/stl_heap.h \
   C:/mingw64/include/c++/14.2.0/bits/stl_iterator.h \
@@ -219,6 +224,7 @@ CMakeFiles/PhaseEngine.dir/src/phaseEngine/BattlePhase.cpp.obj: C:/Users/minhk/O
   C:/mingw64/include/c++/14.2.0/bits/stl_multimap.h \
   C:/mingw64/include/c++/14.2.0/bits/stl_numeric.h \
   C:/mingw64/include/c++/14.2.0/bits/stl_pair.h \
+  C:/mingw64/include/c++/14.2.0/bits/stl_queue.h \
   C:/mingw64/include/c++/14.2.0/bits/stl_raw_storage_iter.h \
   C:/mingw64/include/c++/14.2.0/bits/stl_relops.h \
   C:/mingw64/include/c++/14.2.0/bits/stl_tempbuf.h \
@@ -257,6 +263,7 @@ CMakeFiles/PhaseEngine.dir/src/phaseEngine/BattlePhase.cpp.obj: C:/Users/minhk/O
   C:/mingw64/include/c++/14.2.0/cwctype \
   C:/mingw64/include/c++/14.2.0/debug/assertions.h \
   C:/mingw64/include/c++/14.2.0/debug/debug.h \
+  C:/mingw64/include/c++/14.2.0/deque \
   C:/mingw64/include/c++/14.2.0/exception \
   C:/mingw64/include/c++/14.2.0/ext/aligned_buffer.h \
   C:/mingw64/include/c++/14.2.0/ext/alloc_traits.h \
@@ -287,6 +294,7 @@ CMakeFiles/PhaseEngine.dir/src/phaseEngine/BattlePhase.cpp.obj: C:/Users/minhk/O
   C:/mingw64/include/c++/14.2.0/pstl/glue_memory_defs.h \
   C:/mingw64/include/c++/14.2.0/pstl/glue_numeric_defs.h \
   C:/mingw64/include/c++/14.2.0/pstl/pstl_config.h \
+  C:/mingw64/include/c++/14.2.0/queue \
   C:/mingw64/include/c++/14.2.0/random \
   C:/mingw64/include/c++/14.2.0/ratio \
   C:/mingw64/include/c++/14.2.0/sstream \
@@ -491,11 +499,14 @@ CMakeFiles/PhaseEngine.dir/src/phaseEngine/BlackJackCheckPhase.cpp.obj: C:/Users
   C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include/SFML/Window/WindowEnums.hpp \
   C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include/SFML/Window/WindowHandle.hpp \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/gameEngine/AnimationManager.h \
+  C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/gameEngine/EventQueue.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/gameEngine/Game.h \
+  C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/gameEngine/PresentationLayer.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/gameEngine/RoundManager.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/gameEngine/UIManager.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/Card.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/Deck.h \
+  C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/GameEvent.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/GameState.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/Player.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/SkillDeck.h \
@@ -535,6 +546,7 @@ CMakeFiles/PhaseEngine.dir/src/phaseEngine/BlackJackCheckPhase.cpp.obj: C:/Users
   C:/mingw64/include/c++/14.2.0/bits/cpp_type_traits.h \
   C:/mingw64/include/c++/14.2.0/bits/cxxabi_forced.h \
   C:/mingw64/include/c++/14.2.0/bits/cxxabi_init_exception.h \
+  C:/mingw64/include/c++/14.2.0/bits/deque.tcc \
   C:/mingw64/include/c++/14.2.0/bits/enable_special_members.h \
   C:/mingw64/include/c++/14.2.0/bits/erase_if.h \
   C:/mingw64/include/c++/14.2.0/bits/exception.h \
@@ -589,6 +601,7 @@ CMakeFiles/PhaseEngine.dir/src/phaseEngine/BlackJackCheckPhase.cpp.obj: C:/Users
   C:/mingw64/include/c++/14.2.0/bits/stl_algobase.h \
   C:/mingw64/include/c++/14.2.0/bits/stl_bvector.h \
   C:/mingw64/include/c++/14.2.0/bits/stl_construct.h \
+  C:/mingw64/include/c++/14.2.0/bits/stl_deque.h \
   C:/mingw64/include/c++/14.2.0/bits/stl_function.h \
   C:/mingw64/include/c++/14.2.0/bits/stl_heap.h \
   C:/mingw64/include/c++/14.2.0/bits/stl_iterator.h \
@@ -598,6 +611,7 @@ CMakeFiles/PhaseEngine.dir/src/phaseEngine/BlackJackCheckPhase.cpp.obj: C:/Users
   C:/mingw64/include/c++/14.2.0/bits/stl_multimap.h \
   C:/mingw64/include/c++/14.2.0/bits/stl_numeric.h \
   C:/mingw64/include/c++/14.2.0/bits/stl_pair.h \
+  C:/mingw64/include/c++/14.2.0/bits/stl_queue.h \
   C:/mingw64/include/c++/14.2.0/bits/stl_raw_storage_iter.h \
   C:/mingw64/include/c++/14.2.0/bits/stl_relops.h \
   C:/mingw64/include/c++/14.2.0/bits/stl_tempbuf.h \
@@ -636,6 +650,7 @@ CMakeFiles/PhaseEngine.dir/src/phaseEngine/BlackJackCheckPhase.cpp.obj: C:/Users
   C:/mingw64/include/c++/14.2.0/cwctype \
   C:/mingw64/include/c++/14.2.0/debug/assertions.h \
   C:/mingw64/include/c++/14.2.0/debug/debug.h \
+  C:/mingw64/include/c++/14.2.0/deque \
   C:/mingw64/include/c++/14.2.0/exception \
   C:/mingw64/include/c++/14.2.0/ext/aligned_buffer.h \
   C:/mingw64/include/c++/14.2.0/ext/alloc_traits.h \
@@ -666,6 +681,7 @@ CMakeFiles/PhaseEngine.dir/src/phaseEngine/BlackJackCheckPhase.cpp.obj: C:/Users
   C:/mingw64/include/c++/14.2.0/pstl/glue_memory_defs.h \
   C:/mingw64/include/c++/14.2.0/pstl/glue_numeric_defs.h \
   C:/mingw64/include/c++/14.2.0/pstl/pstl_config.h \
+  C:/mingw64/include/c++/14.2.0/queue \
   C:/mingw64/include/c++/14.2.0/random \
   C:/mingw64/include/c++/14.2.0/ratio \
   C:/mingw64/include/c++/14.2.0/sstream \
@@ -870,11 +886,14 @@ CMakeFiles/PhaseEngine.dir/src/phaseEngine/GameStartPhase.cpp.obj: C:/Users/minh
   C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include/SFML/Window/WindowEnums.hpp \
   C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include/SFML/Window/WindowHandle.hpp \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/gameEngine/AnimationManager.h \
+  C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/gameEngine/EventQueue.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/gameEngine/Game.h \
+  C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/gameEngine/PresentationLayer.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/gameEngine/RoundManager.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/gameEngine/UIManager.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/Card.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/Deck.h \
+  C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/GameEvent.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/GameState.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/Player.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/SkillDeck.h \
@@ -914,6 +933,7 @@ CMakeFiles/PhaseEngine.dir/src/phaseEngine/GameStartPhase.cpp.obj: C:/Users/minh
   C:/mingw64/include/c++/14.2.0/bits/cpp_type_traits.h \
   C:/mingw64/include/c++/14.2.0/bits/cxxabi_forced.h \
   C:/mingw64/include/c++/14.2.0/bits/cxxabi_init_exception.h \
+  C:/mingw64/include/c++/14.2.0/bits/deque.tcc \
   C:/mingw64/include/c++/14.2.0/bits/enable_special_members.h \
   C:/mingw64/include/c++/14.2.0/bits/erase_if.h \
   C:/mingw64/include/c++/14.2.0/bits/exception.h \
@@ -968,6 +988,7 @@ CMakeFiles/PhaseEngine.dir/src/phaseEngine/GameStartPhase.cpp.obj: C:/Users/minh
   C:/mingw64/include/c++/14.2.0/bits/stl_algobase.h \
   C:/mingw64/include/c++/14.2.0/bits/stl_bvector.h \
   C:/mingw64/include/c++/14.2.0/bits/stl_construct.h \
+  C:/mingw64/include/c++/14.2.0/bits/stl_deque.h \
   C:/mingw64/include/c++/14.2.0/bits/stl_function.h \
   C:/mingw64/include/c++/14.2.0/bits/stl_heap.h \
   C:/mingw64/include/c++/14.2.0/bits/stl_iterator.h \
@@ -977,6 +998,7 @@ CMakeFiles/PhaseEngine.dir/src/phaseEngine/GameStartPhase.cpp.obj: C:/Users/minh
   C:/mingw64/include/c++/14.2.0/bits/stl_multimap.h \
   C:/mingw64/include/c++/14.2.0/bits/stl_numeric.h \
   C:/mingw64/include/c++/14.2.0/bits/stl_pair.h \
+  C:/mingw64/include/c++/14.2.0/bits/stl_queue.h \
   C:/mingw64/include/c++/14.2.0/bits/stl_raw_storage_iter.h \
   C:/mingw64/include/c++/14.2.0/bits/stl_relops.h \
   C:/mingw64/include/c++/14.2.0/bits/stl_tempbuf.h \
@@ -1015,6 +1037,7 @@ CMakeFiles/PhaseEngine.dir/src/phaseEngine/GameStartPhase.cpp.obj: C:/Users/minh
   C:/mingw64/include/c++/14.2.0/cwctype \
   C:/mingw64/include/c++/14.2.0/debug/assertions.h \
   C:/mingw64/include/c++/14.2.0/debug/debug.h \
+  C:/mingw64/include/c++/14.2.0/deque \
   C:/mingw64/include/c++/14.2.0/exception \
   C:/mingw64/include/c++/14.2.0/ext/aligned_buffer.h \
   C:/mingw64/include/c++/14.2.0/ext/alloc_traits.h \
@@ -1045,6 +1068,7 @@ CMakeFiles/PhaseEngine.dir/src/phaseEngine/GameStartPhase.cpp.obj: C:/Users/minh
   C:/mingw64/include/c++/14.2.0/pstl/glue_memory_defs.h \
   C:/mingw64/include/c++/14.2.0/pstl/glue_numeric_defs.h \
   C:/mingw64/include/c++/14.2.0/pstl/pstl_config.h \
+  C:/mingw64/include/c++/14.2.0/queue \
   C:/mingw64/include/c++/14.2.0/random \
   C:/mingw64/include/c++/14.2.0/ratio \
   C:/mingw64/include/c++/14.2.0/sstream \
@@ -1249,11 +1273,14 @@ CMakeFiles/PhaseEngine.dir/src/phaseEngine/HostHitPhase.cpp.obj: C:/Users/minhk/
   C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include/SFML/Window/WindowEnums.hpp \
   C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include/SFML/Window/WindowHandle.hpp \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/gameEngine/AnimationManager.h \
+  C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/gameEngine/EventQueue.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/gameEngine/Game.h \
+  C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/gameEngine/PresentationLayer.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/gameEngine/RoundManager.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/gameEngine/UIManager.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/Card.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/Deck.h \
+  C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/GameEvent.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/GameState.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/Player.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/SkillDeck.h \
@@ -1293,6 +1320,7 @@ CMakeFiles/PhaseEngine.dir/src/phaseEngine/HostHitPhase.cpp.obj: C:/Users/minhk/
   C:/mingw64/include/c++/14.2.0/bits/cpp_type_traits.h \
   C:/mingw64/include/c++/14.2.0/bits/cxxabi_forced.h \
   C:/mingw64/include/c++/14.2.0/bits/cxxabi_init_exception.h \
+  C:/mingw64/include/c++/14.2.0/bits/deque.tcc \
   C:/mingw64/include/c++/14.2.0/bits/enable_special_members.h \
   C:/mingw64/include/c++/14.2.0/bits/erase_if.h \
   C:/mingw64/include/c++/14.2.0/bits/exception.h \
@@ -1347,6 +1375,7 @@ CMakeFiles/PhaseEngine.dir/src/phaseEngine/HostHitPhase.cpp.obj: C:/Users/minhk/
   C:/mingw64/include/c++/14.2.0/bits/stl_algobase.h \
   C:/mingw64/include/c++/14.2.0/bits/stl_bvector.h \
   C:/mingw64/include/c++/14.2.0/bits/stl_construct.h \
+  C:/mingw64/include/c++/14.2.0/bits/stl_deque.h \
   C:/mingw64/include/c++/14.2.0/bits/stl_function.h \
   C:/mingw64/include/c++/14.2.0/bits/stl_heap.h \
   C:/mingw64/include/c++/14.2.0/bits/stl_iterator.h \
@@ -1356,6 +1385,7 @@ CMakeFiles/PhaseEngine.dir/src/phaseEngine/HostHitPhase.cpp.obj: C:/Users/minhk/
   C:/mingw64/include/c++/14.2.0/bits/stl_multimap.h \
   C:/mingw64/include/c++/14.2.0/bits/stl_numeric.h \
   C:/mingw64/include/c++/14.2.0/bits/stl_pair.h \
+  C:/mingw64/include/c++/14.2.0/bits/stl_queue.h \
   C:/mingw64/include/c++/14.2.0/bits/stl_raw_storage_iter.h \
   C:/mingw64/include/c++/14.2.0/bits/stl_relops.h \
   C:/mingw64/include/c++/14.2.0/bits/stl_tempbuf.h \
@@ -1394,6 +1424,7 @@ CMakeFiles/PhaseEngine.dir/src/phaseEngine/HostHitPhase.cpp.obj: C:/Users/minhk/
   C:/mingw64/include/c++/14.2.0/cwctype \
   C:/mingw64/include/c++/14.2.0/debug/assertions.h \
   C:/mingw64/include/c++/14.2.0/debug/debug.h \
+  C:/mingw64/include/c++/14.2.0/deque \
   C:/mingw64/include/c++/14.2.0/exception \
   C:/mingw64/include/c++/14.2.0/ext/aligned_buffer.h \
   C:/mingw64/include/c++/14.2.0/ext/alloc_traits.h \
@@ -1424,6 +1455,7 @@ CMakeFiles/PhaseEngine.dir/src/phaseEngine/HostHitPhase.cpp.obj: C:/Users/minhk/
   C:/mingw64/include/c++/14.2.0/pstl/glue_memory_defs.h \
   C:/mingw64/include/c++/14.2.0/pstl/glue_numeric_defs.h \
   C:/mingw64/include/c++/14.2.0/pstl/pstl_config.h \
+  C:/mingw64/include/c++/14.2.0/queue \
   C:/mingw64/include/c++/14.2.0/random \
   C:/mingw64/include/c++/14.2.0/ratio \
   C:/mingw64/include/c++/14.2.0/sstream \
@@ -1628,11 +1660,14 @@ CMakeFiles/PhaseEngine.dir/src/phaseEngine/Phase.cpp.obj: C:/Users/minhk/OneDriv
   C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include/SFML/Window/WindowEnums.hpp \
   C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include/SFML/Window/WindowHandle.hpp \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/gameEngine/AnimationManager.h \
+  C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/gameEngine/EventQueue.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/gameEngine/Game.h \
+  C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/gameEngine/PresentationLayer.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/gameEngine/RoundManager.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/gameEngine/UIManager.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/Card.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/Deck.h \
+  C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/GameEvent.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/GameState.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/Player.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/SkillDeck.h \
@@ -1672,6 +1707,7 @@ CMakeFiles/PhaseEngine.dir/src/phaseEngine/Phase.cpp.obj: C:/Users/minhk/OneDriv
   C:/mingw64/include/c++/14.2.0/bits/cpp_type_traits.h \
   C:/mingw64/include/c++/14.2.0/bits/cxxabi_forced.h \
   C:/mingw64/include/c++/14.2.0/bits/cxxabi_init_exception.h \
+  C:/mingw64/include/c++/14.2.0/bits/deque.tcc \
   C:/mingw64/include/c++/14.2.0/bits/enable_special_members.h \
   C:/mingw64/include/c++/14.2.0/bits/erase_if.h \
   C:/mingw64/include/c++/14.2.0/bits/exception.h \
@@ -1726,6 +1762,7 @@ CMakeFiles/PhaseEngine.dir/src/phaseEngine/Phase.cpp.obj: C:/Users/minhk/OneDriv
   C:/mingw64/include/c++/14.2.0/bits/stl_algobase.h \
   C:/mingw64/include/c++/14.2.0/bits/stl_bvector.h \
   C:/mingw64/include/c++/14.2.0/bits/stl_construct.h \
+  C:/mingw64/include/c++/14.2.0/bits/stl_deque.h \
   C:/mingw64/include/c++/14.2.0/bits/stl_function.h \
   C:/mingw64/include/c++/14.2.0/bits/stl_heap.h \
   C:/mingw64/include/c++/14.2.0/bits/stl_iterator.h \
@@ -1735,6 +1772,7 @@ CMakeFiles/PhaseEngine.dir/src/phaseEngine/Phase.cpp.obj: C:/Users/minhk/OneDriv
   C:/mingw64/include/c++/14.2.0/bits/stl_multimap.h \
   C:/mingw64/include/c++/14.2.0/bits/stl_numeric.h \
   C:/mingw64/include/c++/14.2.0/bits/stl_pair.h \
+  C:/mingw64/include/c++/14.2.0/bits/stl_queue.h \
   C:/mingw64/include/c++/14.2.0/bits/stl_raw_storage_iter.h \
   C:/mingw64/include/c++/14.2.0/bits/stl_relops.h \
   C:/mingw64/include/c++/14.2.0/bits/stl_tempbuf.h \
@@ -1773,6 +1811,7 @@ CMakeFiles/PhaseEngine.dir/src/phaseEngine/Phase.cpp.obj: C:/Users/minhk/OneDriv
   C:/mingw64/include/c++/14.2.0/cwctype \
   C:/mingw64/include/c++/14.2.0/debug/assertions.h \
   C:/mingw64/include/c++/14.2.0/debug/debug.h \
+  C:/mingw64/include/c++/14.2.0/deque \
   C:/mingw64/include/c++/14.2.0/exception \
   C:/mingw64/include/c++/14.2.0/ext/aligned_buffer.h \
   C:/mingw64/include/c++/14.2.0/ext/alloc_traits.h \
@@ -1803,6 +1842,7 @@ CMakeFiles/PhaseEngine.dir/src/phaseEngine/Phase.cpp.obj: C:/Users/minhk/OneDriv
   C:/mingw64/include/c++/14.2.0/pstl/glue_memory_defs.h \
   C:/mingw64/include/c++/14.2.0/pstl/glue_numeric_defs.h \
   C:/mingw64/include/c++/14.2.0/pstl/pstl_config.h \
+  C:/mingw64/include/c++/14.2.0/queue \
   C:/mingw64/include/c++/14.2.0/random \
   C:/mingw64/include/c++/14.2.0/ratio \
   C:/mingw64/include/c++/14.2.0/sstream \
@@ -2006,11 +2046,14 @@ CMakeFiles/PhaseEngine.dir/src/phaseEngine/PlayerHitPhase.cpp.obj: C:/Users/minh
   C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include/SFML/Window/WindowEnums.hpp \
   C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include/SFML/Window/WindowHandle.hpp \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/gameEngine/AnimationManager.h \
+  C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/gameEngine/EventQueue.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/gameEngine/Game.h \
+  C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/gameEngine/PresentationLayer.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/gameEngine/RoundManager.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/gameEngine/UIManager.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/Card.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/Deck.h \
+  C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/GameEvent.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/GameState.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/Player.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/SkillDeck.h \
@@ -2050,6 +2093,7 @@ CMakeFiles/PhaseEngine.dir/src/phaseEngine/PlayerHitPhase.cpp.obj: C:/Users/minh
   C:/mingw64/include/c++/14.2.0/bits/cpp_type_traits.h \
   C:/mingw64/include/c++/14.2.0/bits/cxxabi_forced.h \
   C:/mingw64/include/c++/14.2.0/bits/cxxabi_init_exception.h \
+  C:/mingw64/include/c++/14.2.0/bits/deque.tcc \
   C:/mingw64/include/c++/14.2.0/bits/enable_special_members.h \
   C:/mingw64/include/c++/14.2.0/bits/erase_if.h \
   C:/mingw64/include/c++/14.2.0/bits/exception.h \
@@ -2104,6 +2148,7 @@ CMakeFiles/PhaseEngine.dir/src/phaseEngine/PlayerHitPhase.cpp.obj: C:/Users/minh
   C:/mingw64/include/c++/14.2.0/bits/stl_algobase.h \
   C:/mingw64/include/c++/14.2.0/bits/stl_bvector.h \
   C:/mingw64/include/c++/14.2.0/bits/stl_construct.h \
+  C:/mingw64/include/c++/14.2.0/bits/stl_deque.h \
   C:/mingw64/include/c++/14.2.0/bits/stl_function.h \
   C:/mingw64/include/c++/14.2.0/bits/stl_heap.h \
   C:/mingw64/include/c++/14.2.0/bits/stl_iterator.h \
@@ -2113,6 +2158,7 @@ CMakeFiles/PhaseEngine.dir/src/phaseEngine/PlayerHitPhase.cpp.obj: C:/Users/minh
   C:/mingw64/include/c++/14.2.0/bits/stl_multimap.h \
   C:/mingw64/include/c++/14.2.0/bits/stl_numeric.h \
   C:/mingw64/include/c++/14.2.0/bits/stl_pair.h \
+  C:/mingw64/include/c++/14.2.0/bits/stl_queue.h \
   C:/mingw64/include/c++/14.2.0/bits/stl_raw_storage_iter.h \
   C:/mingw64/include/c++/14.2.0/bits/stl_relops.h \
   C:/mingw64/include/c++/14.2.0/bits/stl_tempbuf.h \
@@ -2151,6 +2197,7 @@ CMakeFiles/PhaseEngine.dir/src/phaseEngine/PlayerHitPhase.cpp.obj: C:/Users/minh
   C:/mingw64/include/c++/14.2.0/cwctype \
   C:/mingw64/include/c++/14.2.0/debug/assertions.h \
   C:/mingw64/include/c++/14.2.0/debug/debug.h \
+  C:/mingw64/include/c++/14.2.0/deque \
   C:/mingw64/include/c++/14.2.0/exception \
   C:/mingw64/include/c++/14.2.0/ext/aligned_buffer.h \
   C:/mingw64/include/c++/14.2.0/ext/alloc_traits.h \
@@ -2181,6 +2228,7 @@ CMakeFiles/PhaseEngine.dir/src/phaseEngine/PlayerHitPhase.cpp.obj: C:/Users/minh
   C:/mingw64/include/c++/14.2.0/pstl/glue_memory_defs.h \
   C:/mingw64/include/c++/14.2.0/pstl/glue_numeric_defs.h \
   C:/mingw64/include/c++/14.2.0/pstl/pstl_config.h \
+  C:/mingw64/include/c++/14.2.0/queue \
   C:/mingw64/include/c++/14.2.0/random \
   C:/mingw64/include/c++/14.2.0/ratio \
   C:/mingw64/include/c++/14.2.0/sstream \
@@ -2385,11 +2433,14 @@ CMakeFiles/PhaseEngine.dir/src/phaseEngine/RoundEndPhase.cpp.obj: C:/Users/minhk
   C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include/SFML/Window/WindowEnums.hpp \
   C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include/SFML/Window/WindowHandle.hpp \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/gameEngine/AnimationManager.h \
+  C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/gameEngine/EventQueue.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/gameEngine/Game.h \
+  C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/gameEngine/PresentationLayer.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/gameEngine/RoundManager.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/gameEngine/UIManager.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/Card.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/Deck.h \
+  C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/GameEvent.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/GameState.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/Player.h \
   C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/SkillDeck.h \
@@ -2429,6 +2480,7 @@ CMakeFiles/PhaseEngine.dir/src/phaseEngine/RoundEndPhase.cpp.obj: C:/Users/minhk
   C:/mingw64/include/c++/14.2.0/bits/cpp_type_traits.h \
   C:/mingw64/include/c++/14.2.0/bits/cxxabi_forced.h \
   C:/mingw64/include/c++/14.2.0/bits/cxxabi_init_exception.h \
+  C:/mingw64/include/c++/14.2.0/bits/deque.tcc \
   C:/mingw64/include/c++/14.2.0/bits/enable_special_members.h \
   C:/mingw64/include/c++/14.2.0/bits/erase_if.h \
   C:/mingw64/include/c++/14.2.0/bits/exception.h \
@@ -2483,6 +2535,7 @@ CMakeFiles/PhaseEngine.dir/src/phaseEngine/RoundEndPhase.cpp.obj: C:/Users/minhk
   C:/mingw64/include/c++/14.2.0/bits/stl_algobase.h \
   C:/mingw64/include/c++/14.2.0/bits/stl_bvector.h \
   C:/mingw64/include/c++/14.2.0/bits/stl_construct.h \
+  C:/mingw64/include/c++/14.2.0/bits/stl_deque.h \
   C:/mingw64/include/c++/14.2.0/bits/stl_function.h \
   C:/mingw64/include/c++/14.2.0/bits/stl_heap.h \
   C:/mingw64/include/c++/14.2.0/bits/stl_iterator.h \
@@ -2492,6 +2545,7 @@ CMakeFiles/PhaseEngine.dir/src/phaseEngine/RoundEndPhase.cpp.obj: C:/Users/minhk
   C:/mingw64/include/c++/14.2.0/bits/stl_multimap.h \
   C:/mingw64/include/c++/14.2.0/bits/stl_numeric.h \
   C:/mingw64/include/c++/14.2.0/bits/stl_pair.h \
+  C:/mingw64/include/c++/14.2.0/bits/stl_queue.h \
   C:/mingw64/include/c++/14.2.0/bits/stl_raw_storage_iter.h \
   C:/mingw64/include/c++/14.2.0/bits/stl_relops.h \
   C:/mingw64/include/c++/14.2.0/bits/stl_tempbuf.h \
@@ -2530,6 +2584,7 @@ CMakeFiles/PhaseEngine.dir/src/phaseEngine/RoundEndPhase.cpp.obj: C:/Users/minhk
   C:/mingw64/include/c++/14.2.0/cwctype \
   C:/mingw64/include/c++/14.2.0/debug/assertions.h \
   C:/mingw64/include/c++/14.2.0/debug/debug.h \
+  C:/mingw64/include/c++/14.2.0/deque \
   C:/mingw64/include/c++/14.2.0/exception \
   C:/mingw64/include/c++/14.2.0/ext/aligned_buffer.h \
   C:/mingw64/include/c++/14.2.0/ext/alloc_traits.h \
@@ -2560,6 +2615,7 @@ CMakeFiles/PhaseEngine.dir/src/phaseEngine/RoundEndPhase.cpp.obj: C:/Users/minhk
   C:/mingw64/include/c++/14.2.0/pstl/glue_memory_defs.h \
   C:/mingw64/include/c++/14.2.0/pstl/glue_numeric_defs.h \
   C:/mingw64/include/c++/14.2.0/pstl/pstl_config.h \
+  C:/mingw64/include/c++/14.2.0/queue \
   C:/mingw64/include/c++/14.2.0/random \
   C:/mingw64/include/c++/14.2.0/ratio \
   C:/mingw64/include/c++/14.2.0/sstream \
@@ -2745,6 +2801,8 @@ C:/mingw64/x86_64-w64-mingw32/include/sec_api/sys/timeb_s.h:
 C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include/SFML/Audio/SoundRecorder.hpp:
 
 C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/phaseEngine/RoundEndPhase.cpp:
+
+C:/mingw64/include/c++/14.2.0/bits/stl_deque.h:
 
 C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include/SFML/Audio/SoundSource.hpp:
 
@@ -2978,9 +3036,17 @@ C:/mingw64/include/c++/14.2.0/bits/predefined_ops.h:
 
 C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/gameEngine/AnimationManager.h:
 
+C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/gameEngine/EventQueue.h:
+
 C:/mingw64/include/c++/14.2.0/tr1/riemann_zeta.tcc:
 
 C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/gameEngine/Game.h:
+
+C:/mingw64/include/c++/14.2.0/map:
+
+C:/mingw64/include/c++/14.2.0/bits/vector.tcc:
+
+C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/gameEngine/PresentationLayer.h:
 
 C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/gameEngine/RoundManager.h:
 
@@ -2989,6 +3055,10 @@ C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/gameEngine/UIManage
 C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/Card.h:
 
 C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/Deck.h:
+
+C:/mingw64/x86_64-w64-mingw32/include/locale.h:
+
+C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/GameEvent.h:
 
 C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/lowLevelEntities/GameState.h:
 
@@ -3070,11 +3140,17 @@ C:/mingw64/include/c++/14.2.0/bits/charconv.h:
 
 C:/mingw64/x86_64-w64-mingw32/include/malloc.h:
 
+C:/mingw64/include/c++/14.2.0/deque:
+
 C:/mingw64/include/c++/14.2.0/bits/chrono.h:
 
 C:/mingw64/include/c++/14.2.0/bits/postypes.h:
 
 C:/mingw64/include/c++/14.2.0/bits/concept_check.h:
+
+C:/mingw64/x86_64-w64-mingw32/include/time.h:
+
+C:/mingw64/include/c++/14.2.0/bits/deque.tcc:
 
 C:/mingw64/x86_64-w64-mingw32/include/corecrt.h:
 
@@ -3184,6 +3260,8 @@ C:/mingw64/include/c++/14.2.0/bits/stl_numeric.h:
 
 C:/mingw64/include/c++/14.2.0/bits/stl_pair.h:
 
+C:/mingw64/include/c++/14.2.0/bits/stl_queue.h:
+
 C:/mingw64/include/c++/14.2.0/bits/stl_relops.h:
 
 C:/mingw64/include/c++/14.2.0/x86_64-w64-mingw32/bits/atomic_word.h:
@@ -3219,10 +3297,6 @@ C:/mingw64/include/c++/14.2.0/bits/unordered_set.h:
 C:/mingw64/include/c++/14.2.0/bits/uses_allocator.h:
 
 C:/mingw64/include/c++/14.2.0/bits/utility.h:
-
-C:/mingw64/include/c++/14.2.0/map:
-
-C:/mingw64/include/c++/14.2.0/bits/vector.tcc:
 
 C:/mingw64/include/c++/14.2.0/x86_64-w64-mingw32/bits/messages_members.h:
 
@@ -3291,6 +3365,8 @@ C:/mingw64/include/c++/14.2.0/pstl/glue_memory_defs.h:
 C:/mingw64/include/c++/14.2.0/pstl/glue_numeric_defs.h:
 
 C:/mingw64/include/c++/14.2.0/pstl/pstl_config.h:
+
+C:/mingw64/include/c++/14.2.0/queue:
 
 C:/mingw64/include/c++/14.2.0/ratio:
 
@@ -3376,8 +3452,6 @@ C:/mingw64/x86_64-w64-mingw32/include/ctype.h:
 
 C:/mingw64/x86_64-w64-mingw32/include/errno.h:
 
-C:/mingw64/x86_64-w64-mingw32/include/locale.h:
-
 C:/mingw64/x86_64-w64-mingw32/include/math.h:
 
 C:/mingw64/x86_64-w64-mingw32/include/process.h:
@@ -3407,8 +3481,6 @@ C:/mingw64/x86_64-w64-mingw32/include/stdlib.h:
 C:/mingw64/x86_64-w64-mingw32/include/sys/timeb.h:
 
 C:/mingw64/x86_64-w64-mingw32/include/sys/types.h:
-
-C:/mingw64/x86_64-w64-mingw32/include/time.h:
 
 C:/mingw64/x86_64-w64-mingw32/include/vadefs.h:
 

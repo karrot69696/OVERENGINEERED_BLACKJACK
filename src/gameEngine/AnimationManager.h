@@ -112,9 +112,7 @@ public:
 
         CardVisual& card = visualState.getCardVisual(cardId);
         sf::Vector2f startPosition = card.cardSprite.getPosition();
-        card.location = CardLocation::HAND;
-        card.ownerId = playerId;
-        card.cardIndex = handIndex;
+        // Visual state (location, ownerId, cardIndex) is set by PresentationLayer before this call
 
         sf::Vector2f seatPos = visualState.getPlayerSeatPos(playerId, gameState.getAllPlayerInfo().size());
         sf::Vector2f endPosition = {
@@ -165,10 +163,7 @@ public:
         float deckY = static_cast<float>(window.getSize().y) / 2.f;
         sf::Vector2f centerEnd = {deckX + worldOffset.x, deckY + worldOffset.y};
 
-        // Reset visual state (card is logically already in deck)
-        card.ownerId = -1;
-        card.cardIndex = -1;
-        card.location = CardLocation::DECK;
+        // Visual state (ownerId, cardIndex, location) is set by PresentationLayer before this call
 
         auto func = [&card, startPosition, centerEnd, this](float t){
             float eased = easeInCubic(t);

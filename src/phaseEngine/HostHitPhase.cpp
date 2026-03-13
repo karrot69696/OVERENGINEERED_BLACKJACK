@@ -15,7 +15,7 @@ void HostHitPhase::onEnter() {
     + " VS PLAYER " 
     + std::to_string(currentPlayer.getId());
 
-    animationManager.spawnPhaseText(turnText,AnimConfig::PHASE_TEXT_DURATION);
+    eventQueue.push({GameEventType::PHASE_ANNOUNCED, PhaseAnnouncedEvent{turnText, AnimConfig::PHASE_TEXT_DURATION}});
 
     //set callback for host action input during host hit phase
     uiManager.onActionChosen = [&](PlayerAction chosenAction){

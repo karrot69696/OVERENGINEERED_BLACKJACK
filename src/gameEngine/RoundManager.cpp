@@ -1,17 +1,17 @@
 #include "RoundManager.h"
 #include "Game.h"
     RoundManager::RoundManager(
-        std::vector<Player>& _players, 
-        Deck& _deck, 
-        GameState& _gameState, VisualState& _visualState, 
-        UIManager& _uiManager, 
-        AnimationManager& _animationManager)
+        std::vector<Player>& _players,
+        Deck& _deck,
+        GameState& _gameState, VisualState& _visualState,
+        UIManager& _uiManager,
+        EventQueue& _eventQueue)
         :
-        players(_players), 
-        deck(_deck), skillManager(), 
+        players(_players),
+        deck(_deck), skillManager(),
         gameState(_gameState), visualState(_visualState),
-        uiManager(_uiManager), 
-        animationManager(_animationManager) {}
+        uiManager(_uiManager),
+        eventQueue(_eventQueue) {}
 // ========================================================================
 // Helper functions
 // ========================================================================
@@ -109,15 +109,12 @@ std::string RoundManager::phaseToString(){
 
 void RoundManager::update(){
     
-    //check for game end | invalid currentPhase | animation playing (blocking)
+    //check for game end | invalid currentPhase
     if(gameState.getPhaseName() == PhaseName::GAME_OVER){
         return;
     }
     else if (!currentPhase){
         std::cout << "[RoundManager] No current phase set. Cannot update." << std::endl;
-        return; 
-    }
-    else if (animationManager.playing()){
         return;
     }
 
@@ -144,17 +141,17 @@ void RoundManager::changePhase(PhaseName newPhase){
 std::unique_ptr<Phase> RoundManager::createPhase(const PhaseName name){
     switch (name){
         case PhaseName::GAME_START_PHASE:
-            return std::make_unique<GameStartPhase>(this->uiManager,this->animationManager, *this, this->skillManager, this->gameState, this->visualState);
+            return std::make_unique<GameStartPhase>(this->uiManager, this->eventQueue, *this, this->skillManager, this->gameState, this->visualState);
         case PhaseName::BLACKJACK_CHECK_PHASE:
-            return std::make_unique<BlackJackCheckPhase>(this->uiManager,this->animationManager, *this, this->skillManager, this->gameState, this->visualState);
+            return std::make_unique<BlackJackCheckPhase>(this->uiManager, this->eventQueue, *this, this->skillManager, this->gameState, this->visualState);
         case PhaseName::PLAYER_HIT_PHASE:
-            return std::make_unique<PlayerHitPhase>(this->uiManager,this->animationManager, *this, this->skillManager, this->gameState, this->visualState);
+            return std::make_unique<PlayerHitPhase>(this->uiManager, this->eventQueue, *this, this->skillManager, this->gameState, this->visualState);
         case PhaseName::HOST_HIT_PHASE:
-            return std::make_unique<HostHitPhase>(this->uiManager,this->animationManager, *this, this->skillManager, this->gameState, this->visualState);
+            return std::make_unique<HostHitPhase>(this->uiManager, this->eventQueue, *this, this->skillManager, this->gameState, this->visualState);
         case PhaseName::BATTLE_PHASE:
-            return std::make_unique<BattlePhase>(this->uiManager,this->animationManager, *this, this->skillManager, this->gameState, this->visualState);
+            return std::make_unique<BattlePhase>(this->uiManager, this->eventQueue, *this, this->skillManager, this->gameState, this->visualState);
         case PhaseName::ROUND_END:
-            return std::make_unique<RoundEndPhase>(this->uiManager,this->animationManager, *this, this->skillManager, this->gameState, this->visualState);
+            return std::make_unique<RoundEndPhase>(this->uiManager, this->eventQueue, *this, this->skillManager, this->gameState, this->visualState);
         case PhaseName::GAME_OVER:
             return nullptr;
     }

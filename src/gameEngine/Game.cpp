@@ -4,12 +4,14 @@
 // Game Implementation
 // ============================================================================
 Game::Game(sf::RenderWindow& window)
-    : 
+    :
         window(window),
         gameState(), deck(), players(), skillDeck(),
         visualState(this->window, this->gameState),
-        uiManager(this->window, this->gameState,this->visualState, this->visualState.getCardVisuals()),
-        animationManager(this->window,this->gameState, this->visualState)
+        uiManager(this->window, this->gameState, this->visualState, this->visualState.getCardVisuals()),
+        animationManager(this->window, this->gameState, this->visualState),
+        eventQueue(),
+        presentationLayer(this->eventQueue, this->animationManager, this->uiManager, this->visualState, this->gameState)
 {
     //initialize card container
     for (int s = 0; s < 4; s++) {
@@ -76,12 +78,12 @@ void Game::SetupGame(){
 void Game::RunGame(){
     std::cout << "\n=== GAME START ===\n" << std::endl;
     RoundManager roundManager(
-        this->players, 
+        this->players,
         this->deck,
         this->gameState,
-        this->visualState, 
-        this->uiManager, 
-        this->animationManager
+        this->visualState,
+        this->uiManager,
+        this->eventQueue
     );
     roundManager.createSkills();
     roundManager.updateGameState(PhaseName::GAME_START_PHASE, 0);
@@ -96,7 +98,13 @@ void Game::RunGame(){
             eventHandler(event);
         }
 
-        roundManager.update();
+        // Only advance game logic when no animations are playing
+        if (!animationManager.playing()) {
+            roundManager.update();
+        }
+
+        // Drain event queue → trigger animations/UI
+        presentationLayer.processEvents();
         animationManager.update(deltaTime);
 
         window.clear();

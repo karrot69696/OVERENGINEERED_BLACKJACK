@@ -10,7 +10,7 @@ void BlackJackCheckPhase::onEnter() {
 
     //spawn text
     std::string turnText = "BLACKJACK CHECK";
-    animationManager.spawnPhaseText(turnText, AnimConfig::PHASE_TEXT_DURATION);
+    eventQueue.push({GameEventType::PHASE_ANNOUNCED, PhaseAnnouncedEvent{turnText, AnimConfig::PHASE_TEXT_DURATION}});
 
     roundManager.updateGameState(PhaseName::BLACKJACK_CHECK_PHASE,currentPlayer.getId());
 

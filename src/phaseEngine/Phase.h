@@ -9,14 +9,14 @@
 #include <iostream>
 
 #include "../lowLevelEntities/VisualState.h"
+#include "../gameEngine/EventQueue.h"
 class UIManager;
 class RoundManager;
 class SkillManager;
-class AnimationManager;
 class Phase {
     protected:
-        UIManager& uiManager;
-        AnimationManager& animationManager;
+        UIManager& uiManager;      // kept for input callbacks (onActionChosen, onTargetChosen)
+        EventQueue& eventQueue;     // replaces AnimationManager& — phases emit events, not animation calls
         RoundManager& roundManager;
         SkillManager& skillManager;
         GameState& gameState;
@@ -25,7 +25,7 @@ class Phase {
         Deck& deck;
     public:
         Phase(UIManager& uiManager,
-            AnimationManager& animationManager,
+            EventQueue& eventQueue,
             RoundManager& roundManager,
             SkillManager& skillManager,
             GameState& gameState, VisualState& visualState);

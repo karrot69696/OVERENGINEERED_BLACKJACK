@@ -286,6 +286,30 @@ src/gameEngine/Game.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\GameEngine.dir\build.make CMakeFiles/GameEngine.dir/src/gameEngine/Game.cpp.s
 .PHONY : src/gameEngine/Game.cpp.s
 
+src/gameEngine/PresentationLayer.obj: src/gameEngine/PresentationLayer.cpp.obj
+.PHONY : src/gameEngine/PresentationLayer.obj
+
+# target to build an object file
+src/gameEngine/PresentationLayer.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\GameEngine.dir\build.make CMakeFiles/GameEngine.dir/src/gameEngine/PresentationLayer.cpp.obj
+.PHONY : src/gameEngine/PresentationLayer.cpp.obj
+
+src/gameEngine/PresentationLayer.i: src/gameEngine/PresentationLayer.cpp.i
+.PHONY : src/gameEngine/PresentationLayer.i
+
+# target to preprocess a source file
+src/gameEngine/PresentationLayer.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\GameEngine.dir\build.make CMakeFiles/GameEngine.dir/src/gameEngine/PresentationLayer.cpp.i
+.PHONY : src/gameEngine/PresentationLayer.cpp.i
+
+src/gameEngine/PresentationLayer.s: src/gameEngine/PresentationLayer.cpp.s
+.PHONY : src/gameEngine/PresentationLayer.s
+
+# target to generate assembly for a file
+src/gameEngine/PresentationLayer.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\GameEngine.dir\build.make CMakeFiles/GameEngine.dir/src/gameEngine/PresentationLayer.cpp.s
+.PHONY : src/gameEngine/PresentationLayer.cpp.s
+
 src/gameEngine/RoundManager.obj: src/gameEngine/RoundManager.cpp.obj
 .PHONY : src/gameEngine/RoundManager.obj
 
@@ -694,6 +718,9 @@ help:
 	@echo ... src/gameEngine/Game.obj
 	@echo ... src/gameEngine/Game.i
 	@echo ... src/gameEngine/Game.s
+	@echo ... src/gameEngine/PresentationLayer.obj
+	@echo ... src/gameEngine/PresentationLayer.i
+	@echo ... src/gameEngine/PresentationLayer.s
 	@echo ... src/gameEngine/RoundManager.obj
 	@echo ... src/gameEngine/RoundManager.i
 	@echo ... src/gameEngine/RoundManager.s

@@ -3,7 +3,7 @@
 
 void GameStartPhase::onEnter() {
     std::cout << "\n=== ENTERING GAME START PHASE ===\n" << std::endl;
-    animationManager.spawnPhaseText("GAME START",AnimConfig::PHASE_TEXT_DURATION);
+    eventQueue.push({GameEventType::PHASE_ANNOUNCED, PhaseAnnouncedEvent{"GAME START", AnimConfig::PHASE_TEXT_DURATION}});
 }
 
 
@@ -21,12 +21,12 @@ std::optional<PhaseName> GameStartPhase::onUpdate(){
         player.addCardToHand(drawnCard);
         roundManager.updateGameState(PhaseName::GAME_START_PHASE, player.getId());
 
-        //graphic
-        animationManager.addDrawAnimation(
+        //emit draw event
+        eventQueue.push({GameEventType::CARD_DRAWN, CardDrawnEvent{
             player.getId(),
             player.getHandSize() - 1,
             drawnCard->getId()
-        );
+        }});
 
         // advance to next player, wrap to next round
         dealPlayer++;

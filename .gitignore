@@ -1,0 +1,16 @@
+# Build output
+build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+downloads/
+# OS
+Thumbs.db
+.DS_Store
+
+# Archives
+*.rar
+*.zip

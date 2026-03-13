@@ -3,7 +3,7 @@
 
 void RoundEndPhase::onEnter() {
     std::cout << "\n=== ENTERING ROUND END PHASE ===\n" << std::endl;
-    animationManager.spawnPhaseText("ROUND END",AnimConfig::PHASE_TEXT_DURATION);
+    eventQueue.push({GameEventType::PHASE_ANNOUNCED, PhaseAnnouncedEvent{"ROUND END", AnimConfig::PHASE_TEXT_DURATION}});
 
     roundManager.incrementRound();
 
@@ -61,7 +61,7 @@ std::optional<PhaseName> RoundEndPhase::onUpdate(){
         auto& cardIds = playerCardIds[returnPlayerIdx];
 
         if (returnCardIdx < (int)cardIds.size()) {
-            animationManager.addReturnToDeckAnimation(cardIds[returnCardIdx]);
+            eventQueue.push({GameEventType::CARD_RETURNED, CardReturnedEvent{cardIds[returnCardIdx]}});
 
             returnCardIdx++;
             if (returnCardIdx >= (int)cardIds.size()) {
