@@ -102,8 +102,7 @@ void Game::RunGame(){
         window.clear();
 
         uiManager.render();
-        animationManager.renderFloatingTexts();
-        animationManager.renderPhaseText();
+        animationManager.render();
         window.display();
         
     }

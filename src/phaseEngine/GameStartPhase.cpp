@@ -8,9 +8,11 @@ void GameStartPhase::onEnter() {
 
 
 std::optional<PhaseName> GameStartPhase::onUpdate(){
-
+    //shuffle deck
+    deck.shuffle();
     // Deal one card per update call; animation blocking in RoundManager::update()
     // ensures each card animates before the next is dealt
+
     if (dealRound < GameConfig::HAND_START_VALUE) {
         Player& player = players[dealPlayer];
 

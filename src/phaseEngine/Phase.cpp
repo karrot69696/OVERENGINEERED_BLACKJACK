@@ -151,13 +151,22 @@ void Phase::skillHandler(Player& player){
         std::cout << "[skillHandler] Skill processing failed for player " << player.getId() << std::endl;
     } else {
         // Animate cards that were returned to deck (ownerId reset to -1)
+        roundManager.updateGameState(gameState.getPhaseName(), player.getId());
         bool anyReturned = false;
         for (int cardId : targetCardIds) {
             for (auto* card : deck.getCards()) {
                 if (card->getId() == cardId && card->getOwnerId() == -1) {
-                    animationManager.addReturnToDeckAnimation(cardId);
+
+                    // Spin first, then return to deck when spin finishes
+                    CardVisual& cardvisual = visualState.getCardVisual(cardId);
+                    animationManager.playDeliveranceEffect(cardvisual.cardSprite.getPosition());
+                    animationManager.addSpinAnimation(cardId, [this, cardId](){
+                        animationManager.addReturnToDeckAnimation(cardId);
+                    });
+
                     anyReturned = true;
                     break;
+
                 }
             }
         }

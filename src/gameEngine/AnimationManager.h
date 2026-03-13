@@ -1,5 +1,6 @@
 #ifndef ANIMATIONMANAGER_H
 #define ANIMATIONMANAGER_H
+#include <array>
 #include <vector>
 #include <functional>
 #include <optional>
@@ -17,10 +18,13 @@
 namespace AnimConfig {
     inline constexpr float PHASE_TEXT_DURATION = 0.9f;
     inline constexpr float CARD_DRAW_DURATION = 0.4f;
+    inline constexpr float CARD_RETURN_DURATION = 0.1f;
+    inline constexpr float POINT_CHANGE_DURATION = 1.7f;
 }
 struct Animation
 {
     std::function<void(float)> update;// float is the [progress] of the animation, from 0% to 100%
+    std::function<void()> onFinish;   // called once when animation completes, before removal
     float time = 0;
     float duration;
 };
@@ -34,11 +38,31 @@ private:
     VisualState& visualState;
     std::unique_ptr<sf::Text> phaseText;
     std::vector<std::shared_ptr<sf::Text>> floatingTexts;
+    sf::Texture shockTexture;
+    std::unique_ptr<sf::Sprite> shockSprite;
+    sf::Texture explosionTexture;
+    std::unique_ptr<sf::Sprite> explosionSprite;
+    sf::Texture holyTexture; 
+    std::unique_ptr<sf::Sprite> holySprite;
+
 public:
     AnimationManager(sf::RenderWindow& window, GameState& gameState, VisualState& visualState) : 
-    window(window), gameState(gameState), visualState(visualState) {}
+    window(window), gameState(gameState), visualState(visualState) {
+        std::filesystem::path shockTextPath = "../assets/images/cartoon-shock-animation-frames.png";
+        shockTexture.loadFromFile(shockTextPath);
+        std::filesystem::path explosionPath = "../assets/images/Explosion02_spritesheet.png";
+        explosionTexture.loadFromFile(explosionPath);
+        holyTexture.loadFromFile("../assets/images/holySpellEffect.png"); 
+    }
     void add(Animation anim){
         animations.push_back(anim);
+    }
+    void render(){
+        renderFloatingTexts();
+        renderPhaseText();
+        renderShockAnimation();
+        renderExplosionAnimation();
+        renderHolyAnimation();
     }
 
 /**
@@ -54,21 +78,30 @@ public:
  */
     void update(float dt)
     {
-        //it = std::vector<Animation>::iterator - an interator that points to each element in the vector, works like a pointer
+        // Collect onFinish callbacks to run AFTER the loop,
+        // because onFinish may call add() which push_back's into this vector,
+        // invalidating iterators mid-loop
+        std::vector<std::function<void()>> pendingCallbacks;
+
         for (auto it = animations.begin(); it != animations.end();)
         {
-            it->time += dt;// [time] accumulates += [delta time]
+            it->time += dt;
 
-            float t = it->time / it->duration; // [time] is divided by [duration] to get [0-100% progress]
-            if (t > 1) t = 1; //capping time back to 1 in case [time] is longer than [duration]
+            float t = it->time / it->duration;
+            if (t > 1) t = 1;
 
-            it->update(t); //updates the animation based on the current progress (0-100%)
+            it->update(t);
 
-            if (it->time >= it->duration) //erase animation when it reaches 100%
+            if (it->time >= it->duration) {
+                if (it->onFinish) pendingCallbacks.push_back(std::move(it->onFinish));
                 it = animations.erase(it);
+            }
             else
-                ++it; //iterates to next animation
+                ++it;
         }
+
+        // Now safe to run callbacks (they may add new animations)
+        for (auto& cb : pendingCallbacks) cb();
     }
 
     bool playing() const
@@ -111,7 +144,7 @@ public:
             card.cardSprite.setRotation(sf::degrees(360.f * t));
         };
 
-        Animation drawAnim = {func, 0, AnimConfig::CARD_DRAW_DURATION};
+        Animation drawAnim = {func, nullptr, 0, AnimConfig::CARD_DRAW_DURATION};
         add(drawAnim);
 
     }
@@ -137,46 +170,61 @@ public:
         card.cardIndex = -1;
         card.location = CardLocation::DECK;
 
-        auto func = [&card, startPosition, centerEnd](float t){
-            float eased = t * (2.f - t);
+        auto func = [&card, startPosition, centerEnd, this](float t){
+            float eased = easeInCubic(t);
             sf::Vector2f pos = startPosition + (centerEnd - startPosition) * eased;
             card.cardSprite.setPosition(pos);
 
             // Reverse frisbee spin
-            card.cardSprite.setRotation(sf::degrees(-360.f * t));
+            card.cardSprite.setRotation(sf::degrees(-360.f * eased));
         };
 
-        Animation returnAnim = {func, 0, AnimConfig::CARD_DRAW_DURATION};
+        Animation returnAnim = {func, nullptr, 0, AnimConfig::CARD_RETURN_DURATION};
         add(returnAnim);
 
     }
+    void addSpinAnimation(int cardId, std::function<void()> onFinish = nullptr){
+        CardVisual& card = visualState.getCardVisual(cardId);
+        sf::Vector2f startPosition = card.cardSprite.getPosition();
+
+        auto bounds = card.cardSprite.getLocalBounds();
+        sf::Vector2f localCenter = {bounds.size.x / 2.f, bounds.size.y / 2.f};
+        sf::Vector2f scale = card.cardSprite.getScale();
+        sf::Vector2f worldOffset = {localCenter.x * scale.x, localCenter.y * scale.y};
+
+        card.cardSprite.setOrigin(localCenter);
+
+        auto func = [this,&card, startPosition](float t){
+            float ease = easeOutCubic(t);
+            // Reverse frisbee spin
+            card.cardSprite.setRotation(sf::degrees(-720.f * ease));
+        };
+
+        Animation spinAnim = {func, std::move(onFinish), 0, AnimConfig::CARD_DRAW_DURATION};
+        add(spinAnim);
+    }
     void repositionHand(int playerId){
-        // Update cardIndex on each CardVisual to match the Card's actual handIndex,
-        // then animate sliding to the correct position
         int totalPlayers = (int)gameState.getAllPlayerInfo().size();
         sf::Vector2f seatPos = visualState.getPlayerSeatPos(playerId, totalPlayers);
 
+        // Collect remaining cards for this player (returned cards already have ownerId=-1)
+        std::vector<CardVisual*> handCards;
         for (auto& cv : visualState.getCardVisuals()) {
-            if (cv.ownerId != playerId) continue;
-
-            // Find the Card's current handIndex by matching cardId
-            int newIndex = -1;
-            for (auto& info : gameState.getAllPlayerInfo()) {
-                if (info.playerId == playerId) {
-                    for (int i = 0; i < (int)info.cardsInHand.size(); i++) {
-                        if (info.cardsInHand[i].getId() == cv.cardId) {
-                            newIndex = i;
-                            break;
-                        }
-                    }
-                    break;
-                }
+            if (cv.ownerId == playerId) {
+                handCards.push_back(&cv);
             }
-            if (newIndex == -1 || newIndex == cv.cardIndex) continue;
+        }
+        // Sort by current index so order is preserved
+        std::sort(handCards.begin(), handCards.end(),
+            [](CardVisual* a, CardVisual* b){ return a->cardIndex < b->cardIndex; });
 
-            cv.cardIndex = newIndex;
+        // Reassign sequential indices and slide to correct positions
+        for (int i = 0; i < (int)handCards.size(); i++) {
+            CardVisual& cv = *handCards[i];
+            if (cv.cardIndex == i) continue; // already in place
 
-            // Compute center-based target position
+            cv.cardIndex = i;
+
             auto bounds = cv.cardSprite.getLocalBounds();
             sf::Vector2f localCenter = {bounds.size.x / 2.f, bounds.size.y / 2.f};
             sf::Vector2f scale = cv.cardSprite.getScale();
@@ -184,7 +232,7 @@ public:
 
             sf::Vector2f startPos = cv.cardSprite.getPosition();
             sf::Vector2f endPos = {
-                seatPos.x + newIndex * UILayout::CARD_SPACING + worldOffset.x,
+                seatPos.x + i * UILayout::CARD_SPACING + worldOffset.x,
                 seatPos.y + worldOffset.y
             };
 
@@ -194,10 +242,27 @@ public:
                 cv.cardSprite.setPosition(pos);
             };
 
-            Animation slideAnim = {func, 0, 0.3f};
+            Animation slideAnim = {func, nullptr, 0, 0.3f};
             add(slideAnim);
         }
     }
+    float easeOutCubic(float t)
+    {
+        return 1 - std::pow(1 - t, 3);
+    }
+
+    float easeInCubic(float t)
+    {
+        return t * t * t;
+    }
+
+    float easeInOutCubic(float t)
+    {
+        return t < 0.5f
+            ? 4 * t * t * t
+            : 1 - std::pow(-2 * t + 2, 3) / 2;
+    }
+
     void spawnPhaseText(std::string text, float duration){
 
         phaseText = std::make_unique<sf::Text>(visualState.getFont(), text, 64.f);
@@ -223,21 +288,32 @@ public:
             float x;
             sf::Vector2f scale = {1.f, 1.f};
 
-            if (t < 0.4f) {
-                float localT = t / 0.4f;
-                float eased = 1 - (1 - localT) * (1 - localT);
+            float flyInEnd   = 0.2f;
+            float holdEnd    = 0.8f;
+            float flyOutEnd  = 1.0f;
+
+            if (t < flyInEnd)
+            {
+                float localT = t / flyInEnd;
+                float eased = easeOutCubic(localT);
                 x = startX + (centerX - startX) * eased;
             }
-            else if (t < 0.6f) {
+            else if (t < holdEnd)
+            {
                 x = centerX;
 
-                float localT = (t - 0.4f) / 0.2f;
-                scale.x = 1.f + 0.2f * std::sin(localT * 3.14159f);
+                float holdDuration = holdEnd - flyInEnd;
+                float localT = (t - flyInEnd) / holdDuration;
+
+                scale.x = 1.f + 0.12f * std::sin(localT * 3.14159f);
                 scale.y = scale.x;
             }
-            else {
-                float localT = (t - 0.6f) / 0.4f;
-                float eased = localT * localT;
+            else
+            {
+                float flyOutDuration = flyOutEnd - holdEnd;
+                float localT = (t - holdEnd) / flyOutDuration;
+
+                float eased = easeInCubic(localT);
                 x = centerX + (endX - centerX) * eased;
             }
 
@@ -245,28 +321,66 @@ public:
             textPtr->setScale(scale);
         };
 
-        Animation phaseTransitionAnimation = { func, 0, duration};
+        Animation phaseTransitionAnimation = {func, nullptr, 0, duration};
         this->add(phaseTransitionAnimation);
     }
 
     void spawnFloatingText(const std::string& text, sf::Vector2f position, sf::Color color, float duration = 1.0f){
-        auto ft = std::make_shared<sf::Text>(visualState.getFont(), text, 20.f);
+        auto ft = std::make_shared<sf::Text>(visualState.getFont(), text, 30.f);
         ft->setFillColor(color);
         ft->setPosition(position);
         floatingTexts.push_back(ft);
-
+        auto bounds = ft->getLocalBounds();
+        ft->setOrigin({bounds.position.x + bounds.size.x / 2.f,
+                        bounds.position.y + bounds.size.y / 2.f});
         auto ptr = ft; // shared_ptr keeps it alive
         sf::Vector2f startPos = position;
 
-        auto func = [ptr, startPos, color](float t){
-            float eased = 1.f - (1.f - t) * (1.f - t); // easeOutQuad
-            ptr->setPosition({startPos.x, startPos.y - 40.f * eased});
-            sf::Color c = color;
-            c.a = static_cast<uint8_t>(255.f * (1.f - t));
-            ptr->setFillColor(c);
+        auto func = [this,ptr, startPos, color](float t){
+
+            float flyInEnd   = 0.2f;
+            float holdEnd    = 0.8f;
+            float flyOutEnd  = 1.0f;
+            float startY  = startPos.y;
+            float centerY = startPos.y - 20.f;
+            float endY    = startPos.y - 40.f;
+            float y       = startPos.y;
+            float x       = startPos.x;
+            sf::Vector2f scale = {1.f, 1.f};
+            if (t < flyInEnd)
+            {
+                float localT = t / flyInEnd;
+                float eased = easeOutCubic(localT);
+                y = startY + (centerY - startY) * eased;
+            }
+            else if (t < holdEnd)
+            {
+
+                float holdDuration = holdEnd - flyInEnd;
+                float localT = (t - flyInEnd) / holdDuration;
+                scale.x = 1.f + 0.1f * std::sin(localT * 3.14159f);
+                scale.y = scale.x;
+            }
+            else
+            {
+                float flyOutDuration = flyOutEnd - holdEnd;
+                float localT = (t - holdEnd) / flyOutDuration;
+
+                float eased = easeInCubic(localT);
+                //float easedOut = 1.f - (1.f - localT) * (1.f - localT); // easeOutQuad
+                sf::Color c = color;
+                c.a = static_cast<uint8_t>(255.f * (1.f - localT));
+                ptr->setFillColor(c);
+                y = centerY + (endY - centerY) * eased;
+            }
+
+            //ptr->setPosition({startPos.x, startPos.y - 40.f * eased});
+            ptr->setScale(scale);
+            ptr->setPosition({x, y});
+
         };
 
-        Animation floatAnim = {func, 0, duration};
+        Animation floatAnim = {func, nullptr, 0, duration};
         add(floatAnim);
     }
 
@@ -285,6 +399,117 @@ public:
         for (auto& ft : floatingTexts){
             window.draw(*ft);
         }
+    }
+    // Generic spritesheet frame animation helper
+    // stepX = distance between frame origins on the sheet (defaults to frameW if 0)
+    void playSpriteAnimation(sf::Sprite* sprite, int frameCount,
+                             int startX, int startY, int frameW, int frameH,
+                             float duration, int stepX = 0,
+                             std::function<void()> onFinish = nullptr)
+    {
+        if (stepX == 0) stepX = frameW;
+        sprite->setTextureRect(sf::IntRect({startX, startY}, {frameW, frameH}));
+
+        auto func = [sprite, frameCount, startX, startY, frameW, frameH, stepX, duration](float t){
+            float elapsed = t * duration;
+            float frameDuration = duration / frameCount;
+            int idx = std::min(int(elapsed / frameDuration), frameCount - 1);
+            int x = startX + idx * stepX;
+            sprite->setTextureRect(sf::IntRect({x, startY}, {frameW, frameH}));
+        };
+
+        Animation anim = {func, std::move(onFinish), 0, duration};
+        add(anim);
+    }
+
+    void playShockAnimation(int winnerId, int loserId, float duration = 1.0f){
+
+        int totalPlayers = (int)gameState.getAllPlayerInfo().size();
+        sf::Vector2f offSet = {-30.f, 0.f};
+        sf::Vector2f winnerPos = visualState.getPlayerSeatPos(winnerId, totalPlayers) + offSet;
+        sf::Vector2f loserPos  = visualState.getPlayerSeatPos(loserId, totalPlayers) + offSet;
+        sf::Vector2f midpoint  = (winnerPos + loserPos) / 2.f;
+
+        sf::Vector2f dir = winnerPos - loserPos;
+        float distance = std::sqrt(dir.x * dir.x + dir.y * dir.y);
+        float angleDeg = std::atan2(dir.y, dir.x) * 180.f / 3.14159f + 90.f + 180.f;
+
+        shockSprite = std::make_unique<sf::Sprite>(shockTexture);
+
+        const int frameW = 307, frameH = 895, frameCount = 7;
+        const int frameY = 221;
+        const std::array<int, 7> frameXs = {1741, 1483, 1183, 896, 586, 306, 7};
+
+        shockSprite->setOrigin({frameW / 2.f, frameH / 2.f});
+        shockSprite->setPosition(midpoint);
+        shockSprite->setRotation(sf::degrees(angleDeg));
+        shockSprite->setScale({0.3f, distance / (float)frameH});
+        shockSprite->setTextureRect(sf::IntRect({frameXs[0], frameY}, {frameW, frameH}));
+
+        sf::Sprite* spritePtr = shockSprite.get();
+
+        // Shock spritesheet has irregular frame positions, so custom update
+        auto func = [spritePtr, frameXs, frameW, frameH, frameY, frameCount, duration](float t){
+            float elapsed = t * duration;
+            float frameDuration = duration / frameCount;
+            int idx = std::min(int(elapsed / frameDuration), frameCount - 1);
+            spritePtr->setTextureRect(sf::IntRect({frameXs[idx], frameY}, {frameW, frameH}));
+        };
+
+        Animation shockAnim = {func, [this](){ shockSprite.reset(); }, 0, duration};
+        add(shockAnim);
+    }
+
+    void renderShockAnimation(){
+        if (shockSprite)
+            window.draw(*shockSprite);
+    }
+
+    void playExplosionAnimation(sf::Vector2f position, float scale = 2.f, float duration = 0.6f){
+        explosionSprite = std::make_unique<sf::Sprite>(explosionTexture);
+
+        explosionSprite->setOrigin({51 / 2.f, 65 / 2.f});
+        explosionSprite->setPosition(position);
+        explosionSprite->setScale({scale, scale});
+        //a lambda function that plays once when animation is finished
+        //called by AnimationManager::update()-> if (time > duration) -> run onFinish() -> erase(animation)
+        auto onDone = [this](){ explosionSprite.reset(); };
+        playSpriteAnimation(explosionSprite.get(), 
+        12, //frameCount
+        6, //startX
+        0, //startY
+        51, //frameW
+        65, //frameH
+        duration, 
+        65, //stepX
+        onDone); 
+    }
+
+    void playDeliveranceEffect(sf::Vector2f position, float scale = 2.f, float duration = 0.6f){
+
+        holySprite = std::make_unique<sf::Sprite>(holyTexture);
+        holySprite->setOrigin({32,32}); 
+        holySprite->setPosition(position); 
+        holySprite->setScale({scale,scale}); 
+        auto onDone = [this](){ holySprite.reset(); };
+        playSpriteAnimation(holySprite.get(), 
+        19, //frameCount
+        0, //startX
+        0, //startY
+        64, //frameW
+        64, //frameH
+        duration, 
+        64, //stepX
+        onDone);
+        
+    }
+    void renderExplosionAnimation(){
+        if (explosionSprite)
+            window.draw(*explosionSprite);
+    }
+    void renderHolyAnimation(){
+        if (holySprite)
+            window.draw(*holySprite);
     }
 };
 
