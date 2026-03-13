@@ -82,9 +82,12 @@ void Game::RunGame(){
         this->eventQueue,
         (networkMode != NetworkMode::LOCAL) ? &this->networkManager : nullptr
     );
-    roundManager.createSkills();
-    roundManager.updateGameState(PhaseName::GAME_START_PHASE, 0);
-    roundManager.changePhase(PhaseName::GAME_START_PHASE);
+    // Server/Local: run game logic init. Client: skip — server owns game state.
+    if (networkMode != NetworkMode::CLIENT) {
+        roundManager.createSkills();
+        roundManager.updateGameState(PhaseName::GAME_START_PHASE, 0);
+        roundManager.changePhase(PhaseName::GAME_START_PHASE);
+    }
 
     // Client mode: override UIManager callbacks to send input over network
     if (networkMode == NetworkMode::CLIENT) {
@@ -175,30 +178,115 @@ bool Game::connectToServer(const std::string& ip, uint16_t port) {
 }
 
 void Game::serverBroadcast() {
+    if (networkManager.getConnectedClientCount() == 0) return;
+
     // Broadcast current game state
     networkManager.broadcastGameState(gameState);
 
-    // Drain the event queue and broadcast events, then re-push for local presentation
-    // We peek at events that were already pushed to the queue
-    // Actually, events are consumed by PresentationLayer, so we broadcast BEFORE draining
-    // The events are still in the queue at this point — we need to serialize them
-    // Better approach: capture events as they're pushed. For now, broadcast state only.
-    // Events will be added in a follow-up when we hook into EventQueue.
+    // Peek events (non-destructive) and broadcast to clients
+    // PresentationLayer will drain them afterwards for local rendering
+    auto events = eventQueue.peekAll();
+    if (!events.empty()) {
+        std::cout << "[Server][broadcast] Sending " << events.size()
+                  << " events to " << networkManager.getConnectedClientCount() << " client(s)" << std::endl;
+        networkManager.broadcastEvents(events);
+    }
 }
 
 void Game::clientReceive() {
     // Apply received game state
     if (networkManager.hasNewState()) {
         GameState& received = networkManager.consumeGameState();
-        // Update local game state from server
         auto allInfo = received.getAllPlayerInfo();
+
+        std::cout << "[Client][clientReceive] Got new GameState: phase="
+                  << static_cast<int>(received.getPhaseName())
+                  << " currentPlayer=" << received.getCurrentPlayerId()
+                  << " players=" << allInfo.size() << std::endl;
+
         gameState.setAllPlayerInfo(allInfo);
         gameState.setPhaseName(received.getPhaseName(), received.getCurrentPlayerId());
+        gameState.setDeckCount(received.getDeckCount());
+
+        // Sync local Card*/Player objects from server's GameState
+        syncLocalFromGameState();
+
+        // Rebuild visual state from synced local objects
+        visualState.rebuildFromState(deck, players);
     }
 
     // Push received events into local event queue for presentation
     auto events = networkManager.drainReceivedEvents();
+    if (!events.empty()) {
+        std::cout << "[Client][clientReceive] Got " << events.size() << " events from server" << std::endl;
+    }
     for (auto& e : events) {
         eventQueue.push(std::move(e));
     }
+}
+
+void Game::syncLocalFromGameState() {
+    auto allInfo = gameState.getAllPlayerInfo();
+
+    std::cout << "[Client][syncLocalFromGameState] Syncing " << allInfo.size()
+              << " players from server state" << std::endl;
+
+    // Step 1: Reset all cards to unowned
+    for (auto& cardPtr : allCards) {
+        cardPtr->setOwnerId(-1);
+        cardPtr->setHandIndex(-1);
+    }
+
+    // Step 2: Clear all player hands
+    for (auto& player : players) {
+        player.clearHand();
+    }
+
+    // Step 3: Assign cards to players based on server GameState
+    for (const PlayerInfo& info : allInfo) {
+        std::cout << "[Client][sync] Player " << info.playerId
+                  << " has " << info.cardsInHand.size() << " cards" << std::endl;
+
+        for (const Card& infoCard : info.cardsInHand) {
+            // Find matching Card* in allCards by suit+rank (first unassigned match)
+            bool found = false;
+            for (auto& cardPtr : allCards) {
+                if (cardPtr->getSuit() == infoCard.getSuit() &&
+                    cardPtr->getRank() == infoCard.getRank() &&
+                    cardPtr->getOwnerId() == -1) {
+
+                    // Sync face-up state
+                    if (infoCard.isFaceUp() != cardPtr->isFaceUp()) {
+                        cardPtr->flip();
+                    }
+
+                    // Find local player and add card to hand
+                    for (auto& player : players) {
+                        if (player.getId() == info.playerId) {
+                            player.addCardToHand(cardPtr.get());
+                            found = true;
+                            break;
+                        }
+                    }
+                    break;
+                }
+            }
+            if (!found) {
+                std::cerr << "[Client][sync] WARNING: Could not find card "
+                          << infoCard.getRankAsString() << infoCard.getSuitAsString()
+                          << " for player " << info.playerId << std::endl;
+            }
+        }
+    }
+
+    // Step 4: Rebuild deck with remaining unowned cards
+    deck.clearCards();
+    for (auto& cardPtr : allCards) {
+        if (cardPtr->getOwnerId() == -1) {
+            deck.addCard(cardPtr.get());
+        }
+    }
+
+    std::cout << "[Client][sync] Done. Deck has " << deck.getSize()
+              << " cards remaining" << std::endl;
 }

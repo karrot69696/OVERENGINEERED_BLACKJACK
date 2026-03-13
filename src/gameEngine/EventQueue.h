@@ -29,6 +29,17 @@ public:
         }
         return result;
     }
+
+    // Copy all events without removing them (for server to broadcast before PresentationLayer drains)
+    std::vector<GameEvent> peekAll() const {
+        std::vector<GameEvent> result;
+        std::queue<GameEvent> copy = events;
+        while (!copy.empty()) {
+            result.push_back(std::move(copy.front()));
+            copy.pop();
+        }
+        return result;
+    }
 };
 
 #endif

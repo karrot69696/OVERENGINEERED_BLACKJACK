@@ -139,6 +139,7 @@ inline PlayerInfo readPlayerInfo(ByteBuffer& buf) {
 inline void writeGameState(ByteBuffer& buf, GameState& state) {
     buf.writeU8(static_cast<uint8_t>(state.getPhaseName()));
     buf.writeI32(state.getCurrentPlayerId());
+    buf.writeI32(state.getDeckCount());
     auto allInfo = state.getAllPlayerInfo();
     buf.writeU16(static_cast<uint16_t>(allInfo.size()));
     for (const PlayerInfo& info : allInfo) {
@@ -149,6 +150,7 @@ inline void writeGameState(ByteBuffer& buf, GameState& state) {
 inline void readGameState(ByteBuffer& buf, GameState& state) {
     PhaseName phase = static_cast<PhaseName>(buf.readU8());
     int currentPlayerId = buf.readI32();
+    int deckCount = buf.readI32();
     uint16_t playerCount = buf.readU16();
     std::vector<PlayerInfo> allInfo;
     for (uint16_t i = 0; i < playerCount; i++) {
@@ -156,6 +158,7 @@ inline void readGameState(ByteBuffer& buf, GameState& state) {
     }
     state.setAllPlayerInfo(allInfo);
     state.setPhaseName(phase, currentPlayerId);
+    state.setDeckCount(deckCount);
 }
 
 // ============================================================================

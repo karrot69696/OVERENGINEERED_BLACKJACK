@@ -65,6 +65,7 @@ public:
         deckCount=count;
     }
     //getters
+    int getDeckCount() const { return deckCount; }
     int getCurrentPlayerId() {return currentPlayerId;}
     void incrementCurrentPlayerId(int numPlayers) {
         currentPlayerId++;

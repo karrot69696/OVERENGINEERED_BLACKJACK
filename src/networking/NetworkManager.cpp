@@ -98,6 +98,11 @@ void NetworkManager::poll() {
                     std::cout << "[NetworkManager] Client connected from "
                               << event.peer->address.host << ":" << event.peer->address.port << std::endl;
                     // Don't assign player ID yet — wait for CLIENT_JOIN message
+                } else {
+                    // Client: we've connected to server, send JOIN request
+                    std::cout << "[NetworkManager] Connected to server! Sending JOIN..." << std::endl;
+                    ByteBuffer joinBuf;
+                    sendPacket(event.peer, NetMsgType::CLIENT_JOIN, joinBuf, 0, true);
                 }
                 break;
 

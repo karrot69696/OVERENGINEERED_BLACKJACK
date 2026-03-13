@@ -58,6 +58,7 @@ public:
 private:
     void serverBroadcast();
     void clientReceive();
+    void syncLocalFromGameState();  // client: sync Card*/Player hands from received GameState
 };
 
 

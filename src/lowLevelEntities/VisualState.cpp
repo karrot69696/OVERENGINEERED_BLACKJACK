@@ -99,3 +99,66 @@ void VisualState::buildCardVisuals(Deck& deck, std::vector<Player>& players){
         i++;
     }
 }
+
+void VisualState::rebuildFromState(Deck& deck, std::vector<Player>& players) {
+    cardVisuals.clear();
+
+    sf::Vector2u texSize = cardTexture.getSize();
+    int cellW = (int)texSize.x / 15;
+    int cellH = (int)texSize.y / 4;
+    float scaleX = UILayout::CARD_SIZE.x / cellW;
+    float scaleY = UILayout::CARD_SIZE.y / cellH;
+
+    float startX = 50.f;
+    auto winSize = window.getSize();
+    float windowH = static_cast<float>(winSize.y);
+    float deckY = windowH / 2.f;
+
+    int totalPlayers = (int)players.size();
+
+    // Helper lambda to create a CardVisual from a Card*
+    auto makeVisual = [&](Card* card, CardLocation location, sf::Vector2f pos) {
+        bool showFace = cheatOn || card->isFaceUp();
+        int col, row;
+        if (showFace) {
+            col = cardSpriteCol(card->getRank());
+            row = cardSpriteRow(card->getSuit());
+        } else {
+            col = 14;
+            row = 2;
+        }
+
+        sf::Sprite sprite(cardTexture);
+        sprite.setTextureRect(sf::IntRect({col * cellW, row * cellH}, {cellW, cellH}));
+        sprite.setScale({scaleX, scaleY});
+        sprite.setPosition(pos);
+
+        CardVisual cv(sprite);
+        cv.cardId = card->getId();
+        cv.cardIndex = card->getHandIndex();
+        cv.ownerId = card->getOwnerId();
+        cv.location = location;
+        cv.highlighted = false;
+        cv.isTarget = false;
+        cv.faceUp = showFace;
+        cardVisuals.emplace_back(cv);
+    };
+
+    // 1. Deck cards — stacked at deck position
+    int i = 0;
+    for (auto* card : deck.getCards()) {
+        makeVisual(card, CardLocation::DECK, {startX + i * 0.03f, deckY + i * 0.03f});
+        i++;
+    }
+
+    // 2. Player hand cards — positioned at player seats
+    for (auto& player : players) {
+        sf::Vector2f seatPos = getPlayerSeatPos(player.getId(), totalPlayers);
+        for (int c = 0; c < player.getHandSize(); c++) {
+            Card* card = player.getCardInHand(c);
+            float cardX = seatPos.x + c * UILayout::CARD_SPACING;
+            float cardY = seatPos.y;
+            makeVisual(card, CardLocation::HAND, {cardX, cardY});
+        }
+    }
+}

@@ -92,7 +92,7 @@ UIManager::UIManager(sf::RenderWindow& window, GameState& gameState,VisualState&
 // Public Interface
 // ============================================================================
 void UIManager::requestActionInput(int playerId) {
-    std::cout << "[UIManager] Request Action Input Menu" << std::endl;
+    if(!showActionMenu) std::cout << "[UIManager] Request Action Input Menu" << std::endl;
     activePlayerId = playerId;
     showActionMenu = true;
     showTargetingOverlay_Deliverance = false;

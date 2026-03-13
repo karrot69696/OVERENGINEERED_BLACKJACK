@@ -64,6 +64,7 @@ class VisualState {
         std::vector<CardVisual>& getCardVisuals() { return cardVisuals; }
         //setters
         void buildCardVisuals(Deck& deck, std::vector<Player>& players);
+        void rebuildFromState(Deck& deck, std::vector<Player>& players);
         //getters
         sf::Font& getFont() { return font; }
 
