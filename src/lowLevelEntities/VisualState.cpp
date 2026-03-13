@@ -1,4 +1,5 @@
 #include "VisualState.h"
+#include <unordered_map>
 // ============================================================================
 // CardVisual
 // ============================================================================
@@ -159,6 +160,68 @@ void VisualState::rebuildFromState(Deck& deck, std::vector<Player>& players) {
             float cardX = seatPos.x + c * UILayout::CARD_SPACING;
             float cardY = seatPos.y;
             makeVisual(card, CardLocation::HAND, {cardX, cardY});
+        }
+    }
+}
+
+void VisualState::reconcile(GameState& gs) {
+    // Lightweight sync: update CardVisual metadata from GameState
+    // Does NOT touch sprite position — animations/PresentationLayer own that
+
+    sf::Vector2u texSize = cardTexture.getSize();
+    int cellW = (int)texSize.x / 15;
+    int cellH = (int)texSize.y / 4;
+
+    auto allInfo = gs.getAllPlayerInfo();
+
+    // Build lookup: cardId → {ownerId, handIndex, faceUp}
+    struct CardMeta { int ownerId; int handIndex; bool faceUp; };
+    std::unordered_map<int, CardMeta> desired;
+    for (const auto& info : allInfo) {
+        for (int i = 0; i < (int)info.cardsInHand.size(); i++) {
+            const Card& c = info.cardsInHand[i];
+            desired[c.getId()] = {info.playerId, i, c.isFaceUp()};
+        }
+    }
+
+    // Update each existing CardVisual
+    for (auto& cv : cardVisuals) {
+        auto it = desired.find(cv.cardId);
+        if (it != desired.end()) {
+            // Card is in a player's hand
+            cv.ownerId = it->second.ownerId;
+            cv.cardIndex = it->second.handIndex;
+            cv.location = CardLocation::HAND;
+
+            // Update face texture if faceUp state changed
+            bool showFace = cheatOn || it->second.faceUp;
+            if (cv.faceUp != showFace) {
+                cv.faceUp = showFace;
+                // We need suit/rank to pick the right texture rect — find from allInfo
+                const Card& infoCard = allInfo[0].cardsInHand[0]; // placeholder
+                for (const auto& info : allInfo) {
+                    for (const Card& c : info.cardsInHand) {
+                        if (c.getId() == cv.cardId) {
+                            int col, row;
+                            if (showFace) {
+                                col = cardSpriteCol(c.getRank());
+                                row = cardSpriteRow(c.getSuit());
+                            } else {
+                                col = 14;
+                                row = 2;
+                            }
+                            cv.cardSprite.setTextureRect(sf::IntRect(
+                                {col * cellW, row * cellH}, {cellW, cellH}));
+                            break;
+                        }
+                    }
+                }
+            }
+        } else {
+            // Card not in any player's hand → it's in the deck
+            cv.ownerId = -1;
+            cv.cardIndex = -1;
+            cv.location = CardLocation::DECK;
         }
     }
 }

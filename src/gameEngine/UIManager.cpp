@@ -121,15 +121,15 @@ void UIManager::clearInput() {
 void UIManager::handleEvent(const std::optional<sf::Event>& event) {
     if (!event.has_value()) return;
 
-    // Track mouse position for hover effects
+    // Track mouse position for hover effects (map pixel → world coords for resized window)
     if (const auto* mouseMoved = event->getIf<sf::Event::MouseMoved>()) {
-        mousePos = {(float)mouseMoved->position.x, (float)mouseMoved->position.y};
+        mousePos = window.mapPixelToCoords({mouseMoved->position.x, mouseMoved->position.y});
     }
 
     if (const auto* mouseBtn = event->getIf<sf::Event::MouseButtonPressed>()) {
         if (mouseBtn->button != sf::Mouse::Button::Left) return;
-        std::cout << "[UIManager] Mouse click at (" << mouseBtn->position.x << ", " << mouseBtn->position.y << ")\n";
-        sf::Vector2f mousePos = { (float)mouseBtn->position.x, (float)mouseBtn->position.y };
+        sf::Vector2f mousePos = window.mapPixelToCoords({mouseBtn->position.x, mouseBtn->position.y});
+        std::cout << "[UIManager] Mouse click at (" << mousePos.x << ", " << mousePos.y << ")\n";
 
         // Action menu clicks
         if (showActionMenu) {

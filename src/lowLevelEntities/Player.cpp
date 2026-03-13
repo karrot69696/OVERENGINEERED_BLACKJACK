@@ -54,7 +54,7 @@ void Player::returnCards(Deck& deck, const std::vector<Card*>& cards) {
     printCardsInHand();
 }
 
-void Player::addCardToHand(Card* card){
+void Player::addCardToHand(Card* card, bool isSync = false){
     if (card == nullptr) {
         std::cout << "[Player] Card is null" << std::endl;
         return;
@@ -63,11 +63,13 @@ void Player::addCardToHand(Card* card){
     card->setHandIndex((int)cardsInHand.size());
     cardsInHand.push_back(card);
     
-    std::cout << "[Player] Card " << card->getRankAsString() 
-    << " of " << card->getSuitAsString()
-    << " owned by Player "<< card->getOwnerId() 
-    << " at index "<< card->getHandIndex()
-    <<std::endl;
+    if (!isSync){
+        std::cout << "[Player] Card " << card->getRankAsString() 
+        << " of " << card->getSuitAsString()
+        << " owned by Player "<< card->getOwnerId() 
+        << " at index "<< card->getHandIndex()
+        <<std::endl;
+    }
 }
 
 void Player::flipAllCardsFaceUp(){

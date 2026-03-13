@@ -216,8 +216,6 @@ public:
         // Reassign sequential indices and slide to correct positions
         for (int i = 0; i < (int)handCards.size(); i++) {
             CardVisual& cv = *handCards[i];
-            if (cv.cardIndex == i) continue; // already in place
-
             cv.cardIndex = i;
 
             auto bounds = cv.cardSprite.getLocalBounds();
@@ -230,6 +228,11 @@ public:
                 seatPos.x + i * UILayout::CARD_SPACING + worldOffset.x,
                 seatPos.y + worldOffset.y
             };
+
+            // Skip if already at target position (within tolerance)
+            float dx = endPos.x - startPos.x;
+            float dy = endPos.y - startPos.y;
+            if (dx * dx + dy * dy < 1.f) continue;
 
             auto func = [&cv, startPos, endPos](float t){
                 float eased = t * (2.f - t);

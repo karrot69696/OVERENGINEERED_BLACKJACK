@@ -101,6 +101,11 @@ void Game::RunGame(){
         };
     }
 
+    // Fixed design resolution — content scales with letterboxing on resize
+    sf::View gameView({0.f, 0.f}, {(float)GameConfig::WINDOW_WIDTH, (float)GameConfig::WINDOW_HEIGHT});
+    gameView.setCenter({GameConfig::WINDOW_WIDTH / 2.f, GameConfig::WINDOW_HEIGHT / 2.f});
+    window.setView(gameView);
+
     sf::Clock clock;
 
     while (window.isOpen()){
@@ -162,6 +167,31 @@ void Game::eventHandler(const std::optional<sf::Event>& event){
             window.close();
         }
     }
+    else if (const auto* resized = event->getIf<sf::Event::Resized>()) {
+        // Letterbox: maintain aspect ratio, black bars fill the gap
+        float designW = (float)GameConfig::WINDOW_WIDTH;
+        float designH = (float)GameConfig::WINDOW_HEIGHT;
+        float windowW = (float)resized->size.x;
+        float windowH = (float)resized->size.y;
+        float designRatio = designW / designH;
+        float windowRatio = windowW / windowH;
+
+        sf::FloatRect viewport;
+        if (windowRatio > designRatio) {
+            // Window wider than design → pillarbox (bars on sides)
+            float viewW = designRatio / windowRatio;
+            viewport = {{(1.f - viewW) / 2.f, 0.f}, {viewW, 1.f}};
+        } else {
+            // Window taller than design → letterbox (bars top/bottom)
+            float viewH = windowRatio / designRatio;
+            viewport = {{0.f, (1.f - viewH) / 2.f}, {1.f, viewH}};
+        }
+
+        sf::View view({0.f, 0.f}, {designW, designH});
+        view.setCenter({designW / 2.f, designH / 2.f});
+        view.setViewport(viewport);
+        window.setView(view);
+    }
     uiManager.handleEvent(event);
 }
 
@@ -187,8 +217,8 @@ void Game::serverBroadcast() {
     // PresentationLayer will drain them afterwards for local rendering
     auto events = eventQueue.peekAll();
     if (!events.empty()) {
-        std::cout << "[Server][broadcast] Sending " << events.size()
-                  << " events to " << networkManager.getConnectedClientCount() << " client(s)" << std::endl;
+        // std::cout << "[Server][broadcast] Sending " << events.size()
+        //           << " events to " << networkManager.getConnectedClientCount() << " client(s)" << std::endl;
         networkManager.broadcastEvents(events);
     }
 }
@@ -199,11 +229,7 @@ void Game::clientReceive() {
         GameState& received = networkManager.consumeGameState();
         auto allInfo = received.getAllPlayerInfo();
 
-        std::cout << "[Client][clientReceive] Got new GameState: phase="
-                  << static_cast<int>(received.getPhaseName())
-                  << " currentPlayer=" << received.getCurrentPlayerId()
-                  << " players=" << allInfo.size() << std::endl;
-
+        // Per-frame GameState receive — no log (too noisy)
         gameState.setAllPlayerInfo(allInfo);
         gameState.setPhaseName(received.getPhaseName(), received.getCurrentPlayerId());
         gameState.setDeckCount(received.getDeckCount());
@@ -211,8 +237,15 @@ void Game::clientReceive() {
         // Sync local Card*/Player objects from server's GameState
         syncLocalFromGameState();
 
-        // Rebuild visual state from synced local objects
-        visualState.rebuildFromState(deck, players);
+        if (!clientInitialBuild) {
+            // First GameState — full visual build (bootstrapping)
+            visualState.rebuildFromState(deck, players);
+            clientInitialBuild = true;
+            std::cout << "[Client] Initial visual build complete" << std::endl;
+        } else {
+            // Subsequent updates — reconcile metadata only, preserve animations
+            visualState.reconcile(gameState);
+        }
     }
 
     // Push received events into local event queue for presentation
@@ -228,8 +261,7 @@ void Game::clientReceive() {
 void Game::syncLocalFromGameState() {
     auto allInfo = gameState.getAllPlayerInfo();
 
-    std::cout << "[Client][syncLocalFromGameState] Syncing " << allInfo.size()
-              << " players from server state" << std::endl;
+    // No per-frame log — too noisy
 
     // Step 1: Reset all cards to unowned
     for (auto& cardPtr : allCards) {
@@ -244,9 +276,6 @@ void Game::syncLocalFromGameState() {
 
     // Step 3: Assign cards to players based on server GameState
     for (const PlayerInfo& info : allInfo) {
-        std::cout << "[Client][sync] Player " << info.playerId
-                  << " has " << info.cardsInHand.size() << " cards" << std::endl;
-
         for (const Card& infoCard : info.cardsInHand) {
             // Find matching Card* in allCards by suit+rank (first unassigned match)
             bool found = false;
@@ -263,7 +292,7 @@ void Game::syncLocalFromGameState() {
                     // Find local player and add card to hand
                     for (auto& player : players) {
                         if (player.getId() == info.playerId) {
-                            player.addCardToHand(cardPtr.get());
+                            player.addCardToHand(cardPtr.get(), true);
                             found = true;
                             break;
                         }
@@ -287,6 +316,5 @@ void Game::syncLocalFromGameState() {
         }
     }
 
-    std::cout << "[Client][sync] Done. Deck has " << deck.getSize()
-              << " cards remaining" << std::endl;
+    // syncLocalFromGameState done — no per-frame log
 }

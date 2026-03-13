@@ -15,7 +15,7 @@ int main() {
     std::cin >> choice;
 
     NetworkMode mode = NetworkMode::LOCAL;
-    std::string serverIP;
+    std::string serverIP = "127.0.0.1";
     uint16_t port = NET_DEFAULT_PORT;
 
     if (choice == 2) {
@@ -27,8 +27,8 @@ int main() {
         if (!portStr.empty()) port = static_cast<uint16_t>(std::stoi(portStr));
     } else if (choice == 3) {
         mode = NetworkMode::CLIENT;
-        std::cout << "Server IP: ";
-        std::cin >> serverIP;
+        std::cout << "Server IP: " << "127.0.0.1" << std::endl;
+        //std::cin >> serverIP;
         std::cout << "Port (default " << NET_DEFAULT_PORT << "): ";
         std::string portStr;
         std::cin.ignore();
@@ -36,8 +36,7 @@ int main() {
         if (!portStr.empty()) port = static_cast<uint16_t>(std::stoi(portStr));
     }
 
-    sf::VideoMode desktop = sf::VideoMode::getDesktopMode();
-    sf::RenderWindow window(desktop, "CrazyJack", sf::State::Fullscreen);
+    sf::RenderWindow window(sf::VideoMode({GameConfig::WINDOW_WIDTH, GameConfig::WINDOW_HEIGHT}), "CrazyJack");
     window.setFramerateLimit(60);
 
     Game newGame(window, mode);

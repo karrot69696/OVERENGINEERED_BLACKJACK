@@ -276,6 +276,7 @@ void NetworkManager::handleServerWelcome(ByteBuffer& buf) {
 void NetworkManager::handleServerGameState(ByteBuffer& buf) {
     NetSerializer::readGameState(buf, receivedGameState);
     hasNewGameState = true;
+    // No log here — fires every frame, too noisy
 }
 
 void NetworkManager::handleServerEvent(ByteBuffer& buf) {

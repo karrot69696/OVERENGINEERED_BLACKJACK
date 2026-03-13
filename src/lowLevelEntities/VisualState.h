@@ -65,6 +65,7 @@ class VisualState {
         //setters
         void buildCardVisuals(Deck& deck, std::vector<Player>& players);
         void rebuildFromState(Deck& deck, std::vector<Player>& players);
+        void reconcile(GameState& gs);  // lightweight sync: update metadata only, don't touch positions
         //getters
         sf::Font& getFont() { return font; }
 

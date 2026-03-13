@@ -56,6 +56,7 @@ public:
     NetworkManager& getNetworkManager() { return networkManager; }
 
 private:
+    bool clientInitialBuild = false;  // true after first GameState → full visual build
     void serverBroadcast();
     void clientReceive();
     void syncLocalFromGameState();  // client: sync Card*/Player hands from received GameState
