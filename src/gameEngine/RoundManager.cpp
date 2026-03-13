@@ -5,13 +5,15 @@
         Deck& _deck,
         GameState& _gameState, VisualState& _visualState,
         UIManager& _uiManager,
-        EventQueue& _eventQueue)
+        EventQueue& _eventQueue,
+        NetworkManager* _networkManager)
         :
         players(_players),
         deck(_deck), skillManager(),
         gameState(_gameState), visualState(_visualState),
         uiManager(_uiManager),
-        eventQueue(_eventQueue) {}
+        eventQueue(_eventQueue),
+        networkManager(_networkManager) {}
 // ========================================================================
 // Helper functions
 // ========================================================================

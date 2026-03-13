@@ -20,6 +20,8 @@ cmake --build --preset windows-msvc-debug
 
 Output: `build/<preset>/bin/CrazyJack.exe`. Assets are copied to `build/<preset>/assets/` automatically.
 
+**Don't build to verify after small changes.** Only build when explicitly asked or after a large batch of changes is complete.
+
 **SFML 3.0.2** is the only external dependency, path hardcoded in CMakeLists.txt. No vcpkg/conan. No test framework.
 
 ## Architecture

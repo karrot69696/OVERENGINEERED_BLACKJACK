@@ -19,6 +19,7 @@
 #include "AnimationManager.h"
 #include "EventQueue.h"
 #include "PresentationLayer.h"
+#include "../networking/NetworkManager.h"
 
 #define maxNumPlayer 7
 #define initialCardCount 2
@@ -39,12 +40,24 @@ private:
     AnimationManager animationManager;
     EventQueue eventQueue;
     PresentationLayer presentationLayer;
+    NetworkManager networkManager;
+    NetworkMode networkMode = NetworkMode::LOCAL;
 public:
-    Game(sf::RenderWindow& window);
+    Game(sf::RenderWindow& window, NetworkMode mode = NetworkMode::LOCAL);
     ~Game(){}
     void SetupGame();
+    void SetupGame(int numHumans, int numBots);
     void RunGame();
     void eventHandler(const std::optional<sf::Event>& event);
+
+    // Networking
+    bool startServer(uint16_t port = NET_DEFAULT_PORT);
+    bool connectToServer(const std::string& ip, uint16_t port = NET_DEFAULT_PORT);
+    NetworkManager& getNetworkManager() { return networkManager; }
+
+private:
+    void serverBroadcast();
+    void clientReceive();
 };
 
 

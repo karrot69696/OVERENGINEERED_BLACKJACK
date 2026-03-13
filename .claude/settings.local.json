@@ -1,7 +1,11 @@
 {
   "permissions": {
     "allow": [
-      "Bash(cmake --build --preset debug)"
+      "Bash(cmake --build --preset debug)",
+      "Bash(ninja --version)",
+      "Bash(cmake --preset debug)",
+      "Bash(cmake --build --preset debug -j)",
+      "Bash(cmake --build --preset debug -j --clean-first)"
     ]
   }
 }

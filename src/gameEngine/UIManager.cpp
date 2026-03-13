@@ -92,6 +92,7 @@ UIManager::UIManager(sf::RenderWindow& window, GameState& gameState,VisualState&
 // Public Interface
 // ============================================================================
 void UIManager::requestActionInput(int playerId) {
+    std::cout << "[UIManager] Request Action Input Menu" << std::endl;
     activePlayerId = playerId;
     showActionMenu = true;
     showTargetingOverlay_Deliverance = false;
@@ -99,6 +100,7 @@ void UIManager::requestActionInput(int playerId) {
 }
 
 void UIManager::requestTargetInput(int playerId) {
+    std::cout << "[UIManager] Request Target Input Menu" << std::endl;
     activePlayerId = playerId;
     showActionMenu = false;
     showTargetingOverlay_Deliverance = true;
@@ -106,6 +108,7 @@ void UIManager::requestTargetInput(int playerId) {
 }
 
 void UIManager::clearInput() {
+    std::cout << "[UIManager] Clear Input Menu" << std::endl;
     showActionMenu = false;
     showTargetingOverlay_Deliverance = false;
     activePlayerId = -1;
@@ -117,6 +120,12 @@ void UIManager::clearInput() {
 // ============================================================================
 void UIManager::handleEvent(const std::optional<sf::Event>& event) {
     if (!event.has_value()) return;
+
+    // Track mouse position for hover effects
+    if (const auto* mouseMoved = event->getIf<sf::Event::MouseMoved>()) {
+        mousePos = {(float)mouseMoved->position.x, (float)mouseMoved->position.y};
+    }
+
     if (const auto* mouseBtn = event->getIf<sf::Event::MouseButtonPressed>()) {
         if (mouseBtn->button != sf::Mouse::Button::Left) return;
         std::cout << "[UIManager] Mouse click at (" << mouseBtn->position.x << ", " << mouseBtn->position.y << ")\n";
@@ -265,15 +274,47 @@ void UIManager::renderActionMenu() {
 }
 
 void UIManager::renderTargetingOverlay_Deliverance() {
+    hoveredCardId = -1;
+
     // Highlight cards belonging to the active player
     for (auto& cv : cardVisuals) {
         if (cv.ownerId == activePlayerId) {
             auto cardBounds = cv.cardSprite.getGlobalBounds();
-            sf::RectangleShape highlight({cardBounds.size.x + 2.f, cardBounds.size.y + 2.f});
-            highlight.setPosition({cardBounds.position.x - 1.f, cardBounds.position.y - 1.f});
+            bool hovered = cardBounds.contains(mousePos);
+
+            if (hovered) hoveredCardId = cv.cardId;
+
+            // Shake effect for targeted cards
+            if (cv.isTarget) {
+                float elapsed = shakeClock.getElapsedTime().asSeconds();
+                float shakeOffsetX =
+                    std::sin(elapsed * 40.f) * 3.f +
+                    std::sin(elapsed * 80.f) * 3.f;
+
+                float shakeOffsetY =
+                    std::cos(elapsed * 40.f) * 3.f +
+                    std::sin(elapsed * 80.f) * 3.f;
+                sf::Vector2f origPos = cv.cardSprite.getPosition();
+                cv.cardSprite.setPosition({origPos.x + shakeOffsetX, origPos.y + shakeOffsetY});
+                window.draw(cv.cardSprite);
+                cv.cardSprite.setPosition(origPos);
+            }
+            // Hover effect: scale up slightly
+            else if (hovered && !cv.isTarget) {
+                sf::Vector2f origScale = cv.cardSprite.getScale();
+                float hoverScale = 1.15f;
+                cv.cardSprite.setScale(origScale * hoverScale);
+                cardBounds = cv.cardSprite.getGlobalBounds();
+                window.draw(cv.cardSprite);
+                cv.cardSprite.setScale(origScale);
+            }
+
+            sf::RectangleShape highlight({cardBounds.size.x, cardBounds.size.y});
+            highlight.setPosition({cardBounds.position.x, cardBounds.position.y});
             highlight.setFillColor(sf::Color::Transparent);
-            highlight.setOutlineThickness(2.f);
-            highlight.setOutlineColor(cv.isTarget ? UILayout::CARD_TARGET : UILayout::CARD_HIGHLIGHT);
+            highlight.setOutlineThickness(hovered ? 5.f : 3.f);
+            highlight.setOutlineColor(cv.isTarget ? UILayout::CARD_TARGET :
+                                      hovered ? sf::Color(255, 240, 100) : UILayout::CARD_HIGHLIGHT);
             window.draw(highlight);
         }
     }

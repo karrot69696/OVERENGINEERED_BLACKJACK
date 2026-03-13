@@ -1,2 +1,0 @@
-C:\mingw64\bin\ar.exe qc lib\libGameEngine.a CMakeFiles/GameEngine.dir/src/gameEngine/Game.cpp.obj CMakeFiles/GameEngine.dir/src/gameEngine/UIManager.cpp.obj CMakeFiles/GameEngine.dir/src/gameEngine/RoundManager.cpp.obj CMakeFiles/GameEngine.dir/src/gameEngine/AnimationManager.cpp.obj CMakeFiles/GameEngine.dir/src/gameEngine/PresentationLayer.cpp.obj
-C:\mingw64\bin\ranlib.exe lib\libGameEngine.a

@@ -9,7 +9,7 @@
 enum class GameEventType {
     CARD_DRAWN,
     CARD_RETURNED,
-    CARD_SPIN,            // skill visual: spin → return → reposition
+    CARD_DELIVERANCE,            // skill visual: spin → return → reposition
     HAND_REPOSITIONED,
 
     BATTLE_WIN,

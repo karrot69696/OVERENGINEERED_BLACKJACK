@@ -30,6 +30,7 @@ class Player{
         PlayerAction pendingAction = PlayerAction::IDLE;
     public:
         bool isBot = 1;
+        bool isRemote = false;  // true for players whose input comes over network
         Player( int id, SkillName skillName, int isBot, int isHost) : skillName(skillName), isBot(isBot), isHost(isHost), id(id) {};
         virtual ~Player() = default;
 

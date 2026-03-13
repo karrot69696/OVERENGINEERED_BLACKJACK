@@ -8,14 +8,31 @@ PresentationLayer::PresentationLayer(EventQueue& eq, AnimationManager& am,
     : eventQueue(eq), animationManager(am), uiManager(um), visualState(vs), gameState(gs)
 {}
 
+bool PresentationLayer::isCutscene(GameEventType type) {
+    switch (type) {
+        case GameEventType::PHASE_ANNOUNCED:
+        case GameEventType::CARD_DRAWN:
+        case GameEventType::CARD_RETURNED:
+        case GameEventType::CARD_DELIVERANCE:
+            uiManager.clearInput();
+            return true;
+        default:
+            return false;
+    }
+}
+
 void PresentationLayer::processEvents() {
-    auto events = eventQueue.drain();
-    for (auto& event : events) {
+    while (!eventQueue.empty()) {
+        // A cutscene event was processed last time — wait for its animation to finish
+        if (cutsceneBlocking && animationManager.playing()) break;
+        cutsceneBlocking = false;
+
+        GameEvent event = eventQueue.pop();
+
         switch (event.type) {
 
         case GameEventType::CARD_DRAWN: {
             auto& e = std::get<CardDrawnEvent>(event.data);
-            // Set visual state BEFORE animation reads positions
             CardVisual& card = visualState.getCardVisual(e.cardId);
             card.location = CardLocation::HAND;
             card.ownerId = e.playerId;
@@ -25,7 +42,6 @@ void PresentationLayer::processEvents() {
 
         case GameEventType::CARD_RETURNED: {
             auto& e = std::get<CardReturnedEvent>(event.data);
-            // Set visual state BEFORE animation
             CardVisual& card = visualState.getCardVisual(e.cardId);
             card.ownerId = -1;
             card.cardIndex = -1;
@@ -33,16 +49,14 @@ void PresentationLayer::processEvents() {
             animationManager.addReturnToDeckAnimation(e.cardId);
         } break;
 
-        case GameEventType::CARD_SPIN: {
+        case GameEventType::CARD_DELIVERANCE: {
             auto& e = std::get<CardSpinEvent>(event.data);
             CardVisual& cv = visualState.getCardVisual(e.cardId);
             int cardId = e.cardId;
             int playerId = e.playerId;
 
-            // Play deliverance VFX alongside spin
             animationManager.playDeliveranceEffect(cv.cardSprite.getPosition());
 
-            // Chain: spin → return to deck → reposition hand
             animationManager.addSpinAnimation(cardId, [this, cardId, playerId](){
                 CardVisual& card = visualState.getCardVisual(cardId);
                 card.ownerId = -1;
@@ -61,7 +75,7 @@ void PresentationLayer::processEvents() {
 
         case GameEventType::BATTLE_WIN: {
             auto& e = std::get<BattleWinEvent>(event.data);
-            (void)e; // battle logic is in the individual events below
+            (void)e;
         } break;
 
         case GameEventType::BATTLE_TIE: {
@@ -117,5 +131,11 @@ void PresentationLayer::processEvents() {
         } break;
 
         } // switch
-    } // for
+
+        // Cutscene event — stop processing, remaining events wait for animation
+        if (isCutscene(event.type)) {
+            cutsceneBlocking = true;
+            break;
+        }
+    } // while
 }

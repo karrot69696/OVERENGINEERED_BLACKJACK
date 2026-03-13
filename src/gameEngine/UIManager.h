@@ -51,7 +51,10 @@ class UIManager {
         sf::Texture tableTexture;
         sf::Texture playerIcon;
         std::vector<sf::Sprite> playerSprite;
-        
+        sf::Vector2f mousePos = {0.f, 0.f};
+        int hoveredCardId = -1;
+        sf::Clock shakeClock;
+
     public:
         UIManager(sf::RenderWindow& window, GameState& gameState,VisualState& visualState, std::vector<CardVisual>& cardVisuals);
 

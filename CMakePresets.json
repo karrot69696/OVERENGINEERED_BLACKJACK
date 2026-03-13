@@ -11,7 +11,8 @@
       "hidden": true,
       "binaryDir": "${sourceDir}/build/${presetName}",
       "cacheVariables": {
-        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+        "CMAKE_DEPENDS_USE_COMPILER": "TRUE"
       }
     },
     {
@@ -19,7 +20,7 @@
       "displayName": "Debug Build",
       "description": "Debug build with symbols and no optimization",
       "inherits": "default",
-      "generator": "MinGW Makefiles",
+      "generator": "Ninja",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
         "CMAKE_CXX_FLAGS": "-g -O0 -Wall -Wextra",
@@ -32,10 +33,12 @@
       "displayName": "Release Build",
       "description": "Optimized release build",
       "inherits": "default",
-      "generator": "MinGW Makefiles",
+      "generator": "Ninja",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release",
-        "CMAKE_CXX_FLAGS": "-O3 -DNDEBUG"
+        "CMAKE_CXX_FLAGS": "-O3 -DNDEBUG",
+        "CMAKE_C_COMPILER": "C:/mingw64/bin/gcc.exe",
+        "CMAKE_CXX_COMPILER": "C:/mingw64/bin/g++.exe"
       }
     },
     {

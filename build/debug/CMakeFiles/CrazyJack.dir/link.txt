@@ -1,3 +1,0 @@
-"C:\Program Files\CMake\bin\cmake.exe" -E rm -f CMakeFiles\CrazyJack.dir/objects.a
-C:\mingw64\bin\ar.exe qc CMakeFiles\CrazyJack.dir/objects.a @CMakeFiles\CrazyJack.dir\objects1.rsp
-C:\mingw64\bin\g++.exe -g -O0 -Wall -Wextra -g -Wl,--whole-archive CMakeFiles\CrazyJack.dir/objects.a -Wl,--no-whole-archive -o bin\CrazyJack.exe -Wl,--out-implib,lib\libCrazyJack.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\CrazyJack.dir\linkLibs.rsp

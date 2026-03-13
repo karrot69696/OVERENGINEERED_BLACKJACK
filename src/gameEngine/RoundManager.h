@@ -21,6 +21,7 @@
 #include "EventQueue.h"
 
 class Game;
+class NetworkManager;
 
 class RoundManager {
 private:
@@ -31,6 +32,7 @@ private:
     VisualState& visualState;
     UIManager& uiManager;
     EventQueue& eventQueue;
+    NetworkManager* networkManager = nullptr;  // nullptr for LOCAL mode
     //NEW PHASE SYSTEM
     std::unique_ptr<Phase> currentPhase; 
     int round = 0;
@@ -42,10 +44,12 @@ public:
         Deck& _deck,
         GameState& _gameState, VisualState& _visualState,
         UIManager& _uiManager,
-        EventQueue& _eventQueue);
+        EventQueue& _eventQueue,
+        NetworkManager* _networkManager = nullptr);
     //getters
     Deck& getDeck(){return deck;}
     SkillManager& getSkillManager(){return skillManager;}
+    NetworkManager* getNetworkManager(){return networkManager;}
     int getRound(){return round;}
 
     //setters

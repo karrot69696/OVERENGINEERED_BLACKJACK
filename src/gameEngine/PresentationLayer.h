@@ -15,12 +15,15 @@ private:
     UIManager& uiManager;
     VisualState& visualState;
     GameState& gameState;
+    bool cutsceneBlocking = false;
+
+    bool isCutscene(GameEventType type);
 
 public:
     PresentationLayer(EventQueue& eq, AnimationManager& am,
                       UIManager& um, VisualState& vs, GameState& gs);
 
-    // Called once per frame — drains the event queue and triggers animations/UI
+    // Called once per frame — processes events, pausing after cutscene events
     void processEvents();
 };
 

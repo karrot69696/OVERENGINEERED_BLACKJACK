@@ -12,10 +12,10 @@ void HostHitPhase::onEnter() {
     //spawn text
     std::string turnText = 
     "HOST " + std::to_string(hostPlayer.getId()) 
-    + " VS PLAYER " 
-    + std::to_string(currentPlayer.getId());
+    + " PHASE";
 
-    eventQueue.push({GameEventType::PHASE_ANNOUNCED, PhaseAnnouncedEvent{turnText, AnimConfig::PHASE_TEXT_DURATION}});
+    eventQueue.push({GameEventType::PHASE_ANNOUNCED, 
+        PhaseAnnouncedEvent{turnText, AnimConfig::PHASE_TEXT_DURATION}});
 
     //set callback for host action input during host hit phase
     uiManager.onActionChosen = [&](PlayerAction chosenAction){
@@ -37,7 +37,7 @@ void HostHitPhase::onEnter() {
     //populate callback for skill target input during host hit phase
     uiManager.onTargetChosen = [&](PlayerTargeting chosenTarget){
         if (chosenTarget.targetPlayerIds.empty() && chosenTarget.targetCards.empty()){
-            uiManager.requestActionInput(hostPlayer.getId());
+            eventQueue.push({GameEventType::REQUEST_ACTION_INPUT, RequestActionInputEvent{hostPlayer.getId()}});
             getCurrentPlayer().setPendingAction(PlayerAction::IDLE);
         }
         else {
@@ -52,8 +52,8 @@ void HostHitPhase::onEnter() {
         }
     };
 
-    //UI prompt for host action input
-    uiManager.requestActionInput(hostPlayer.getId());
+    //UI prompt for host action input (queued after PHASE_ANNOUNCED so it shows after animation)
+    eventQueue.push({GameEventType::REQUEST_ACTION_INPUT, RequestActionInputEvent{hostPlayer.getId()}});
 
     //update player info in game state
     roundManager.updateGameState(PhaseName::HOST_HIT_PHASE,currentPlayer.getId());

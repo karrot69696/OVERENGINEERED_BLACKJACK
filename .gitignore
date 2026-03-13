@@ -14,3 +14,6 @@ Thumbs.db
 # Archives
 *.rar
 *.zip
+
+# Build scripts
+b.bat

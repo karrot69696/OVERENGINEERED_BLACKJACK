@@ -1,7 +1,8 @@
 {
 	"InstallScripts" : 
 	[
-		"C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/build/debug/cmake_install.cmake"
+		"C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/build/debug/cmake_install.cmake",
+		"C:/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/build/debug/include/enet-1.3.18/cmake_install.cmake"
 	],
 	"Parallel" : false
 }

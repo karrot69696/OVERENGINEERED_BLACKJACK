@@ -1,5 +1,6 @@
 #include "Phase.h"
 #include "../gameEngine/Game.h"
+#include "../networking/NetworkManager.h"
 
 Phase::Phase(UIManager& uiManager,
              EventQueue& eventQueue,
@@ -32,6 +33,19 @@ bool Phase::turnHandler(Player& player, Player& opponent){
 
     if(player._isBot()){
        player.setPendingAction(player.botMode(gameState));
+    }
+    // Remote player: pull action from NetworkManager
+    else if (player.isRemote) {
+        NetworkManager* net = roundManager.getNetworkManager();
+        if (net && net->hasRemoteAction(player.getId())) {
+            PlayerAction remoteAction = net->consumeRemoteAction(player.getId());
+            player.setPendingAction(remoteAction);
+
+            // If skill request, also check for targeting
+            if (remoteAction == PlayerAction::SKILL_REQUEST && net->hasRemoteTarget(player.getId())) {
+                gameState.pendingTarget = net->consumeRemoteTarget(player.getId());
+            }
+        }
     }
 
     switch (player.getPendingAction()){
@@ -77,6 +91,7 @@ bool Phase::turnHandler(Player& player, Player& opponent){
         break;
 
         case PlayerAction::IDLE:
+            eventQueue.push({GameEventType::REQUEST_ACTION_INPUT, RequestActionInputEvent{player.getId()}});
         break;
     }
 
@@ -134,7 +149,7 @@ void Phase::skillHandler(Player& player){
                 if (card->getId() == cardId && card->getOwnerId() == -1) {
                     // Emit spin event — PresentationLayer handles the full chain:
                     // deliverance effect + spin → return to deck → reposition
-                    eventQueue.push({GameEventType::CARD_SPIN, CardSpinEvent{
+                    eventQueue.push({GameEventType::CARD_DELIVERANCE, CardSpinEvent{
                         cardId, player.getId()
                     }});
                     break;

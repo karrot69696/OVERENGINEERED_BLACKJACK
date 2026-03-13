@@ -321,7 +321,7 @@ public:
     }
 
     void spawnFloatingText(const std::string& text, sf::Vector2f position, sf::Color color, float duration = 1.0f){
-        auto ft = std::make_shared<sf::Text>(visualState.getFont(), text, 30.f);
+        auto ft = std::make_shared<sf::Text>(visualState.getFont(), text, 20.f);
         ft->setFillColor(color);
         ft->setPosition(position);
         floatingTexts.push_back(ft);
@@ -333,45 +333,54 @@ public:
 
         auto func = [this,ptr, startPos, color](float t){
 
-            float flyInEnd   = 0.2f;
-            float holdEnd    = 0.8f;
+            float flyInEnd   = 0.33f;
+            float holdEnd    = 0.66f;
             float flyOutEnd  = 1.0f;
+
             float startY  = startPos.y;
-            float centerY = startPos.y - 20.f;
-            float endY    = startPos.y - 40.f;
-            float y       = startPos.y;
-            float x       = startPos.x;
+            float centerY = startPos.y - 10.f;
+            float endY    = startPos.y - 20.f;
+
+            float y = startY;
+            float x = startPos.x;
+            sf::Color c = color;
+            float peakScale = 1.1f;
             sf::Vector2f scale = {1.f, 1.f};
             if (t < flyInEnd)
             {
                 float localT = t / flyInEnd;
-                float eased = easeOutCubic(localT);
+                float eased = easeInCubic(localT);
+
                 y = startY + (centerY - startY) * eased;
+
+                float s = 1.f + (peakScale - 1.f) * eased;
+                scale = {s, s};
+                c.a = static_cast<uint8_t>(255.f * localT);
+
             }
             else if (t < holdEnd)
             {
-
-                float holdDuration = holdEnd - flyInEnd;
-                float localT = (t - flyInEnd) / holdDuration;
-                scale.x = 1.f + 0.1f * std::sin(localT * 3.14159f);
-                scale.y = scale.x;
+                y = centerY;
+                scale = {peakScale, peakScale};
             }
             else
             {
                 float flyOutDuration = flyOutEnd - holdEnd;
                 float localT = (t - holdEnd) / flyOutDuration;
+                float eased = easeOutCubic(localT);
 
-                float eased = easeInCubic(localT);
-                //float easedOut = 1.f - (1.f - localT) * (1.f - localT); // easeOutQuad
-                sf::Color c = color;
                 c.a = static_cast<uint8_t>(255.f * (1.f - localT));
-                ptr->setFillColor(c);
                 y = centerY + (endY - centerY) * eased;
+
+                float s = peakScale * (1.f - eased);
+                scale = {s, s};
             }
+
 
             //ptr->setPosition({startPos.x, startPos.y - 40.f * eased});
             ptr->setScale(scale);
             ptr->setPosition({x, y});
+            ptr->setFillColor(c);
 
         };
 
@@ -444,11 +453,14 @@ public:
         sf::Sprite* spritePtr = shockSprite.get();
 
         // Shock spritesheet has irregular frame positions, so custom update
-        auto func = [spritePtr, frameXs, frameW, frameH, frameY, frameCount, duration](float t){
-            float elapsed = t * duration;
-            float frameDuration = duration / frameCount;
-            int idx = std::min(int(elapsed / frameDuration), frameCount - 1);
-            spritePtr->setTextureRect(sf::IntRect({frameXs[idx], frameY}, {frameW, frameH}));
+        auto func = [spritePtr, frameXs, frameW, frameH, frameY, frameCount](float t)
+        {
+            float loopT = std::fmod(t * 2.f, 1.f);
+            int idx = std::min((int)std::floor(loopT * frameCount), frameCount - 1);
+
+            spritePtr->setTextureRect(
+                sf::IntRect({frameXs[idx], frameY}, {frameW, frameH})
+            );
         };
 
         Animation shockAnim = {func, [this](){ shockSprite.reset(); }, 0, duration};

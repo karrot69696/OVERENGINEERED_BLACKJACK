@@ -6,6 +6,15 @@ void BattlePhase::onEnter() {
 
     Player& currentPlayer = getCurrentPlayer();
     roundManager.updateGameState(PhaseName::BATTLE_PHASE,currentPlayer.getId());
+    std::string battleText =
+    "HOST " + std::to_string(roundManager.getHostPlayer().getId()) +
+    " VS PLAYER " + std::to_string(currentPlayer.getId());
+    eventQueue.push({
+        GameEventType::PHASE_ANNOUNCED, 
+        PhaseAnnouncedEvent{
+            battleText, 
+            AnimConfig::PHASE_TEXT_DURATION
+        }});
 }
 
 
@@ -39,8 +48,8 @@ std::optional<PhaseName> BattlePhase::onUpdate(){
         winner.gainPoint();
         loser.gainLoss();
         eventQueue.push({GameEventType::POINT_CHANGED, PointChangedEvent{winner.getId(), "+1 POINT"}});
-        eventQueue.push({GameEventType::SHOCK_EFFECT, ShockEffectEvent{winner.getId(), loser.getId(), 0.7f}});
-        eventQueue.push({GameEventType::EXPLOSION_EFFECT, ExplosionEffectEvent{loser.getId(), 3.0f, 0.8f}});
+        eventQueue.push({GameEventType::SHOCK_EFFECT, ShockEffectEvent{winner.getId(), loser.getId(), 0.9f}});
+        eventQueue.push({GameEventType::EXPLOSION_EFFECT, ExplosionEffectEvent{loser.getId(), 3.0f, 0.9f}});
     };
 
     //determine outcome

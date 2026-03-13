@@ -27,6 +27,9 @@ find_package(SFML 3 COMPONENTS System Window Graphics Audio Network REQUIRED)
 
 
 
+# ENet networking library
+add_subdirectory(include/enet-1.3.18)
+
 # Compiler warnings
 add_compile_options(-Wall -Wextra -Wpedantic)
 add_compile_options(-I "C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/include")
@@ -124,6 +127,34 @@ target_link_libraries(SkillEngine
         LowLevelEntities
 )
 
+# Create static library for networking
+set(NETWORKING_SOURCES
+    src/networking/NetworkManager.cpp
+)
+
+set(NETWORKING_HEADERS
+    src/networking/NetworkManager.h
+    src/networking/NetMessage.h
+    src/networking/NetSerializer.h
+)
+
+add_library(Networking STATIC
+    ${NETWORKING_SOURCES}
+    ${NETWORKING_HEADERS}
+)
+
+target_include_directories(Networking
+    PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}/src
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/enet-1.3.18/include
+)
+
+target_link_libraries(Networking
+    PUBLIC
+        LowLevelEntities
+        enet
+)
+
 # Create static library for game engine
 add_library(GameEngine STATIC
     ${GAME_ENGINE_SOURCES}
@@ -139,6 +170,7 @@ target_link_libraries(GameEngine
     PUBLIC
         LowLevelEntities
         SkillEngine
+        Networking
 )
 
 # Create static library for phase engine
@@ -156,6 +188,7 @@ target_link_libraries(PhaseEngine
     PUBLIC
         LowLevelEntities
         SkillEngine
+        Networking
 )
 
 # Main executable (assumes there's a main.cpp somewhere)
@@ -177,17 +210,12 @@ target_link_libraries(CrazyJack
         SkillEngine
         LowLevelEntities
         PhaseEngine
+        Networking
         SFML::Graphics
         SFML::Window
         SFML::System
         SFML::Audio
         SFML::Network
-)
-# copy SFML dlls to build directory after build
-add_custom_target(copy_assets ALL
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-    ${CMAKE_SOURCE_DIR}/src/assets
-    ${CMAKE_BINARY_DIR}/assets
 )
 # Installation rules
 install(TARGETS LowLevelEntities SkillEngine GameEngine PhaseEngine
