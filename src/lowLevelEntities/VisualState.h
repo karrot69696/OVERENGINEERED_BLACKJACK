@@ -29,6 +29,7 @@ namespace UILayout {
     const sf::Vector2f CARD_SIZE   = {60.f, 90.f};
     const sf::Vector2f BUTTON_SIZE = {120.f, 40.f};
     const float CARD_SPACING       = 70.f;
+    const float DECK_X_RATIO       = 0.07f;  // deck X as fraction of window width
 }
 // ============================================================================
 // Card Visual

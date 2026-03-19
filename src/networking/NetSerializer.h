@@ -85,6 +85,15 @@ public:
 };
 
 // ============================================================================
+// Target request (server → specific client, for multi-actor skills)
+// ============================================================================
+struct TargetRequestData {
+    int requesterId = -1;             // who triggered the skill
+    std::vector<int> allowedCardIds;  // card IDs the recipient may pick from
+    bool isBoostPick = false;         // false = pick your card, true = pick which card to boost
+};
+
+// ============================================================================
 // Card serialization (Suit, Rank, faceUp, id, ownerId, handIndex)
 // ============================================================================
 namespace NetSerializer {
@@ -94,6 +103,7 @@ inline void writeCard(ByteBuffer& buf, const Card& card) {
     buf.writeU8(static_cast<uint8_t>(card.getSuit()));
     buf.writeU8(static_cast<uint8_t>(card.getRank()));
     buf.writeBool(card.isFaceUp());
+    buf.writeI32(card.getRankBonus());
 }
 
 inline Card readCard(ByteBuffer& buf) {
@@ -101,8 +111,10 @@ inline Card readCard(ByteBuffer& buf) {
     Suit suit = static_cast<Suit>(buf.readU8());
     Rank rank = static_cast<Rank>(buf.readU8());
     bool faceUp = buf.readBool();
+    int rankBonus = buf.readI32();
     Card c(suit, rank, faceUp);
     c.setId(id);
+    c.setRankBonus(rankBonus);
     return c;
 }
 
@@ -114,6 +126,8 @@ inline void writePlayerInfo(ByteBuffer& buf, const PlayerInfo& info) {
     buf.writeU8(static_cast<uint8_t>(info.skill));
     buf.writeI32(info.skillUses);
     buf.writeI32(info.points);
+    buf.writeBool(info.isBot);
+    buf.writeBool(info.isHost);
     buf.writeU16(static_cast<uint16_t>(info.cardsInHand.size()));
     for (const Card& card : info.cardsInHand) {
         writeCard(buf, card);
@@ -126,6 +140,8 @@ inline PlayerInfo readPlayerInfo(ByteBuffer& buf) {
     info.skill = static_cast<SkillName>(buf.readU8());
     info.skillUses = buf.readI32();
     info.points = buf.readI32();
+    info.isBot = buf.readBool();
+    info.isHost = buf.readBool();
     uint16_t cardCount = buf.readU16();
     for (uint16_t i = 0; i < cardCount; i++) {
         info.cardsInHand.push_back(readCard(buf));
@@ -139,7 +155,13 @@ inline PlayerInfo readPlayerInfo(ByteBuffer& buf) {
 inline void writeGameState(ByteBuffer& buf, GameState& state) {
     buf.writeU8(static_cast<uint8_t>(state.getPhaseName()));
     buf.writeI32(state.getCurrentPlayerId());
-    buf.writeI32(state.getDeckCount());
+    // Deck cards
+    const auto& deckCards = state.getDeckCards();
+    buf.writeU16(static_cast<uint16_t>(deckCards.size()));
+    for (const Card& card : deckCards) {
+        writeCard(buf, card);
+    }
+    // Players
     auto allInfo = state.getAllPlayerInfo();
     buf.writeU16(static_cast<uint16_t>(allInfo.size()));
     for (const PlayerInfo& info : allInfo) {
@@ -150,7 +172,13 @@ inline void writeGameState(ByteBuffer& buf, GameState& state) {
 inline void readGameState(ByteBuffer& buf, GameState& state) {
     PhaseName phase = static_cast<PhaseName>(buf.readU8());
     int currentPlayerId = buf.readI32();
-    int deckCount = buf.readI32();
+    // Deck cards
+    uint16_t deckCardCount = buf.readU16();
+    std::vector<Card> deckCards;
+    for (uint16_t i = 0; i < deckCardCount; i++) {
+        deckCards.push_back(readCard(buf));
+    }
+    // Players
     uint16_t playerCount = buf.readU16();
     std::vector<PlayerInfo> allInfo;
     for (uint16_t i = 0; i < playerCount; i++) {
@@ -158,7 +186,7 @@ inline void readGameState(ByteBuffer& buf, GameState& state) {
     }
     state.setAllPlayerInfo(allInfo);
     state.setPhaseName(phase, currentPlayerId);
-    state.setDeckCount(deckCount);
+    state.setDeckCards(deckCards);
 }
 
 // ============================================================================
@@ -263,6 +291,16 @@ inline void writeGameEvent(ByteBuffer& buf, const GameEvent& event) {
         else if constexpr (std::is_same_v<T, ClearInputEvent>) {
             // no payload
         }
+        else if constexpr (std::is_same_v<T, SkillErrorEvent>) {
+            buf.writeI32(payload.playerId);
+            buf.writeString(payload.reason);
+        }
+        else if constexpr (std::is_same_v<T, NeuralGambitRevealEvent>) {
+            buf.writeI32(payload.cardId1);
+            buf.writeI32(payload.cardId2);
+            buf.writeI32(payload.boostCardId);
+            buf.writeI32(payload.boostAmount);
+        }
     }, event.data);
 }
 
@@ -350,6 +388,20 @@ inline GameEvent readGameEvent(ByteBuffer& buf) {
         case GameEventType::CLEAR_INPUT: {
             data = ClearInputEvent{};
         } break;
+        case GameEventType::SKILL_ERROR: {
+            SkillErrorEvent e;
+            e.playerId = buf.readI32();
+            e.reason = buf.readString();
+            data = e;
+        } break;
+        case GameEventType::NEURALGAMBIT_REVEAL: {
+            NeuralGambitRevealEvent e;
+            e.cardId1 = buf.readI32();
+            e.cardId2 = buf.readI32();
+            e.boostCardId = buf.readI32();
+            e.boostAmount = buf.readI32();
+            data = e;
+        } break;
     }
 
     return GameEvent{type, data};
@@ -371,6 +423,25 @@ inline std::vector<GameEvent> readEventBatch(ByteBuffer& buf) {
         events.push_back(readGameEvent(buf));
     }
     return events;
+}
+
+// ============================================================================
+// TargetRequest serialization
+// ============================================================================
+inline void writeTargetRequest(ByteBuffer& buf, const TargetRequestData& req) {
+    buf.writeI32(req.requesterId);
+    buf.writeBool(req.isBoostPick);
+    buf.writeU16(static_cast<uint16_t>(req.allowedCardIds.size()));
+    for (int id : req.allowedCardIds) buf.writeI32(id);
+}
+
+inline TargetRequestData readTargetRequest(ByteBuffer& buf) {
+    TargetRequestData req;
+    req.requesterId = buf.readI32();
+    req.isBoostPick = buf.readBool();
+    uint16_t n = buf.readU16();
+    for (uint16_t i = 0; i < n; i++) req.allowedCardIds.push_back(buf.readI32());
+    return req;
 }
 
 } // namespace NetSerializer

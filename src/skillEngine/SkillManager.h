@@ -4,27 +4,29 @@
 #include "Skill.h"
 #include "Skill_Deliverance.h"
 #include "Skill_NeuralGambit.h"
-#include <string>
+#include <vector>
+#include <memory>
 #include <iostream>
 #include "../lowLevelEntities/GameState.h"
-
-//every time a new skill is added
-// 0. Create the class for that skill
-// 1. add them to property of SkillManager : SkillDeliverance* skillDeliverance;
-// 2. modify createSkills, processSkill, getSkillUses, resetSkillUses
-class SkillManager{
+struct SkillExecutionResult {
+    SkillName name=SkillName::UNDEFINED;
+    std::string errorMsg="";
+};
+// To add a new skill:
+// 1. Create the skill class (Skill_Name.h)
+// 2. Add a case in createSkills()
+// Everything else (processSkill, getSkillUses, resetSkillUses, skillPassiveHandler) is generic.
+class SkillManager {
     private:
-        SkillDeliverance* skillDeliverance;
-        //other skills go here
+        std::vector<std::unique_ptr<Skill>> skills;
     public:
-        SkillManager(){};
+        SkillManager() {};
         void createSkills(std::vector<Player>& players);
-        bool processSkill(SkillContext& context);
+        SkillExecutionResult processSkill(SkillContext& context);
+        std::string preValidateSkill(int playerId, const GameState& state);
         int getSkillUses(SkillName name);
         void resetSkillUses(std::vector<Player>& players);
         bool skillPassiveHandler(GameState& gameState);
-
-
 };
 
 #endif

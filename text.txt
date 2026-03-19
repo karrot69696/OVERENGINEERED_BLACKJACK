@@ -68,9 +68,10 @@ Deliverance - 3 uses
     you can return 1 card from you hand
     to the deck, then shuffle it. If your are a host, this skill gains 3 uses
 Neural gambit - 2 use 
-    During your hit phase, you can choose another player, you and that player each choose
-    one card from your hand and reveal them, then you choose one of the cards revealed, 
+    During your hit phase, you can choose two players, both player each chooses
+    one card from their hand and reveal it, then you choose one of the cards revealed, 
     that card rank is increased by X (X is the difference between the revealed cards)
+    Passive - repercussions: Card affected by Neural gambit can increase their rank infinitely  
 Changing timeline - 2 use:
     During your hit phase or at the beginning of another player's hit phase,
     You can check the top 2 cards of the deck, then put them back anywhere in the deck.

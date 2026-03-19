@@ -29,7 +29,22 @@ struct Button {
     void draw(sf::RenderWindow& window);
     bool isClicked(sf::Vector2f mousePos);
 };
+struct PlayerVisual {
+    PlayerVisual(sf::Sprite sprite)
+        : playerSprite(std::move(sprite)) {}
+    sf::Sprite playerSprite;
+    int playerId = -1;
+    bool isTarget = false;
+    bool highlighted = false;
+    bool isHost = false;
+    SkillName skillName = SkillName::UNDEFINED;
+    int skillUses = 100;
+    int points = 0;
+    sf::Vector2f seatPostion = {0.f, 0.f};
 
+    void draw(sf::RenderWindow& window);
+    bool isClicked(sf::Vector2f mousePos);
+};
 // ============================================================================
 // UIManager
 // ============================================================================
@@ -45,15 +60,27 @@ class UIManager {
         std::vector<Button> actionButtons;
         bool showActionMenu = false;
         bool showTargetingOverlay_Deliverance = false;
+        bool showTargetingOverlay_NeuralGambit = false;
         int activePlayerId = -1;
+
+        enum class NgStep { PICK_PLAYER, WAITING_FOR_PICKS, PICK_BOOST_CARD };
+        NgStep ngStep = NgStep::PICK_PLAYER;
+        std::vector<int> ngTargetPlayerIds = {};
+        std::vector<int> ngTargetCardIds = {};     // [0],[1] = the two revealed card IDs for boost pick
+
+        // Pick-card overlay (shown to target players or skill user for boost pick)
+        bool showPickCardOverlay = false;
+        std::vector<int> pickCardAllowedIds;
         sf::Font font;
         sf::Texture cardTexture;
         sf::Texture tableTexture;
         sf::Texture playerIcon;
-        std::vector<sf::Sprite> playerSprite;
+        std::vector<PlayerVisual> playerVisuals;
         sf::Vector2f mousePos = {0.f, 0.f};
         int hoveredCardId = -1;
+        int hoveredPlayerId = -1;
         sf::Clock shakeClock;
+        int cheatOn = 1;
 
     public:
         UIManager(sf::RenderWindow& window, GameState& gameState,VisualState& visualState, std::vector<CardVisual>& cardVisuals);
@@ -61,7 +88,9 @@ class UIManager {
         // Call once per frame
         void handleEvent(const std::optional<sf::Event>& event);
         void render();
-        int cheatOn = 1;
+
+        int getActivePlayerId() const { return activePlayerId; }
+
         // Called by game logic to tell UI what input is needed
         void requestActionInput(int playerId);                          // show Hit/Stand/Skill buttons
         void requestTargetInput(int playerId);                          // show card targeting overlay
@@ -80,12 +109,20 @@ class UIManager {
         std::function<void(PlayerAction)> onActionChosen;
         std::function<void(PlayerTargeting)> onTargetChosen;
         
+        // Called by Phase::ngTickPending — target player must pick one of allowedCardIds
+        void requestPickCard(const std::vector<int>& allowedCardIds);
+        // Called by Phase::ngTickPending — skill user picks which of two cards gets boosted
+        void requestBoostPickInput(int card1Id, int card2Id);
+
         // Sub-renderers
         void renderTable();
         void renderCards();
         void renderHUD();
+        void renderPlayerVisuals();
         void renderActionMenu();
         void renderTargetingOverlay_Deliverance();
+        void renderTargetingOverlay_NeuralGambit();
+        void renderPickCardOverlay();
 };
 
 #endif

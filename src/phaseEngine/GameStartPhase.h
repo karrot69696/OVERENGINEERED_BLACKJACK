@@ -15,6 +15,7 @@ class GameStartPhase : public Phase {
         void onEnter() override;
         std::optional<PhaseName> onUpdate() override;
         void onExit() override;
+        PhaseName getClassPhaseName() const override { return PhaseName::GAME_START_PHASE; }
 };
 
 #endif

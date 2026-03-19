@@ -17,6 +17,7 @@ enum class GameEventType {
     POINT_CHANGED,
 
     PHASE_ANNOUNCED,
+    SKILL_ERROR,
 
     SHOCK_EFFECT,
     EXPLOSION_EFFECT,
@@ -25,6 +26,8 @@ enum class GameEventType {
     REQUEST_ACTION_INPUT,
     REQUEST_TARGET_INPUT,
     CLEAR_INPUT,
+
+    NEURALGAMBIT_REVEAL,         // skill visual: flash both revealed cards
 };
 
 // Payloads carry IDs only, never screen positions
@@ -91,7 +94,18 @@ struct RequestTargetInputEvent {
     int playerId;
 };
 
+struct SkillErrorEvent {
+    int playerId;
+    std::string reason;
+};
 struct ClearInputEvent {};
+
+struct NeuralGambitRevealEvent {
+    int cardId1;  // user's card
+    int cardId2;  // target's card
+    int boostCardId;
+    int boostAmount;
+};
 
 using GameEventData = std::variant<
     CardDrawnEvent,
@@ -107,7 +121,9 @@ using GameEventData = std::variant<
     DeliveranceEffectEvent,
     RequestActionInputEvent,
     RequestTargetInputEvent,
-    ClearInputEvent
+    ClearInputEvent,
+    SkillErrorEvent,
+    NeuralGambitRevealEvent
 >;
 
 struct GameEvent {

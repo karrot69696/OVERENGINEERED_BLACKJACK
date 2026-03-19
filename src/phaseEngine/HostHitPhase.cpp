@@ -17,42 +17,7 @@ void HostHitPhase::onEnter() {
     eventQueue.push({GameEventType::PHASE_ANNOUNCED, 
         PhaseAnnouncedEvent{turnText, AnimConfig::PHASE_TEXT_DURATION}});
 
-    //set callback for host action input during host hit phase
-    uiManager.onActionChosen = [&](PlayerAction chosenAction){
-        std::cout << "[HostHitPhase] Host " << hostPlayer.getId() << " chose action: " 
-                        << (chosenAction == PlayerAction::HIT ? 
-                            "HIT" : chosenAction == PlayerAction::STAND ? "STAND" : "SKILL_REQUEST") 
-                        << std::endl;
-
-        hostPlayer.setPendingAction(chosenAction);
-    
-        // If host chooses skill, switch to targeting mode immediately
-        if (chosenAction == PlayerAction::SKILL_REQUEST) {
-            // Switch to targeting mode
-            //UI prompt for skill target input
-            uiManager.requestTargetInput(hostPlayer.getId());
-        }
-    };
-    
-    //populate callback for skill target input during host hit phase
-    uiManager.onTargetChosen = [&](PlayerTargeting chosenTarget){
-        if (chosenTarget.targetPlayerIds.empty() && chosenTarget.targetCards.empty()){
-            eventQueue.push({GameEventType::REQUEST_ACTION_INPUT, RequestActionInputEvent{hostPlayer.getId()}});
-            getCurrentPlayer().setPendingAction(PlayerAction::IDLE);
-        }
-        else {
-            std::cout << "[uiManager.onTargetChosen] Host " << hostPlayer.getId() << " chose skill target: " 
-                        << ((int)chosenTarget.targetPlayerIds.size() > 0 ? 
-                            "Player " + chosenTarget.targetPlayerIds[0] : 
-                            "Card " + chosenTarget.targetCards[0].getRankAsString() 
-                            + " of " 
-                            + chosenTarget.targetCards[0].getSuitAsString())
-                        << std::endl;
-            gameState.pendingTarget = chosenTarget;
-        }
-    };
-
-    //UI prompt for host action input (queued after PHASE_ANNOUNCED so it shows after animation)
+    //UI prompt for host action input (callbacks wired once in Game.cpp)
     eventQueue.push({GameEventType::REQUEST_ACTION_INPUT, RequestActionInputEvent{hostPlayer.getId()}});
 
     //update player info in game state

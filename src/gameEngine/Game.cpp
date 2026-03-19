@@ -71,6 +71,40 @@ void Game::SetupGame(int numHumans, int numBots){
     std::cout << "Player " << players.front().getId() << " is the host." << std::endl;
 }
 
+void Game::SetupGame(int numLocal, int numRemote, int numBots){
+    int numPlayers = numLocal + numRemote + numBots;
+    if (numPlayers <= 1 || numBots < 0) {
+        std::cout << "Invalid input. Using defaults." << std::endl;
+        SetupGame(1, 2);
+        return;
+    }
+    numPlayers = std::min(numPlayers, maxNumPlayer);
+
+    // Create local human players
+    for (int i = 0; i < numLocal; i++){
+        SkillName newSkill = skillDeck.drawSkill();
+        std::cout << "Player " << i << " created (local)." << std::endl;
+        players.emplace_back(i, newSkill, 0, 0);
+    }
+    // Create remote human players
+    for (int i = numLocal; i < numLocal + numRemote; i++){
+        SkillName newSkill = skillDeck.drawSkill();
+        std::cout << "Player " << i << " created (remote)." << std::endl;
+        players.emplace_back(i, newSkill, 0, 0);
+        players.back().isRemote = true;
+    }
+    // Create bots
+    for (int i = numLocal + numRemote; i < numPlayers; i++){
+        SkillName newSkill = skillDeck.drawSkill();
+        std::cout << "Player (bot) " << i << " created." << std::endl;
+        players.emplace_back(i, newSkill, 1, 0);
+    }
+
+    //choose host (dealer)
+    players.front().setHost();
+    std::cout << "Player " << players.front().getId() << " is the host." << std::endl;
+}
+
 void Game::RunGame(){
     std::cout << "\n=== GAME START ===\n" << std::endl;
     RoundManager roundManager(
@@ -89,21 +123,76 @@ void Game::RunGame(){
         roundManager.changePhase(PhaseName::GAME_START_PHASE);
     }
 
-    // Client mode: override UIManager callbacks to send input over network
+    // Wire input callbacks ONCE — logic validates, then tells UI what to show
     if (networkMode == NetworkMode::CLIENT) {
         uiManager.onActionChosen = [this](PlayerAction action) {
             std::cout << "[Client] Sending action: " << static_cast<int>(action) << std::endl;
             networkManager.sendAction(action);
+            if (action == PlayerAction::SKILL_REQUEST) {
+                // Show targeting overlay locally; server will validate on execution
+                int activeId = uiManager.getActivePlayerId();
+                uiManager.requestTargetInput(activeId);
+            }
         };
         uiManager.onTargetChosen = [this](PlayerTargeting targeting) {
-            std::cout << "[Client] Sending targeting" << std::endl;
-            networkManager.sendTarget(targeting);
+            int activeId = uiManager.getActivePlayerId();
+            if (targeting.targetPlayerIds.empty() && targeting.targetCards.empty()) {
+                // Cancel — re-show action menu locally
+                eventQueue.push({GameEventType::REQUEST_ACTION_INPUT,
+                    RequestActionInputEvent{activeId}});
+            } else {
+                std::cout << "[Client] Sending targeting" << std::endl;
+                networkManager.sendTarget(targeting);
+            }
+        };
+    } else {
+        // HOST / LOCAL — logic layer validates before showing targeting UI
+        uiManager.onActionChosen = [this, &roundManager](PlayerAction action) {
+            int activeId = uiManager.getActivePlayerId();
+            Player* active = nullptr;
+            for (auto& p : players) {
+                if (p.getId() == activeId) { active = &p; break; }
+            }
+            if (!active) return;
+
+            if (action == PlayerAction::SKILL_REQUEST) {
+                // Pre-validate: check uses, phase, hand — before showing targeting
+                std::string error = roundManager.getSkillManager()
+                    .preValidateSkill(activeId, gameState);
+                if (!error.empty()) {
+                    eventQueue.push({GameEventType::SKILL_ERROR,
+                        SkillErrorEvent{activeId, error}});
+                    // Action menu stays visible — don't change UI
+                    return;
+                }
+                active->setPendingAction(action);
+                uiManager.requestTargetInput(activeId);
+            } else {
+                active->setPendingAction(action);
+            }
+        };
+        uiManager.onTargetChosen = [this](PlayerTargeting targeting) {
+            int activeId = uiManager.getActivePlayerId();
+            Player* active = nullptr;
+            for (auto& p : players) {
+                if (p.getId() == activeId) { active = &p; break; }
+            }
+            if (!active) return;
+
+            if (targeting.targetPlayerIds.empty() && targeting.targetCards.empty()) {
+                // Cancel — go back to action menu
+                eventQueue.push({GameEventType::REQUEST_ACTION_INPUT,
+                    RequestActionInputEvent{activeId}});
+                active->setPendingAction(PlayerAction::IDLE);
+            } else {
+                gameState.pendingTarget = targeting;
+            }
         };
     }
 
     // Fixed design resolution — content scales with letterboxing on resize
-    sf::View gameView({0.f, 0.f}, {(float)GameConfig::WINDOW_WIDTH, (float)GameConfig::WINDOW_HEIGHT});
-    gameView.setCenter({GameConfig::WINDOW_WIDTH / 2.f, GameConfig::WINDOW_HEIGHT / 2.f});
+    sf::View gameView({0.f, 0.f}, {(float)window.getSize().x, (float)window.getSize().y});
+    gameView.setCenter({window.getSize().x / 2.f, window.getSize().y / 2.f});
     window.setView(gameView);
 
     sf::Clock clock;
@@ -128,13 +217,15 @@ void Game::RunGame(){
         // Server and LOCAL run game logic; client does NOT
         if (networkMode != NetworkMode::CLIENT) {
             if (!animationManager.playing()) {
+                // Snapshot event queue size BEFORE logic runs
+                size_t eventsBefore = eventQueue.size();
                 roundManager.update();
-            }
-        }
 
-        if (networkMode == NetworkMode::HOST) {
-            // Server: broadcast state + events after logic tick
-            serverBroadcast();
+                if (networkMode == NetworkMode::HOST) {
+                    // Broadcast only NEW events produced by this update
+                    serverBroadcast(eventsBefore);
+                }
+            }
         }
 
         // Drain event queue → trigger animations/UI
@@ -169,8 +260,8 @@ void Game::eventHandler(const std::optional<sf::Event>& event){
     }
     else if (const auto* resized = event->getIf<sf::Event::Resized>()) {
         // Letterbox: maintain aspect ratio, black bars fill the gap
-        float designW = (float)GameConfig::WINDOW_WIDTH;
-        float designH = (float)GameConfig::WINDOW_HEIGHT;
+        float designW = (float)window.getSize().x;
+        float designH = (float)window.getSize().y;
         float windowW = (float)resized->size.x;
         float windowH = (float)resized->size.y;
         float designRatio = designW / designH;
@@ -207,19 +298,19 @@ bool Game::connectToServer(const std::string& ip, uint16_t port) {
     return networkManager.initClient(ip, port);
 }
 
-void Game::serverBroadcast() {
+void Game::serverBroadcast(size_t eventsBefore) {
     if (networkManager.getConnectedClientCount() == 0) return;
 
     // Broadcast current game state
     networkManager.broadcastGameState(gameState);
 
-    // Peek events (non-destructive) and broadcast to clients
-    // PresentationLayer will drain them afterwards for local rendering
-    auto events = eventQueue.peekAll();
-    if (!events.empty()) {
-        // std::cout << "[Server][broadcast] Sending " << events.size()
-        //           << " events to " << networkManager.getConnectedClientCount() << " client(s)" << std::endl;
-        networkManager.broadcastEvents(events);
+    // Broadcast only events that were added AFTER the snapshot
+    // Events stay in the queue for local PresentationLayer to consume — no drain/re-push
+    auto newEvents = eventQueue.getEventsFrom(eventsBefore);
+    if (!newEvents.empty()) {
+        std::cout << "[Server][broadcast] Sending " << newEvents.size()
+                  << " new events to " << networkManager.getConnectedClientCount() << " client(s)" << std::endl;
+        networkManager.broadcastEvents(newEvents);
     }
 }
 
@@ -229,10 +320,36 @@ void Game::clientReceive() {
         GameState& received = networkManager.consumeGameState();
         auto allInfo = received.getAllPlayerInfo();
 
-        // Per-frame GameState receive — no log (too noisy)
+        PhaseName oldPhase = gameState.getPhaseName();
+        int oldPlayerId = gameState.getCurrentPlayerId();
         gameState.setAllPlayerInfo(allInfo);
         gameState.setPhaseName(received.getPhaseName(), received.getCurrentPlayerId());
-        gameState.setDeckCount(received.getDeckCount());
+        gameState.setDeckCards(received.getDeckCards());
+
+        // Log phase/turn changes (not every frame)
+        if (received.getPhaseName() != oldPhase || received.getCurrentPlayerId() != oldPlayerId) {
+            std::cout << "[Client] State changed: phase=" << gameState.phaseToString(received.getPhaseName())
+                      << " currentPlayer=" << received.getCurrentPlayerId()
+                      << " deck=" << received.getDeckCards().size() << std::endl;
+            for (const auto& info : allInfo) {
+                std::cout << "  P" << info.playerId << ": " << info.cardsInHand.size() << " cards [";
+                for (const auto& c : info.cardsInHand) {
+                    std::cout << " id=" << c.getId() << (c.isFaceUp() ? "↑" : "↓");
+                }
+                std::cout << " ] pts=" << info.points << std::endl;
+            }
+        }
+
+        // Scale players to match server if count differs
+        if ((int)players.size() != (int)allInfo.size()) {
+            std::cout << "[Client] Player count mismatch: local=" << players.size()
+                      << " server=" << allInfo.size() << " → rebuilding" << std::endl;
+            players.clear();
+            for (const auto& info : allInfo) {
+                players.emplace_back(info.playerId, info.skill, 1, 0); // all remote bots by default
+            }
+            players.front().setHost();
+        }
 
         // Sync local Card*/Player objects from server's GameState
         syncLocalFromGameState();
@@ -243,8 +360,21 @@ void Game::clientReceive() {
             clientInitialBuild = true;
             std::cout << "[Client] Initial visual build complete" << std::endl;
         } else {
-            // Subsequent updates — reconcile metadata only, preserve animations
+            // Reconcile every frame — only updates metadata (ownerId, cardIndex,
+            // faceUp texture), never touches sprite positions, so it's safe
+            // even while animations are playing
             visualState.reconcile(gameState);
+        }
+    }
+
+    // Route target-pick requests from server (multi-actor skills like NeuralGambit)
+    if (networkManager.hasPendingTargetRequest()) {
+        TargetRequestData req = networkManager.consumePendingTargetRequest();
+        if (req.isBoostPick) {
+            if (req.allowedCardIds.size() >= 2)
+                uiManager.requestBoostPickInput(req.allowedCardIds[0], req.allowedCardIds[1]);
+        } else {
+            uiManager.requestPickCard(req.allowedCardIds);
         }
     }
 
@@ -253,7 +383,17 @@ void Game::clientReceive() {
     if (!events.empty()) {
         std::cout << "[Client][clientReceive] Got " << events.size() << " events from server" << std::endl;
     }
+    int myId = networkManager.getLocalPlayerId();
     for (auto& e : events) {
+        // Only show action/target input for this client's player
+        if (e.type == GameEventType::REQUEST_ACTION_INPUT) {
+            auto& data = std::get<RequestActionInputEvent>(e.data);
+            if (data.playerId != myId) continue;
+        }
+        if (e.type == GameEventType::REQUEST_TARGET_INPUT) {
+            auto& data = std::get<RequestTargetInputEvent>(e.data);
+            if (data.playerId != myId) continue;
+        }
         eventQueue.push(std::move(e));
     }
 }
@@ -274,21 +414,16 @@ void Game::syncLocalFromGameState() {
         player.clearHand();
     }
 
-    // Step 3: Assign cards to players based on server GameState
+    // Step 3: Assign cards to players based on server GameState (match by cardId)
     for (const PlayerInfo& info : allInfo) {
         for (const Card& infoCard : info.cardsInHand) {
-            // Find matching Card* in allCards by suit+rank (first unassigned match)
             bool found = false;
             for (auto& cardPtr : allCards) {
-                if (cardPtr->getSuit() == infoCard.getSuit() &&
-                    cardPtr->getRank() == infoCard.getRank() &&
-                    cardPtr->getOwnerId() == -1) {
-
+                if (cardPtr->getId() == infoCard.getId()) {
                     // Sync face-up state
                     if (infoCard.isFaceUp() != cardPtr->isFaceUp()) {
                         cardPtr->flip();
                     }
-
                     // Find local player and add card to hand
                     for (auto& player : players) {
                         if (player.getId() == info.playerId) {
@@ -301,20 +436,42 @@ void Game::syncLocalFromGameState() {
                 }
             }
             if (!found) {
-                std::cerr << "[Client][sync] WARNING: Could not find card "
-                          << infoCard.getRankAsString() << infoCard.getSuitAsString()
-                          << " for player " << info.playerId << std::endl;
+                std::cerr << "[Client][sync] WARNING: Could not find cardId="
+                          << infoCard.getId() << " for player " << info.playerId << std::endl;
             }
         }
     }
 
-    // Step 4: Rebuild deck with remaining unowned cards
+    // Step 4: Rebuild deck from GameState's deck cards (by cardId)
     deck.clearCards();
-    for (auto& cardPtr : allCards) {
-        if (cardPtr->getOwnerId() == -1) {
-            deck.addCard(cardPtr.get());
+    for (const Card& deckCard : gameState.getDeckCards()) {
+        for (auto& cardPtr : allCards) {
+            if (cardPtr->getId() == deckCard.getId()) {
+                if (deckCard.isFaceUp() != cardPtr->isFaceUp()) {
+                    cardPtr->flip();
+                }
+                deck.addCard(cardPtr.get());
+                break;
+            }
         }
     }
 
-    // syncLocalFromGameState done — no per-frame log
+    // Log sync summary (only when something interesting happened)
+    static int lastDeckSize = -1;
+    static std::vector<int> lastHandSizes;
+    bool changed = (int)deck.getCards().size() != lastDeckSize;
+    std::vector<int> handSizes;
+    for (auto& p : players) {
+        handSizes.push_back(p.getHandSize());
+    }
+    if (handSizes != lastHandSizes) changed = true;
+    if (changed) {
+        std::cout << "[Sync] deck=" << deck.getCards().size();
+        for (auto& p : players) {
+            std::cout << " P" << p.getId() << "=" << p.getHandSize() << "cards";
+        }
+        std::cout << std::endl;
+        lastDeckSize = (int)deck.getCards().size();
+        lastHandSizes = handSizes;
+    }
 }

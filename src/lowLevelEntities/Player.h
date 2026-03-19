@@ -105,7 +105,7 @@ class Player{
         void Stand();
         void returnCards(Deck& deck);
         void returnCards(Deck& deck, const std::vector<Card*>& cards);
-        void addCardToHand(Card* card);
+        void addCardToHand(Card* card, bool isSync = false);
         void flipAllCardsFaceUp();
         void clearHand() { cardsInHand.clear(); }  // for network sync (doesn't touch card ownership)
 

@@ -114,6 +114,18 @@ void PresentationLayer::processEvents() {
             animationManager.spawnPhaseText(e.text, e.duration);
         } break;
 
+        case GameEventType::SKILL_ERROR: {
+            auto& e = std::get<SkillErrorEvent>(event.data);
+                       std::cout << "[PresentationLayer] SKILL_ERROR: player=" << e.playerId
+                      << " text=\"" << e.reason << "\"" << std::endl;
+            sf::Vector2f seat = visualState.getPlayerSeatPos(
+                e.playerId, (int)gameState.getAllPlayerInfo().size()
+            );
+            sf::Vector2f textPos = {seat.x, seat.y - 40.f};
+            sf::Color textColor(255, 69, 69);
+            animationManager.spawnFloatingText(e.reason, textPos, textColor, 0.5);
+        } break;
+
         case GameEventType::SHOCK_EFFECT: {
             auto& e = std::get<ShockEffectEvent>(event.data);
             std::cout << "[PresentationLayer] SHOCK_EFFECT: winner=" << e.winnerId
@@ -140,13 +152,36 @@ void PresentationLayer::processEvents() {
         case GameEventType::REQUEST_ACTION_INPUT: {
             auto& e = std::get<RequestActionInputEvent>(event.data);
             std::cout << "[PresentationLayer] REQUEST_ACTION_INPUT: player=" << e.playerId << std::endl;
-            uiManager.requestActionInput(e.playerId);
+            // Only show UI for locally-controlled human players
+            PlayerInfo info = gameState.getPlayerInfo(e.playerId);
+            if (!info.isBot && !info.isRemote) {
+                uiManager.requestActionInput(e.playerId);
+            }
         } break;
 
         case GameEventType::REQUEST_TARGET_INPUT: {
             auto& e = std::get<RequestTargetInputEvent>(event.data);
             std::cout << "[PresentationLayer] REQUEST_TARGET_INPUT: player=" << e.playerId << std::endl;
-            uiManager.requestTargetInput(e.playerId);
+            PlayerInfo info = gameState.getPlayerInfo(e.playerId);
+            if (!info.isBot && !info.isRemote) {
+                uiManager.requestTargetInput(e.playerId);
+            }
+        } break;
+
+        case GameEventType::NEURALGAMBIT_REVEAL: {
+            auto& e = std::get<NeuralGambitRevealEvent>(event.data);
+            std::cout << "[PresentationLayer] NEURALGAMBIT_REVEAL: cards "
+                      << e.cardId1 << " & " << e.cardId2
+                      << " -> boost card " << e.boostCardId
+                      << " +" << e.boostAmount << std::endl;
+            CardVisual& boostCv = visualState.getCardVisual(e.boostCardId);
+            sf::Vector2f pos = boostCv.cardSprite.getPosition();
+            animationManager.spawnFloatingText(
+                "+" + std::to_string(e.boostAmount),
+                { pos.x, pos.y - 20.f },
+                sf::Color(255, 215, 0),
+                1.5f
+            );
         } break;
 
         case GameEventType::CLEAR_INPUT: {

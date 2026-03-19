@@ -38,8 +38,10 @@ void RoundEndPhase::onEnter() {
         playerCardIds.push_back(ids);
     }
 
-    // Return all cards to deck + reset blackjack
+    // Return all cards to deck + reset blackjack + clear rank bonuses
     for (auto& player : players){
+        for (int i = 0; i < player.getHandSize(); i++)
+            player.getCardInHand(i)->resetRankBonus();
         player.returnCards(deck);
         player.blackJackSet(false);
     }

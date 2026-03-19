@@ -22,7 +22,12 @@ void RoundManager::updateGameState(PhaseName phase, int playerId){
     //             << " Player Id: "<< playerId << std::endl;
                 
     gameState.setPhaseName(phase, playerId);
-    gameState.setDeckCount(deck.getSize());
+    // Snapshot deck cards into GameState
+    std::vector<Card> deckSnapshot;
+    for (auto* card : deck.getCards()) {
+        deckSnapshot.push_back(*card);
+    }
+    gameState.setDeckCards(deckSnapshot);
     //update playerInfo
     std::vector<PlayerInfo> allPlayerInfos;
     for (auto& player : players){
@@ -37,13 +42,16 @@ void RoundManager::updateGameState(PhaseName phase, int playerId){
             playerHand.push_back(*player.getCardInHand(i));
         }
         
-        PlayerInfo playerInfo{  
+        PlayerInfo playerInfo{
             player.getId(),
             playerHand,
             player.getSkillName(),
             skillManager.getSkillUses(player.getSkillName()),
-            player.getPoint()
-        }; 
+            player.getPoint(),
+            player._isBot(),
+            (bool)player.getHost(),
+            player.isRemote
+        };
 
         allPlayerInfos.push_back(playerInfo);
     }

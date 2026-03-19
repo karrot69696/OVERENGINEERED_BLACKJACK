@@ -11,6 +11,7 @@ class PlayerHitPhase :public Phase {
         void onEnter() override;
         std::optional<PhaseName> onUpdate() override;
         void onExit() override;
+        PhaseName getClassPhaseName() const override { return PhaseName::PLAYER_HIT_PHASE; }
 };
 
 #endif

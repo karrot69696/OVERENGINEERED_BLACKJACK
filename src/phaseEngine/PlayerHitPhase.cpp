@@ -16,32 +16,7 @@ void PlayerHitPhase::onEnter() {
     //update player info in game state
     roundManager.updateGameState(PhaseName::PLAYER_HIT_PHASE,currentPlayer.getId());
 
-    // Set up callback for player action input
-    uiManager.onActionChosen = [&](PlayerAction chosenAction){
-        std::cout << "[PlayerHitPhase] Player " << getCurrentPlayer().getId() << " chose action: " 
-                    << (chosenAction == PlayerAction::HIT ? 
-                        "HIT" : chosenAction == PlayerAction::STAND ? "STAND" : "SKILL_REQUEST") 
-                    << std::endl;
-
-        getCurrentPlayer().setPendingAction(chosenAction);
-        if (chosenAction == PlayerAction::SKILL_REQUEST) {
-            // Switch to targeting mode
-            //UI prompt for skill target input
-            uiManager.requestTargetInput(currentPlayer.getId());
-        }
-    };
-
-    //populate callback for skill target input during player hit phase
-    uiManager.onTargetChosen = [&](PlayerTargeting chosenTarget){
-        
-        if (chosenTarget.targetPlayerIds.empty() && chosenTarget.targetCards.empty()){
-            eventQueue.push({GameEventType::REQUEST_ACTION_INPUT, RequestActionInputEvent{currentPlayer.getId()}});
-            getCurrentPlayer().setPendingAction(PlayerAction::IDLE);
-        }
-        else gameState.pendingTarget = chosenTarget;
-
-    };
-    //UI prompt for player action input
+    //UI prompt for player action input (callbacks wired once in Game.cpp)
     eventQueue.push({GameEventType::REQUEST_ACTION_INPUT, RequestActionInputEvent{currentPlayer.getId()}});
 }
 

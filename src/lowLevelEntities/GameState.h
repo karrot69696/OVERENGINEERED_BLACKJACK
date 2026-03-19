@@ -5,8 +5,8 @@
 #include "SkillDeck.h"
 #include <vector>
 namespace GameConfig {
-    constexpr int WINDOW_WIDTH = 1366;
-    constexpr int WINDOW_HEIGHT = 768;
+    constexpr int WINDOW_WIDTH = 683;
+    constexpr int WINDOW_HEIGHT = 384;
     constexpr int BLACKJACK_VALUE = 21;
     constexpr int DEALER_STAND_VALUE = 17;
     constexpr int ACE_HIGH_VALUE = 11;
@@ -39,6 +39,9 @@ struct PlayerInfo {
     SkillName skill;
     int skillUses;
     int points;
+    bool isBot = false;
+    bool isHost = false;
+    bool isRemote = false;
 };
 enum class PlayerAction{
     HIT,
@@ -55,17 +58,16 @@ private:
     std::vector<PlayerInfo> playersInfo;
     PhaseName phase;
     int currentPlayerId=0;
-    int deckCount;
+    std::vector<Card> deckCards;
 public:
     PlayerAction pendingPlayerAction = PlayerAction::IDLE;
     PlayerTargeting pendingTarget;
     void setAllPlayerInfo(std::vector<PlayerInfo> playersInfo);
     void setPhaseName(PhaseName newPhaseName, int newCurrentPlayerId);
-    void setDeckCount(int count){
-        deckCount=count;
-    }
+    void setDeckCards(const std::vector<Card>& cards) { deckCards = cards; }
     //getters
-    int getDeckCount() const { return deckCount; }
+    int getDeckCount() const { return (int)deckCards.size(); }
+    const std::vector<Card>& getDeckCards() const { return deckCards; }
     int getCurrentPlayerId() {return currentPlayerId;}
     void incrementCurrentPlayerId(int numPlayers) {
         currentPlayerId++;
@@ -74,8 +76,8 @@ public:
            currentPlayerId = -1;
         }
     }
-    PhaseName getPhaseName();
-    PlayerInfo getPlayerInfo(int id){
+    PhaseName getPhaseName() const;
+    PlayerInfo getPlayerInfo(int id) const {
         for (auto& player : playersInfo){
             if (player.playerId==id)
             return player;
@@ -111,19 +113,28 @@ public:
     }
     std::string phaseToString(PhaseName phase) {
         switch (phase) {
+            case PhaseName::GAME_START_PHASE: return "GAME START PHASE";
             case PhaseName::BLACKJACK_CHECK_PHASE: return "BLACKJACK CHECK PHASE";
             case PhaseName::PLAYER_HIT_PHASE: return "PLAYER HIT PHASE";
             case PhaseName::HOST_HIT_PHASE: return "HOST HIT PHASE";
             case PhaseName::BATTLE_PHASE: return "BATTLE PHASE";
             case PhaseName::ROUND_END: return "ROUND END";
+            case PhaseName::GAME_OVER: return "GAME OVER";
             default: return "UNKNOWN PHASE";
         }
     }
     
     std::string skillNameToString(SkillName skill) {
         switch (skill) {
-            case SkillName::DELIVERANCE: return "DELIVERANCE";
-            default: return "UNKNOWN";
+            case SkillName::DELIVERANCE:   return "DELIVERANCE";
+            case SkillName::NEURALGAMBIT:  return "NEURAL GAMBIT";
+            case SkillName::MULTIVERSE:    return "MULTIVERSE";
+            case SkillName::CLONE:         return "CLONE";
+            case SkillName::BOOGIEWOOGIE:  return "BOOGIE WOOGIE";
+            case SkillName::LOOKMAXXING:   return "LOOKMAXXING";
+            case SkillName::SIGMA:         return "SIGMA";
+            case SkillName::UNDEFINED:     return "UNDEFINED";
+            default:                       return "UNKNOWN";
         }
     }
 

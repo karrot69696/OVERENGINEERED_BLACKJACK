@@ -67,6 +67,7 @@ private:
     void handleServerEvent(ByteBuffer& buf);
     void handleServerEventBatch(ByteBuffer& buf);
     void handleServerGameSetup(ByteBuffer& buf);
+    void handleServerTargetRequest(ByteBuffer& buf);
 
     // Find RemotePlayer by peer
     RemotePlayer* findRemoteByPeer(ENetPeer* peer);
@@ -133,6 +134,22 @@ public:
     // Drain received events
     std::vector<GameEvent> drainReceivedEvents();
 
+    // Server: broadcast game start signal to all clients
+    void broadcastGameStart();
+
+    // Server: send a target-pick request to a specific client (multi-actor skills)
+    void sendTargetRequest(int targetPlayerId, const TargetRequestData& req);
+
+    // Client: has the server signaled game start?
+    bool hasGameStarted() const { return gameStarted; }
+
+    // Client: pending target request from server (multi-actor skills)
+    bool hasPendingTargetRequest() const { return hasPendingTargetRequestFlag; }
+    TargetRequestData consumePendingTargetRequest() {
+        hasPendingTargetRequestFlag = false;
+        return pendingTargetRequest;
+    }
+
     // Callbacks for connection events
     std::function<void(int playerId)> onClientConnected;    // server: new client joined
     std::function<void(int playerId)> onClientDisconnected; // server: client left
@@ -143,6 +160,11 @@ private:
     // Pending actions/targets from remote players (server-side)
     std::unordered_map<int, PlayerAction> pendingActions;
     std::unordered_map<int, PlayerTargeting> pendingTargets;
+    bool gameStarted = false;   // client: set true when SERVER_GAME_START received
+
+    // Client: incoming target-pick request from server
+    bool hasPendingTargetRequestFlag = false;
+    TargetRequestData pendingTargetRequest;
 };
 
 #endif

@@ -110,8 +110,8 @@ void VisualState::rebuildFromState(Deck& deck, std::vector<Player>& players) {
     float scaleX = UILayout::CARD_SIZE.x / cellW;
     float scaleY = UILayout::CARD_SIZE.y / cellH;
 
-    float startX = 50.f;
     auto winSize = window.getSize();
+    float startX = static_cast<float>(winSize.x) * UILayout::DECK_X_RATIO;
     float windowH = static_cast<float>(winSize.y);
     float deckY = windowH / 2.f;
 
@@ -185,10 +185,14 @@ void VisualState::reconcile(GameState& gs) {
     }
 
     // Update each existing CardVisual
+    int changedOwner = 0, changedIndex = 0, changedFace = 0, changedLoc = 0;
     for (auto& cv : cardVisuals) {
         auto it = desired.find(cv.cardId);
         if (it != desired.end()) {
             // Card is in a player's hand
+            if (cv.ownerId != it->second.ownerId) { changedOwner++; }
+            if (cv.cardIndex != it->second.handIndex) { changedIndex++; }
+            if (cv.location != CardLocation::HAND) { changedLoc++; }
             cv.ownerId = it->second.ownerId;
             cv.cardIndex = it->second.handIndex;
             cv.location = CardLocation::HAND;
@@ -196,6 +200,7 @@ void VisualState::reconcile(GameState& gs) {
             // Update face texture if faceUp state changed
             bool showFace = cheatOn || it->second.faceUp;
             if (cv.faceUp != showFace) {
+                changedFace++;
                 cv.faceUp = showFace;
                 // We need suit/rank to pick the right texture rect — find from allInfo
                 const Card& infoCard = allInfo[0].cardsInHand[0]; // placeholder
@@ -219,9 +224,16 @@ void VisualState::reconcile(GameState& gs) {
             }
         } else {
             // Card not in any player's hand → it's in the deck
+            if (cv.location != CardLocation::DECK) { changedLoc++; }
             cv.ownerId = -1;
             cv.cardIndex = -1;
             cv.location = CardLocation::DECK;
         }
+    }
+    if (changedOwner || changedIndex || changedFace || changedLoc) {
+        std::cout << "[Reconcile] owner=" << changedOwner
+                  << " index=" << changedIndex
+                  << " face=" << changedFace
+                  << " loc=" << changedLoc << std::endl;
     }
 }

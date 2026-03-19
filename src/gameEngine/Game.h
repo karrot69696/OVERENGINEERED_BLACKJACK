@@ -47,6 +47,7 @@ public:
     ~Game(){}
     void SetupGame();
     void SetupGame(int numHumans, int numBots);
+    void SetupGame(int numLocal, int numRemote, int numBots);
     void RunGame();
     void eventHandler(const std::optional<sf::Event>& event);
 
@@ -57,7 +58,8 @@ public:
 
 private:
     bool clientInitialBuild = false;  // true after first GameState → full visual build
-    void serverBroadcast();
+    PhaseName lastClientPhase = PhaseName::GAME_START_PHASE;  // track phase for reconcile gating
+    void serverBroadcast(size_t eventsBefore);
     void clientReceive();
     void syncLocalFromGameState();  // client: sync Card*/Player hands from received GameState
 };

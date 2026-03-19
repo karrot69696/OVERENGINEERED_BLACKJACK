@@ -18,6 +18,8 @@ enum class NetMsgType : uint8_t {
     SERVER_EVENT_BATCH,     // batch of GameEvents
     SERVER_KICK,            // server kicking client
     SERVER_GAME_SETUP,      // player list + initial setup info
+    SERVER_GAME_START,      // server signals lobby → game transition
+    SERVER_TARGET_REQUEST,  // server asks a specific client to pick a card (multi-actor skills)
 };
 
 enum class NetworkMode : uint8_t {

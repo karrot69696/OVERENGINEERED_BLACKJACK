@@ -5,16 +5,16 @@ void BattlePhase::onEnter() {
     std::cout << "\n=== ENTERING BATTLE PHASE ===\n" << std::endl;
 
     Player& currentPlayer = getCurrentPlayer();
-    roundManager.updateGameState(PhaseName::BATTLE_PHASE,currentPlayer.getId());
     std::string battleText =
     "HOST " + std::to_string(roundManager.getHostPlayer().getId()) +
     " VS PLAYER " + std::to_string(currentPlayer.getId());
     eventQueue.push({
-        GameEventType::PHASE_ANNOUNCED, 
+        GameEventType::PHASE_ANNOUNCED,
         PhaseAnnouncedEvent{
-            battleText, 
+            battleText,
             AnimConfig::PHASE_TEXT_DURATION
         }});
+    roundManager.updateGameState(PhaseName::BATTLE_PHASE,currentPlayer.getId());
 }
 
 
@@ -35,7 +35,6 @@ std::optional<PhaseName> BattlePhase::onUpdate(){
                 <<" [" << opponentHandValue << "]" << std::endl;
     //start battle, reprint hand value after host's turn since manipulation might
     //have happenned here
-    roundManager.updateGameState(PhaseName::BATTLE_PHASE,opponent.getId());
     host.flipAllCardsFaceUp();
     opponentHandValue = opponent.calculateHandValue();
     hostHandValue = host.calculateHandValue() ;

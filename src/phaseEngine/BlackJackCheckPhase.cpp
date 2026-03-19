@@ -35,6 +35,8 @@ std::optional<PhaseName> BlackJackCheckPhase::onUpdate(){
 
             std::cout << "[BlackJackCheckPhase] Host player has Black Jack! Host player wins the round!" << std::endl;
             currentPlayer.gainPoint((int)players.size()-1);
+            eventQueue.push({GameEventType::POINT_CHANGED, PointChangedEvent{
+                currentPlayer.getId(), "BLACKJACK! +" + std::to_string((int)players.size()-1)}});
             roundManager.updateGameState(PhaseName::ROUND_END, currentPlayer.getId());
             return PhaseName::ROUND_END;
         }
@@ -44,6 +46,8 @@ std::optional<PhaseName> BlackJackCheckPhase::onUpdate(){
             currentPlayer.flipAllCardsFaceUp();
             currentPlayer.gainPoint(2);
             currentPlayer.blackJackSet();
+            eventQueue.push({GameEventType::POINT_CHANGED, PointChangedEvent{
+                currentPlayer.getId(), "BLACKJACK! +2"}});
         }
     }
 

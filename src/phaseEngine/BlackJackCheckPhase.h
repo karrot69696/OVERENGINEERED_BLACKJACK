@@ -12,6 +12,7 @@ class BlackJackCheckPhase : public Phase {
         void onEnter() override;
         std::optional<PhaseName> onUpdate() override;
         void onExit() override;
+        PhaseName getClassPhaseName() const override { return PhaseName::BLACKJACK_CHECK_PHASE; }
 };
 
 #endif

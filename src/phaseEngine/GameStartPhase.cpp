@@ -19,14 +19,15 @@ std::optional<PhaseName> GameStartPhase::onUpdate(){
         //logic
         Card* drawnCard = deck.draw();
         player.addCardToHand(drawnCard);
-        roundManager.updateGameState(PhaseName::GAME_START_PHASE, player.getId());
 
-        //emit draw event
+        //emit draw event BEFORE updateGameState so event+state are consistent
         eventQueue.push({GameEventType::CARD_DRAWN, CardDrawnEvent{
             player.getId(),
             player.getHandSize() - 1,
             drawnCard->getId()
         }});
+
+        roundManager.updateGameState(PhaseName::GAME_START_PHASE, player.getId());
 
         // advance to next player, wrap to next round
         dealPlayer++;
@@ -34,7 +35,7 @@ std::optional<PhaseName> GameStartPhase::onUpdate(){
             dealPlayer = 0;
             dealRound++;
         }
-
+        std::cout<<"\nstaying in GAME_START_PHASE...."<<std::endl;
         return std::nullopt; // stay in this phase
     }
 

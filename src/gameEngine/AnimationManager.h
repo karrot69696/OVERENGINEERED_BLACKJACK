@@ -121,10 +121,11 @@ public:
         };
 
         // Set center origin so rotation spins around the card center (frisbee)
-        auto bounds = card.cardSprite.getLocalBounds();
-        sf::Vector2f localCenter = {bounds.size.x / 2.f, bounds.size.y / 2.f};
-        sf::Vector2f scale = card.cardSprite.getScale();
-        sf::Vector2f worldOffset = {localCenter.x * scale.x, localCenter.y * scale.y};
+        // setOrigin needs local coords; worldOffset needs world (scaled) coords
+        auto localBounds  = card.cardSprite.getLocalBounds();
+        auto globalBounds = card.cardSprite.getGlobalBounds();
+        sf::Vector2f localCenter = {localBounds.size.x / 2.f, localBounds.size.y / 2.f};
+        sf::Vector2f worldOffset = {globalBounds.size.x / 2.f, globalBounds.size.y / 2.f};
 
         card.cardSprite.setOrigin(localCenter);
 
@@ -153,13 +154,11 @@ public:
         // Current hand position (already center-based from draw animation)
         sf::Vector2f startPosition = card.cardSprite.getPosition();
 
-        // Deck position (top-left based: 50, windowH/2), convert to center
-        auto bounds = card.cardSprite.getLocalBounds();
-        sf::Vector2f localCenter = {bounds.size.x / 2.f, bounds.size.y / 2.f};
-        sf::Vector2f scale = card.cardSprite.getScale();
-        sf::Vector2f worldOffset = {localCenter.x * scale.x, localCenter.y * scale.y};
+        // Deck position (top-left based), convert to center
+        auto bounds = card.cardSprite.getGlobalBounds();
+        sf::Vector2f worldOffset = {bounds.size.x / 2.f, bounds.size.y / 2.f};
 
-        float deckX = 50.f;
+        float deckX = static_cast<float>(window.getSize().x) * UILayout::DECK_X_RATIO;
         float deckY = static_cast<float>(window.getSize().y) / 2.f;
         sf::Vector2f centerEnd = {deckX + worldOffset.x, deckY + worldOffset.y};
 
@@ -183,11 +182,7 @@ public:
         sf::Vector2f startPosition = card.cardSprite.getPosition();
 
         auto bounds = card.cardSprite.getLocalBounds();
-        sf::Vector2f localCenter = {bounds.size.x / 2.f, bounds.size.y / 2.f};
-        sf::Vector2f scale = card.cardSprite.getScale();
-        sf::Vector2f worldOffset = {localCenter.x * scale.x, localCenter.y * scale.y};
-
-        card.cardSprite.setOrigin(localCenter);
+        card.cardSprite.setOrigin({bounds.size.x / 2.f, bounds.size.y / 2.f});
 
         auto func = [this,&card, startPosition](float t){
             float ease = easeOutCubic(t);
@@ -218,10 +213,8 @@ public:
             CardVisual& cv = *handCards[i];
             cv.cardIndex = i;
 
-            auto bounds = cv.cardSprite.getLocalBounds();
-            sf::Vector2f localCenter = {bounds.size.x / 2.f, bounds.size.y / 2.f};
-            sf::Vector2f scale = cv.cardSprite.getScale();
-            sf::Vector2f worldOffset = {localCenter.x * scale.x, localCenter.y * scale.y};
+            auto globalBounds = cv.cardSprite.getGlobalBounds();
+            sf::Vector2f worldOffset = {globalBounds.size.x / 2.f, globalBounds.size.y / 2.f};
 
             sf::Vector2f startPos = cv.cardSprite.getPosition();
             sf::Vector2f endPos = {

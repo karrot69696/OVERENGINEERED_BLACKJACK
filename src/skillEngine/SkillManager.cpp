@@ -1,71 +1,88 @@
 #include "SkillManager.h"
 
-void SkillManager::createSkills(std::vector<Player>& players){
-    for (auto & player : players){
-        switch (player.getSkillName()){
+void SkillManager::createSkills(std::vector<Player>& players) {
+    for (auto& player : players) {
+        switch (player.getSkillName()) {
             case SkillName::DELIVERANCE:
-                skillDeliverance = new SkillDeliverance(player.getId());
-                std::cout<<"[createSkills] Created [Deliverance] for player "<< player.getId()<<std::endl;
-            break;
+                skills.push_back(std::make_unique<SkillDeliverance>(player.getId()));
+                std::cout << "[createSkills] Created [Deliverance] for player " << player.getId() << std::endl;
+                break;
+            case SkillName::NEURALGAMBIT:
+                skills.push_back(std::make_unique<SkillNeuralGambit>(player.getId()));
+                std::cout << "[createSkills] Created [NeuralGambit] for player " << player.getId() << std::endl;
+                break;
             default:
-                std::cout <<"[createSkills] Skill: "<<player.skillNameToString() <<" does not exist"<<std::endl;
+                std::cout << "[createSkills] Skill: " << player.skillNameToString() << " does not exist" << std::endl;
         }
-        
-        //run other ifs here to create other skills
     }
 }
 
-bool SkillManager::processSkill(SkillContext& context){
-    if (context.user.getSkillName()==SkillName::DELIVERANCE ){
-        std::cout<< "[processSkill] Using "<< skillDeliverance->skillNameToString() 
-        << std::endl;
-        if ( skillDeliverance->canUse(context) ){
-            return skillDeliverance->execute(context);
-        }
-        return false;
-    }
-
-    std::cout << "[processSkill] Skill does not exist" << std::endl;
-    return false;
-}
-
- int SkillManager::getSkillUses(SkillName name){
-    switch (name){
-        case SkillName::DELIVERANCE:
-            return skillDeliverance->getUses();
-        break;
-        default:
-            //std::cout << "[getSkillUses] Skill does not exist" << std::endl;
-            return 100;
-    }
-}
-
-void SkillManager::resetSkillUses(std::vector<Player>& players){
-    std::cout<< "[SkillManager] Reset all skills' uses" << std::endl;
-    for (auto& player : players){
-        std::cout<<"player:"<<player.getId()<<std::endl;
-        switch (player.getSkillName()){
-
-            case SkillName::DELIVERANCE:
-                if (player.getHost() && skillDeliverance){
-                    skillDeliverance->resetUses();
+SkillExecutionResult SkillManager::processSkill(SkillContext& context) {
+    SkillExecutionResult result;
+    for (auto& skill : skills) {
+        //find skill that the user is owning
+        if (skill->getUserId() == context.user.getId()) {
+            std::cout << "[processSkill] Using " << skill->skillNameToString() << std::endl;
+            //check its conditions
+            result.errorMsg = skill->canUse(context);
+            if (result.errorMsg=="") {
+                //execute skill -> pure logic, just modifies game
+                bool success = skill->execute(context);
+                //return result 
+                if(success){
+                    result.name = skill->getSkillName();
+                    return result;
                 }
-                else skillDeliverance->resetUses();
-            break;
+                else {
+                    result.errorMsg = "Skill execution failed";
+                    result.name = SkillName::UNDEFINED;
+                    return result;
+                }
+            }
+            std::cout << "[processSkill] " << result.errorMsg << std::endl;
+            result.name = SkillName::UNDEFINED;
+            return result;
         }
+    }
+    result.errorMsg = "SKILL DOES NOT EXIST";
+    std::cout << "[processSkill] Skill does not exist" << std::endl;
+    result.name = SkillName::UNDEFINED;
+    return result;
+}
+
+std::string SkillManager::preValidateSkill(int playerId, const GameState& state) {
+    for (auto& skill : skills) {
+        if (skill->getUserId() == playerId) {
+            return skill->canActivate(state);
+        }
+    }
+    return "SKILL DOES NOT EXIST";
+}
+
+int SkillManager::getSkillUses(SkillName name) {
+    for (auto& skill : skills) {
+        if (skill->getSkillName() == name) {
+            return skill->getUses();
+        }
+    }
+    return 100;
+}
+
+void SkillManager::resetSkillUses(std::vector<Player>& players) {
+    std::cout << "[SkillManager] Reset all skills' uses" << std::endl;
+    for (auto& skill : skills) {
+        std::cout << "player:" << skill->getUserId() << std::endl;
+        skill->resetUses();
     }
 }
 
-bool SkillManager::skillPassiveHandler(GameState& gameState){
-    std::cout << "[SkillManager] Activating skill passive..."<<std::endl;
-    if (skillDeliverance){
-        if (skillDeliverance->activatePassive(gameState)){
-            std::cout
-            <<"[SkillManager] Deliverance passive activated, Player "
-            << gameState.getCurrentPlayerId()<< " gains 3 uses" << std::endl;
+bool SkillManager::skillPassiveHandler(GameState& gameState) {
+    std::cout << "[SkillManager] Activating skill passive..." << std::endl;
+    for (auto& skill : skills) {
+        if (skill->activatePassive(gameState)) {
+            std::cout << "[SkillManager] Passive activated for player " << skill->getUserId() << std::endl;
             return true;
         }
     }
     return false;
 }
-// write a function that calculates factorial

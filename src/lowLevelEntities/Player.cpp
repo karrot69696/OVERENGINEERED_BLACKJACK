@@ -54,7 +54,7 @@ void Player::returnCards(Deck& deck, const std::vector<Card*>& cards) {
     printCardsInHand();
 }
 
-void Player::addCardToHand(Card* card, bool isSync = false){
+void Player::addCardToHand(Card* card, bool isSync){
     if (card == nullptr) {
         std::cout << "[Player] Card is null" << std::endl;
         return;
@@ -142,6 +142,10 @@ int Player::calculateHandValue() const{
             handValue += GameConfig::ACE_LOW_VALUE;
         }
     }
+
+    // Apply rank bonuses from skills (e.g. NeuralGambit)
+    for (auto* card : cardsInHand) handValue += card->getRankBonus();
+
     return handValue;
 }
 
@@ -241,10 +245,14 @@ void Player::printCardsInHand(){
 
 std::string Player::skillNameToString(){
     switch (skillName){
-        case SkillName::DELIVERANCE:
-            return "DELIVERANCE";
-        break;
-        default:
-            return "[skillNameToString] Skill name not found";
+        case SkillName::DELIVERANCE:   return "DELIVERANCE";
+        case SkillName::NEURALGAMBIT:  return "NEURAL GAMBIT";
+        case SkillName::MULTIVERSE:    return "MULTIVERSE";
+        case SkillName::CLONE:         return "CLONE";
+        case SkillName::BOOGIEWOOGIE:  return "BOOGIE WOOGIE";
+        case SkillName::LOOKMAXXING:   return "LOOKMAXXING";
+        case SkillName::SIGMA:         return "SIGMA";
+        case SkillName::UNDEFINED:     return "UNDEFINED";
+        default:                       return "UNKNOWN";
     }
 } 

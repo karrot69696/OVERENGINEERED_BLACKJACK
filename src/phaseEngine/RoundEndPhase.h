@@ -17,6 +17,7 @@ class RoundEndPhase : public Phase {
         void onEnter() override;
         std::optional<PhaseName> onUpdate() override;
         void onExit() override;
+        PhaseName getClassPhaseName() const override { return PhaseName::ROUND_END; }
 };
 
 #endif

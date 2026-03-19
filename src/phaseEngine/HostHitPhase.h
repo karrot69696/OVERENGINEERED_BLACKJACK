@@ -12,6 +12,7 @@ class HostHitPhase : public Phase {
         void onEnter() override;
         std::optional<PhaseName> onUpdate() override;
         void onExit() override;
+        PhaseName getClassPhaseName() const override { return PhaseName::HOST_HIT_PHASE; }
 };
 
 #endif

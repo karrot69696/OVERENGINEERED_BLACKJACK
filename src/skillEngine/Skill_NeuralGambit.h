@@ -4,6 +4,7 @@
 #include "Skill.h"
 #include <string>
 #include <iostream>
+#include <cstdlib>
 class SkillNeuralGambit : public Skill{
 
     public:
@@ -23,47 +24,57 @@ class SkillNeuralGambit : public Skill{
         int getSkillId() const override {
             return 1;
         }
+        SkillName getSkillName() const override {
+            return SkillName::NEURALGAMBIT;
+        }
 
         
-        bool canUse(const SkillContext& context) override {
-            // At the end of any player's hit phase, 
-            if (context.state.getPhaseName() != PhaseName::PLAYER_HIT_PHASE 
-                    && context.state.getPhaseName() != PhaseName::HOST_HIT_PHASE ) {
-                std::cout << "[SkillNeuralGambit - canUse] Can only be used during hit phase" << std::endl;
-                return 0;
-            }
-            if (context.user.getHandSize() == 0) {
-                std::cout << "[SkillNeuralGambit - canUse] No card in hand" << std::endl;
-                return 0;
-            }
-            if (uses == 0) {
-                std::cout << "[SkillNeuralGambit - canUse] Out of uses" << std::endl;
-                return 0;
-            }
-            if (context.targetCards.empty()) {
-                std::cout << "[SkillNeuralGambit - canUse] Invalid target card" << std::endl;
-                return 0;
-            }
-            return 1;
+        std::string canUse(const SkillContext& context) override {
+            if (context.user.getId() != this->userId)
+                return "CAN ONLY BE USED IN YOUR TURN";
+            if (context.state.getPhaseName() != PhaseName::PLAYER_HIT_PHASE
+                    && context.state.getPhaseName() != PhaseName::HOST_HIT_PHASE)
+                return "CAN ONLY BE USED DURING HIT PHASE";
+            if (context.user.getHandSize() == 0)
+                return "NO CARD IN HAND";
+            if (uses == 0)
+                return "OUT OF USES";
+            // targetCards: [0]=user's card, [1]=target's card, [2]=chosen card to boost
+            if ((int)context.targetCards.size() < 3)
+                return "SELECT TWO CARDS FIRST";
+            if (!context.targetPlayers.empty() && context.targetPlayers[0]->getHandSize() == 0)
+                return "TARGET HAS NO CARDS";
+            return "";
         }
-        bool execute(SkillContext& context) override{
-            // During your hit phase, you can choose another player, 
-            // you and that player each choose one card from your hand
-            // and reveal them, then you choose one of the cards revealed, 
-            // that card rank is increased by X 
-            // (X is the difference between the revealed cards)
-            context.user.returnCards(context.deck,context.targetCards);
-            context.deck.shuffle();
+
+        bool execute(SkillContext& context) override {
+            // targetCards[0] = user's card, [1] = target's card, [2] = chosen card to boost
+            Card* userCard   = context.targetCards[0];
+            Card* targetCard = context.targetCards[1];
+            Card* boostCard  = context.targetCards[2];
+
+            int userVal   = static_cast<int>(userCard->getRank())   + userCard->getRankBonus();
+            int targetVal = static_cast<int>(targetCard->getRank()) + targetCard->getRankBonus();
+            int boost = std::abs(userVal - targetVal);
+
+            boostCard->setRankBonus(boostCard->getRankBonus() + boost);
+
+            std::cout << "[NeuralGambit] Card " << boostCard->getRankAsString()
+                      << " boosted by +" << boost << " (new bonus: "
+                      << boostCard->getRankBonus() << ")" << std::endl;
+
+            context.eventQueue.push({ GameEventType::NEURALGAMBIT_REVEAL,
+                NeuralGambitRevealEvent{
+                    userCard->getId(),
+                    targetCard->getId(),
+                    boostCard->getId(),
+                    boost
+                }
+            });
+
             uses--;
             return true;
         }
-        void resetUses(){
-            uses = 3;
-        }
-        void gainUses(int usesGained){
-            uses+=usesGained;
-        }
-        
 
 };
 

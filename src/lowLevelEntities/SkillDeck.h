@@ -11,7 +11,8 @@ enum class SkillName {
     CLONE,
     BOOGIEWOOGIE,
     LOOKMAXXING,
-    SIGMA
+    SIGMA,
+    UNDEFINED
 };
 class SkillDeck {
     private:

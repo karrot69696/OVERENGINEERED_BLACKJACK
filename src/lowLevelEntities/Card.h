@@ -40,6 +40,7 @@ class Card {
         bool faceUp;
         int ownerId=-1;
         int handIndex=-1;
+        int rankBonus=0;
     public:
         bool operator==(const Card& other) const {
             return rank == other.rank && suit == other.suit;
@@ -89,6 +90,9 @@ class Card {
         }   
         Color getColor() const;
         bool isFaceUp() const;
+        int getRankBonus() const { return rankBonus; }
+        void setRankBonus(int bonus) { rankBonus = bonus; }
+        void resetRankBonus() { rankBonus = 0; }
         //setters
         void setId(int _id);
         void flip();

@@ -30,6 +30,18 @@ void Button::draw(sf::RenderWindow& window) {
 bool Button::isClicked(sf::Vector2f mousePos) {
     return visible && shape.getGlobalBounds().contains(mousePos);
 }
+
+// ============================================================================
+// PlayerVisual
+// ============================================================================
+
+void PlayerVisual::draw(sf::RenderWindow& window) {
+    window.draw(playerSprite);
+}
+
+bool PlayerVisual::isClicked(sf::Vector2f mousePos) {
+    return playerSprite.getGlobalBounds().contains(mousePos);
+}
 // ============================================================================
 // UIManager
 // ============================================================================
@@ -54,9 +66,6 @@ UIManager::UIManager(sf::RenderWindow& window, GameState& gameState,VisualState&
     };
     actionButtons[2].onClick = [this]() {
         if (onActionChosen) onActionChosen(PlayerAction::SKILL_REQUEST);
-        // Switch to targeting mode
-        showActionMenu = false;
-        showTargetingOverlay_Deliverance = true;
     };
 
     std::filesystem::path tableTexturePath = "../assets/images/crazyJackBG.png";
@@ -75,17 +84,19 @@ UIManager::UIManager(sf::RenderWindow& window, GameState& gameState,VisualState&
     sf::Vector2i cropSize = { 195, 195 };
     sf::Sprite p0(playerIcon);
     p0.setTextureRect(sf::IntRect({772, 194},cropSize));
-    playerSprite.push_back(p0);
-
+    PlayerVisual player0(p0);
+    playerVisuals.push_back(player0);
     // Player 1: start x=64 y=224, crop 96x96
     sf::Sprite p1(playerIcon);
     p1.setTextureRect(sf::IntRect({62, 212}, cropSize));
-    playerSprite.push_back(p1);
+    PlayerVisual player1(p1);
+    playerVisuals.push_back(player1);
 
     // Player 2: start x=512 y=224, crop 96x96
     sf::Sprite p2(playerIcon);
     p2.setTextureRect(sf::IntRect({536, 240}, cropSize));
-    playerSprite.push_back(p2);
+    PlayerVisual player2(p2);
+    playerVisuals.push_back(player2);
 }
 
 // ============================================================================
@@ -103,16 +114,50 @@ void UIManager::requestTargetInput(int playerId) {
     std::cout << "[UIManager] Request Target Input Menu" << std::endl;
     activePlayerId = playerId;
     showActionMenu = false;
-    showTargetingOverlay_Deliverance = true;
     pendingTargeting = {};
+    // Choose overlay based on player's skill
+    auto players = gameState.getAllPlayerInfo();
+    for (auto& p : players) {
+        if (p.playerId == playerId) {
+            if (p.skill == SkillName::NEURALGAMBIT) {
+                showTargetingOverlay_NeuralGambit = true;
+                ngStep = NgStep::PICK_PLAYER;
+                ngTargetPlayerIds={};
+                ngTargetCardIds = {};
+            } else if (p.skill == SkillName::DELIVERANCE) {
+                showTargetingOverlay_Deliverance = true;
+            }
+            return;
+        }
+    }
 }
 
 void UIManager::clearInput() {
     std::cout << "[UIManager] Clear Input Menu" << std::endl;
     showActionMenu = false;
     showTargetingOverlay_Deliverance = false;
+    showTargetingOverlay_NeuralGambit = false;
+    showPickCardOverlay = false;
+    pickCardAllowedIds = {};
+    ngStep = NgStep::PICK_PLAYER;
+    ngTargetPlayerIds = {};
+    ngTargetCardIds = {};
     activePlayerId = -1;
     pendingTargeting = {};
+}
+
+void UIManager::requestPickCard(const std::vector<int>& allowedCardIds) {
+    std::cout << "[UIManager] requestPickCard: " << allowedCardIds.size() << " allowed cards" << std::endl;
+    showPickCardOverlay = true;
+    pickCardAllowedIds = allowedCardIds;
+    pendingTargeting = {};
+}
+
+void UIManager::requestBoostPickInput(int card1Id, int card2Id) {
+    std::cout << "[UIManager] requestBoostPickInput: cards " << card1Id << " and " << card2Id << std::endl;
+    ngTargetCardIds = {card1Id, card2Id};
+    ngStep = NgStep::PICK_BOOST_CARD;
+    showTargetingOverlay_NeuralGambit = true;
 }
 
 // ============================================================================
@@ -140,6 +185,86 @@ void UIManager::handleEvent(const std::optional<sf::Event>& event) {
                     return;
                 }
             }
+        }
+
+        // Pick-card overlay: target player or skill user picking a specific card
+        if (showPickCardOverlay) {
+            for (auto& cv : cardVisuals) {
+                if (cv.isClicked(mousePos) &&
+                    std::find(pickCardAllowedIds.begin(), pickCardAllowedIds.end(), cv.cardId) != pickCardAllowedIds.end()) {
+                    PlayerTargeting target;
+                    Card chosenCard(
+                        gameState.getCardSuit(cv.ownerId, cv.cardIndex),
+                        gameState.getCardRank(cv.ownerId, cv.cardIndex),
+                        gameState.isCardFaceUp(cv.ownerId, cv.cardIndex)
+                    );
+                    chosenCard.setId(cv.cardId);
+                    chosenCard.setOwnerId(cv.ownerId);
+                    chosenCard.setHandIndex(cv.cardIndex);
+                    target.targetCards.push_back(chosenCard);
+                    pendingTargeting = target;
+                    showPickCardOverlay = false;
+                    pickCardAllowedIds = {};
+                    std::cout << "[UIManager] Pick-card overlay: picked card " << cv.cardId << std::endl;
+                    confirmTargeting();
+                    return;
+                }
+            }
+            return;
+        }
+
+        // NeuralGambit targeting clicks
+        if (showTargetingOverlay_NeuralGambit) {
+            if (ngStep == NgStep::PICK_PLAYER) {
+                for (auto& playerVisual : playerVisuals) {
+                    if (playerVisual.isClicked(mousePos)) {
+                        if (playerVisual.isTarget) {
+                            playerVisual.isTarget = false;
+                            auto it = std::find(ngTargetPlayerIds.begin(), ngTargetPlayerIds.end(), playerVisual.playerId);
+                            if (it != ngTargetPlayerIds.end()) ngTargetPlayerIds.erase(it);
+                            return;
+                        }
+                        playerVisual.isTarget = true;
+                        ngTargetPlayerIds.push_back(playerVisual.playerId);
+                        if ((int)ngTargetPlayerIds.size() < 2) return;
+                        // Two players selected: fire partial target (player IDs only) to Phase
+                        std::sort(ngTargetPlayerIds.begin(), ngTargetPlayerIds.end());
+                        PlayerTargeting partial;
+                        partial.targetPlayerIds = ngTargetPlayerIds;
+                        if (onTargetChosen) onTargetChosen(partial);
+                        ngStep = NgStep::WAITING_FOR_PICKS;
+                        std::cout << "[UIManager][NeuralGambit] Sent player selection, waiting for picks" << std::endl;
+                        return;
+                    }
+                }
+            }
+            else if (ngStep == NgStep::WAITING_FOR_PICKS) {
+                // No input needed — server is orchestrating target picks
+            }
+            else if (ngStep == NgStep::PICK_BOOST_CARD) {
+                for (auto& cv : cardVisuals) {
+                    if ((cv.cardId == ngTargetCardIds[0] || cv.cardId == ngTargetCardIds[1])
+                            && cv.isClicked(mousePos)) {
+                        // Send only the chosen boost card — server has the other two
+                        PlayerTargeting target;
+                        Card chosenCard(
+                            gameState.getCardSuit(cv.ownerId, cv.cardIndex),
+                            gameState.getCardRank(cv.ownerId, cv.cardIndex),
+                            gameState.isCardFaceUp(cv.ownerId, cv.cardIndex)
+                        );
+                        chosenCard.setId(cv.cardId);
+                        chosenCard.setOwnerId(cv.ownerId);
+                        chosenCard.setHandIndex(cv.cardIndex);
+                        target.targetCards.push_back(chosenCard);
+                        pendingTargeting = target;
+                        showTargetingOverlay_NeuralGambit = false;
+                        std::cout << "[UIManager][NeuralGambit] Boost card chosen: " << cv.cardId << std::endl;
+                        confirmTargeting();
+                        return;
+                    }
+                }
+            }
+            return; // don't fall through to Deliverance handling
         }
 
         // Card targeting clicks
@@ -170,6 +295,7 @@ void UIManager::handleEvent(const std::optional<sf::Event>& event) {
                         gameState.getCardRank(activePlayerId, cv.cardIndex),
                         gameState.isCardFaceUp(activePlayerId, cv.cardIndex)
                     );
+                    chosenCard.setId(cv.cardId);
                     chosenCard.setOwnerId(cv.ownerId);
                     chosenCard.setHandIndex(cv.cardIndex);
                     target.targetCards.push_back(chosenCard);
@@ -206,8 +332,11 @@ void UIManager::render() {
     renderTable();
     renderCards();
     renderHUD();
-    if (showActionMenu)      renderActionMenu();
-    if (showTargetingOverlay_Deliverance) renderTargetingOverlay_Deliverance();
+    renderPlayerVisuals();
+    if (showActionMenu)                       renderActionMenu();
+    if (showTargetingOverlay_Deliverance)     renderTargetingOverlay_Deliverance();
+    if (showTargetingOverlay_NeuralGambit)    renderTargetingOverlay_NeuralGambit();
+    if (showPickCardOverlay)                  renderPickCardOverlay();
 }
 
 void UIManager::renderTable() {
@@ -232,30 +361,6 @@ void UIManager::renderHUD() {
     phaseText.setFillColor(getPhaseNameColor());
     phaseText.setPosition({10.f, 10.f});
     window.draw(phaseText);
-
-    // Per-player icon + points + seat label
-    auto players = gameState.getAllPlayerInfo();
-    for (auto& info : players) {
-        sf::Vector2f seatPos = visualState.getPlayerSeatPos(info.playerId, (int)players.size());
-
-        // Draw player icon
-        sf::Vector2f iconScale = {0.37f, 0.37f};
-        if (info.playerId < (int)playerSprite.size()) {
-            playerSprite[info.playerId].setPosition({ seatPos.x - 86.f, seatPos.y - 26.f });
-            playerSprite[info.playerId].setScale(iconScale);
-            window.draw(playerSprite[info.playerId]);
-        }
-
-        std::string label = "P" + std::to_string(info.playerId)
-                          + "  " + std::to_string(info.points) + "pts"
-                          + "  [" + gameState.skillNameToString(info.skill)
-                          + " x" + std::to_string(info.skillUses) + "]";
-
-        sf::Text playerLabel(font, label, 14);
-        playerLabel.setFillColor(sf::Color::White);
-        playerLabel.setPosition({ seatPos.x, seatPos.y - 20.f });
-        window.draw(playerLabel);
-    }
 }
 
 void UIManager::renderActionMenu() {
@@ -271,6 +376,67 @@ void UIManager::renderActionMenu() {
     window.draw(prompt);
 
     for (auto& btn : actionButtons) btn.draw(window);
+}
+
+void UIManager::renderPlayerVisuals(){
+    //update visuals with info from gameState
+    auto players = gameState.getAllPlayerInfo();
+    int currentTurnId = gameState.getCurrentPlayerId();
+    for (int i=0;i<(int)players.size();i++){
+        playerVisuals[i].playerId=players[i].playerId;
+        playerVisuals[i].seatPostion = visualState.getPlayerSeatPos(i, (int)players.size());
+        playerVisuals[i].skillName = players[i].skill;
+        playerVisuals[i].skillUses = players[i].skillUses;
+        playerVisuals[i].points = players[i].points;
+        playerVisuals[i].isHost = players[i].isHost;
+    }
+    // Per-player icon + points + seat label
+    for (auto& playerVisual : playerVisuals ) {
+        bool isCurrentTurn = (playerVisual.playerId == currentTurnId);
+
+        // Draw player icon
+        sf::Vector2f iconScale = {0.37f, 0.37f};
+        playerVisual.playerSprite.setPosition({
+            playerVisual.seatPostion.x - 86.f,
+            playerVisual.seatPostion.y - 26.f
+        });
+        playerVisual.playerSprite.setScale(iconScale);
+        window.draw(playerVisual.playerSprite);
+
+        // Host label above player icon
+        if (playerVisual.isHost) {
+            sf::Text hostLabel(font, "HOST", 12);
+            hostLabel.setFillColor(sf::Color(255, 200, 50));
+            hostLabel.setStyle(sf::Text::Bold);
+            hostLabel.setPosition({ playerVisual.seatPostion.x - 86.f, playerVisual.seatPostion.y - 50.f });
+            window.draw(hostLabel);
+        }
+
+        std::string label = "P" + std::to_string(playerVisual.playerId)
+                          + "  " + std::to_string(playerVisual.points) + "pts"
+                          + "  [" + gameState.skillNameToString(playerVisual.skillName)
+                          + " x" + std::to_string(playerVisual.skillUses) + "]";
+
+        sf::Text playerLabel(font, label, 14);
+        // Highlight current turn player's name
+        if (isCurrentTurn) {
+            playerLabel.setFillColor(sf::Color(100, 255, 100));
+            playerLabel.setStyle(sf::Text::Bold);
+        } else {
+            playerLabel.setFillColor(sf::Color::White);
+        }
+        playerLabel.setPosition({ playerVisual.seatPostion.x, playerVisual.seatPostion.y - 20.f });
+        window.draw(playerLabel);
+
+        // Turn indicator arrow
+        if (isCurrentTurn) {
+            sf::Text arrow(font, ">", 16);
+            arrow.setFillColor(sf::Color(100, 255, 100));
+            arrow.setStyle(sf::Text::Bold);
+            arrow.setPosition({ playerVisual.seatPostion.x - 14.f, playerVisual.seatPostion.y - 22.f });
+            window.draw(arrow);
+        }
+    }
 }
 
 void UIManager::renderTargetingOverlay_Deliverance() {
@@ -331,9 +497,168 @@ void UIManager::renderTargetingOverlay_Deliverance() {
     prompt.setPosition({ 10.f, (float)window.getSize().y - 65.f });
     window.draw(prompt);
 }
+void UIManager::renderTargetingOverlay_NeuralGambit() {
+    auto players = gameState.getAllPlayerInfo();
+    int totalPlayers = (int)players.size();
+
+    // Bottom strip prompt
+    sf::RectangleShape strip({ (float)window.getSize().x, 70.f });
+    strip.setFillColor(UILayout::HUD_BG);
+    strip.setPosition({ 0.f, (float)window.getSize().y - 70.f });
+    window.draw(strip);
+
+    // Step-specific prompt text and visuals
+    if (ngStep == NgStep::PICK_PLAYER) {
+        hoveredPlayerId = -1;
+        sf::Text prompt(font, "NEURAL GAMBIT: Choose a target player", 16);
+        prompt.setFillColor(sf::Color::Cyan);
+        prompt.setPosition({ 10.f, (float)window.getSize().y - 65.f });
+        window.draw(prompt);
+
+        // Draw highlights for all players (include self)
+        for (auto& playerVisual : playerVisuals) {
+            auto playerBounds = playerVisual.playerSprite.getGlobalBounds();
+            bool hovered = playerBounds.contains(mousePos);
+
+            if (hovered) hoveredPlayerId = playerVisual.playerId;
+            // Hover effect: scale up slightly
+            if (playerVisual.isTarget){
+                float elapsed = shakeClock.getElapsedTime().asSeconds();
+                float shakeOffsetX =
+                    std::sin(elapsed * 40.f) * 3.f +
+                    std::sin(elapsed * 80.f) * 3.f;
+
+                float shakeOffsetY =
+                    std::cos(elapsed * 40.f) * 3.f +
+                    std::sin(elapsed * 80.f) * 3.f;
+                sf::Vector2f origPos = playerVisual.playerSprite.getPosition();
+                playerVisual.playerSprite.setPosition({origPos.x + shakeOffsetX, origPos.y + shakeOffsetY});
+                window.draw(playerVisual.playerSprite);
+                playerVisual.playerSprite.setPosition(origPos);
+            }
+            else if (hovered && !playerVisual.isTarget) {
+                sf::Vector2f origScale = playerVisual.playerSprite.getScale();
+                float hoverScale = 1.15f;
+                playerVisual.playerSprite.setScale(origScale * hoverScale);
+                playerBounds = playerVisual.playerSprite.getGlobalBounds();
+                window.draw(playerVisual.playerSprite);
+                playerVisual.playerSprite.setScale(origScale);
+            }
+
+            sf::RectangleShape highlight({playerBounds.size.x, playerBounds.size.y});
+            highlight.setPosition({playerBounds.position.x, playerBounds.position.y});
+            highlight.setFillColor(sf::Color::Transparent);
+            highlight.setOutlineThickness(hovered ? 5.f : 3.f);
+            highlight.setOutlineColor(playerVisual.isTarget ? UILayout::CARD_TARGET :
+                                      hovered ? sf::Color(255, 240, 100) : UILayout::CARD_HIGHLIGHT);
+            window.draw(highlight);
+        }
+    }
+    else if (ngStep == NgStep::WAITING_FOR_PICKS) {
+        sf::Text prompt(font, "NEURAL GAMBIT: Waiting for players to reveal cards...", 16);
+        prompt.setFillColor(sf::Color(150, 220, 255));
+        prompt.setPosition({ 10.f, (float)window.getSize().y - 65.f });
+        window.draw(prompt);
+
+        // Highlight targeted players with shake; others get hover scale
+        for (auto& playerVisual : playerVisuals) {
+            bool isTarget = std::find(ngTargetPlayerIds.begin(), ngTargetPlayerIds.end(), playerVisual.playerId) != ngTargetPlayerIds.end();
+            auto playerBounds = playerVisual.playerSprite.getGlobalBounds();
+            bool hovered = playerBounds.contains(mousePos);
+
+            if (isTarget) {
+                float elapsed = shakeClock.getElapsedTime().asSeconds();
+                float shakeOffsetX = std::sin(elapsed * 40.f) * 3.f + std::sin(elapsed * 80.f) * 3.f;
+                float shakeOffsetY = std::cos(elapsed * 40.f) * 3.f + std::sin(elapsed * 80.f) * 3.f;
+                sf::Vector2f origPos = playerVisual.playerSprite.getPosition();
+                playerVisual.playerSprite.setPosition({origPos.x + shakeOffsetX, origPos.y + shakeOffsetY});
+                window.draw(playerVisual.playerSprite);
+                playerVisual.playerSprite.setPosition(origPos);
+            } else if (hovered) {
+                sf::Vector2f origScale = playerVisual.playerSprite.getScale();
+                playerVisual.playerSprite.setScale(origScale * 1.15f);
+                playerBounds = playerVisual.playerSprite.getGlobalBounds();
+                window.draw(playerVisual.playerSprite);
+                playerVisual.playerSprite.setScale(origScale);
+            }
+
+            sf::RectangleShape highlight({ playerBounds.size.x, playerBounds.size.y });
+            highlight.setPosition({ playerBounds.position.x, playerBounds.position.y });
+            highlight.setFillColor(sf::Color::Transparent);
+            highlight.setOutlineThickness(isTarget ? 4.f : (hovered ? 3.f : 0.f));
+            highlight.setOutlineColor(isTarget ? UILayout::CARD_TARGET : sf::Color(255, 240, 100));
+            window.draw(highlight);
+        }
+    }
+    else if (ngStep == NgStep::PICK_BOOST_CARD) {
+        sf::Text prompt(font, "NEURAL GAMBIT: Choose which card gets boosted", 16);
+        prompt.setFillColor(sf::Color::Cyan);
+        prompt.setPosition({ 10.f, (float)window.getSize().y - 65.f });
+        window.draw(prompt);
+
+        // Highlight both revealed cards
+        for (auto& cv : cardVisuals) {
+            if (cv.cardId != ngTargetCardIds[0] && cv.cardId != ngTargetCardIds[1]) continue;
+            auto bounds = cv.cardSprite.getGlobalBounds();
+            bool hovered = bounds.contains(mousePos);
+            sf::RectangleShape highlight({ bounds.size.x, bounds.size.y });
+            highlight.setPosition({ bounds.position.x, bounds.position.y });
+            highlight.setFillColor(sf::Color(255, 215, 0, hovered ? 60 : 30));
+            highlight.setOutlineThickness(hovered ? 6.f : 3.f);
+            highlight.setOutlineColor(sf::Color(255, 215, 0));
+            window.draw(highlight);
+        }
+    }
+}
+
 // ============================================================================
 // Layout Helpers
 // ============================================================================
+
+void UIManager::renderPickCardOverlay() {
+    // Bottom strip
+    sf::RectangleShape strip({ (float)window.getSize().x, 70.f });
+    strip.setFillColor(UILayout::HUD_BG);
+    strip.setPosition({ 0.f, (float)window.getSize().y - 70.f });
+    window.draw(strip);
+
+    sf::Text prompt(font, "NEURAL GAMBIT: Choose a card to reveal", 16);
+    prompt.setFillColor(sf::Color::Cyan);
+    prompt.setPosition({ 10.f, (float)window.getSize().y - 65.f });
+    window.draw(prompt);
+
+    // Highlight only allowed cards
+    for (auto& cv : cardVisuals) {
+        if (std::find(pickCardAllowedIds.begin(), pickCardAllowedIds.end(), cv.cardId) == pickCardAllowedIds.end()) continue;
+        auto bounds = cv.cardSprite.getGlobalBounds();
+        bool hovered = bounds.contains(mousePos);
+
+        if (cv.isTarget) {
+            float elapsed = shakeClock.getElapsedTime().asSeconds();
+            float shakeOffsetX = std::sin(elapsed * 40.f) * 3.f + std::sin(elapsed * 80.f) * 3.f;
+            float shakeOffsetY = std::cos(elapsed * 40.f) * 3.f + std::sin(elapsed * 80.f) * 3.f;
+            sf::Vector2f origPos = cv.cardSprite.getPosition();
+            cv.cardSprite.setPosition({origPos.x + shakeOffsetX, origPos.y + shakeOffsetY});
+            window.draw(cv.cardSprite);
+            cv.cardSprite.setPosition(origPos);
+        }
+        else if (hovered) {
+            sf::Vector2f origScale = cv.cardSprite.getScale();
+            cv.cardSprite.setScale(origScale * 1.15f);
+            window.draw(cv.cardSprite);
+            cv.cardSprite.setScale(origScale);
+            bounds = cv.cardSprite.getGlobalBounds();
+        }
+
+        sf::RectangleShape highlight({ bounds.size.x, bounds.size.y });
+        highlight.setPosition({ bounds.position.x, bounds.position.y });
+        highlight.setFillColor(sf::Color::Transparent);
+        highlight.setOutlineThickness(hovered ? 5.f : 3.f);
+        highlight.setOutlineColor(cv.isTarget ? UILayout::CARD_TARGET :
+                                  hovered ? sf::Color(255, 240, 100) : UILayout::CARD_HIGHLIGHT);
+        window.draw(highlight);
+    }
+}
 
 sf::Color UIManager::getPhaseNameColor() {
     switch (gameState.getPhaseName()) {

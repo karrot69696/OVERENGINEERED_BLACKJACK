@@ -172,6 +172,13 @@ void NetworkManager::handlePacket(ENetPeer* peer, ENetPacket* packet) {
             case NetMsgType::SERVER_EVENT_BATCH:
                 handleServerEventBatch(buf);
                 break;
+            case NetMsgType::SERVER_GAME_START:
+                std::cout << "[NetworkManager] Server signaled game start!" << std::endl;
+                gameStarted = true;
+                break;
+            case NetMsgType::SERVER_TARGET_REQUEST:
+                handleServerTargetRequest(buf);
+                break;
             default:
                 std::cerr << "[NetworkManager] Client got unexpected msg type: "
                           << static_cast<int>(header.type) << std::endl;
@@ -295,6 +302,14 @@ void NetworkManager::handleServerGameSetup(ByteBuffer& /*buf*/) {
     // Future: receive full player list, skills, etc.
 }
 
+void NetworkManager::handleServerTargetRequest(ByteBuffer& buf) {
+    pendingTargetRequest = NetSerializer::readTargetRequest(buf);
+    hasPendingTargetRequestFlag = true;
+    std::cout << "[NetworkManager] Got target request from server (isBoostPick="
+              << pendingTargetRequest.isBoostPick << ", "
+              << pendingTargetRequest.allowedCardIds.size() << " allowed cards)" << std::endl;
+}
+
 // ============================================================================
 // Server API
 // ============================================================================
@@ -315,6 +330,28 @@ void NetworkManager::broadcastEvents(const std::vector<GameEvent>& events) {
     for (auto& client : remoteClients) {
         sendPacket(client.peer, NetMsgType::SERVER_EVENT_BATCH, buf, 1, true);
     }
+}
+
+void NetworkManager::sendTargetRequest(int targetPlayerId, const TargetRequestData& req) {
+    for (auto& client : remoteClients) {
+        if (client.playerId == targetPlayerId) {
+            ByteBuffer buf;
+            NetSerializer::writeTargetRequest(buf, req);
+            sendPacket(client.peer, NetMsgType::SERVER_TARGET_REQUEST, buf, 0, true);
+            std::cout << "[NetworkManager] Sent target request to player " << targetPlayerId
+                      << " (isBoostPick=" << req.isBoostPick << ")" << std::endl;
+            return;
+        }
+    }
+    std::cerr << "[NetworkManager] sendTargetRequest: player " << targetPlayerId << " not found" << std::endl;
+}
+
+void NetworkManager::broadcastGameStart() {
+    ByteBuffer buf; // empty payload
+    for (auto& client : remoteClients) {
+        sendPacket(client.peer, NetMsgType::SERVER_GAME_START, buf, 0, true);
+    }
+    std::cout << "[NetworkManager] Broadcast game start to " << remoteClients.size() << " client(s)" << std::endl;
 }
 
 void NetworkManager::sendWelcome(ENetPeer* peer, int assignedPlayerId, int totalPlayers) {

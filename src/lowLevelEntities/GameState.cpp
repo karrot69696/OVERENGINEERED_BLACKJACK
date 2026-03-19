@@ -4,7 +4,7 @@ void GameState::setPhaseName(PhaseName newPhaseName,int newCurrentPlayerId){
     phase = newPhaseName;
     currentPlayerId = newCurrentPlayerId;
 }
-PhaseName GameState::getPhaseName(){
+PhaseName GameState::getPhaseName() const{
     return phase;
 }
 
@@ -19,7 +19,7 @@ void GameState::printAllInfo(){
 
     std::cout << "Current PhaseName       : " << phaseToString(phase) << std::endl;
     std::cout << "Current Player ID   : " << currentPlayerId << std::endl;
-    std::cout << "Deck Count          : " << deckCount << std::endl;
+    std::cout << "Deck Count          : " << getDeckCount() << std::endl;
 
     std::cout << std::endl;
     std::cout << "------------ Players Info ------------" << std::endl;
