@@ -35,6 +35,7 @@ class Phase {
             int secondCardId = -1;
             bool firstRequestSent    = false;
             bool secondRequestSent   = false;
+            bool revealSent          = false;
             bool boostRequested      = false;
             bool waitingForLocalPick = false;
         };
@@ -85,6 +86,7 @@ class Phase {
         bool turnHandler(Player& player, Player& opponent);
         void skillHandler(Player& player);
         void skillProcessAftermath(SkillContext& context, SkillExecutionResult skillResult);
+        void blackJackAndQuintetCheck(std::vector<Player>& players);
 };
 
 #endif

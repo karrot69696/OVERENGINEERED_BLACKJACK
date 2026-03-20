@@ -60,6 +60,7 @@ std::optional<PhaseName> PlayerHitPhase::onUpdate() {
             return PhaseName::HOST_HIT_PHASE;
         }
         // Re-enter phase for next player (triggers onExit→onEnter with fresh UI prompts)
+        roundManager.updateGameState(PhaseName::PLAYER_HIT_PHASE, gameState.getCurrentPlayerId());
         return PhaseName::PLAYER_HIT_PHASE;
     }
     return std::nullopt ;

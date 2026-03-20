@@ -88,7 +88,7 @@ bool Phase::turnHandler(Player& player, Player& opponent){
         case PlayerAction::HIT: {
             Card* drawnCard = deck.draw();
             player.addCardToHand(drawnCard);
-
+            blackJackAndQuintetCheck(players);
             // Emit event — PresentationLayer handles visual state + animation
             eventQueue.push({GameEventType::CARD_DRAWN, CardDrawnEvent{
                 player.getId(),
@@ -273,6 +273,7 @@ void Phase::skillProcessAftermath(SkillContext& context, SkillExecutionResult sk
             }
         break;
     }
+    blackJackAndQuintetCheck(players);
 }
 
 // ============================================================================
@@ -387,7 +388,18 @@ void Phase::ngTickPending(Player& skillUser) {
         return;
     }
 
-    // --- Both picks received: request boost pick ---
+    // --- Both picks received: reveal cards first ---
+    if (!ng.revealSent) {
+        Card* first = findCard(ng.firstCardId);
+        Card* second = findCard(ng.secondCardId);
+        if (first && !first->isFaceUp()) first->flip();
+        if (second && !second->isFaceUp()) second->flip();
+        eventQueue.push({GameEventType::CARDS_REVEALED, CardsRevealedEvent{{ng.firstCardId, ng.secondCardId}}});
+        ng.revealSent = true;
+        return; // let the flip animation play before showing boost pick UI
+    }
+
+    // --- Request boost pick (after reveal animation) ---
     if (!ng.boostRequested) {
         bool skillUserIsLocal = !net || !net->isServer() || ng.skillUserId == localPlayerId;
         if (skillUserIsLocal) {
@@ -671,4 +683,39 @@ void Phase::reactiveTickPending() {
     default:
         break;
     }
+}
+
+void Phase::blackJackAndQuintetCheck(std::vector<Player>& players){
+    for (auto& player : players) {
+        if (player.getHandSize() == 5 && player.calculateHandValue() <= 21) {
+            std::vector<int> revealIds;
+            for (int i = 0; i < player.getHandSize(); i++) {
+                Card* c = player.getCardInHand(i);
+                if (!c->isFaceUp()) revealIds.push_back(c->getId());
+            }
+            player.flipAllCardsFaceUp();
+            if (!revealIds.empty()) {
+                eventQueue.push({GameEventType::CARDS_REVEALED, CardsRevealedEvent{revealIds}});
+            }
+            player.gainPoint(5);
+            eventQueue.push({GameEventType::POINT_CHANGED, PointChangedEvent{
+            player.getId(), "QUINTET! +5" + std::to_string((int)players.size()+2)}});
+
+        }
+        else if (player.getHandSize() == 2 && player.calculateHandValue() == 21) {
+            std::vector<int> revealIds;
+            for (int i = 0; i < player.getHandSize(); i++) {
+                Card* c = player.getCardInHand(i);
+                if (!c->isFaceUp()) revealIds.push_back(c->getId());
+            }
+            player.flipAllCardsFaceUp();
+            if (!revealIds.empty()) {
+                eventQueue.push({GameEventType::CARDS_REVEALED, CardsRevealedEvent{revealIds}});
+            }
+            player.gainPoint(3);
+            eventQueue.push({GameEventType::POINT_CHANGED, PointChangedEvent{
+            player.getId(), "BLACKJACK! +3"}});
+        }
+    }
+    roundManager.updateGameState(gameState.getPhaseName(), gameState.getCurrentPlayerId());
 }

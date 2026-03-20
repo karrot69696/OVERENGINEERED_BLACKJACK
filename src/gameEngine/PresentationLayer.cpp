@@ -17,6 +17,7 @@ bool PresentationLayer::isCutscene(GameEventType type) {
         case GameEventType::HAND_REPOSITIONED:
         case GameEventType::NEURALGAMBIT_REVEAL:
         case GameEventType::FATALDEAL_SWAP:
+        case GameEventType::CARDS_REVEALED:
             uiManager.clearInput();
             return true;
         default:
@@ -42,6 +43,9 @@ void PresentationLayer::processEvents() {
             card.location = CardLocation::HAND;
             card.ownerId = e.playerId;
             card.cardIndex = e.handIndex;
+            if (e.playerId == visualState.getLocalPlayerId()) {
+                visualState.flipCardVisualFaceUp(e.cardId);
+            }
             animationManager.addDrawAnimation(e.playerId, e.handIndex, e.cardId);
         } break;
 
@@ -177,11 +181,12 @@ void PresentationLayer::processEvents() {
                       << e.cardId1 << " & " << e.cardId2
                       << " -> boost card " << e.boostCardId
                       << " +" << e.boostAmount << std::endl;
+            // Flip the two revealed cards with animation, then play the NG effect
+            animationManager.playCardFlip(e.cardId1);
+            animationManager.playCardFlip(e.cardId2);
             animationManager.playNeuralGambitEffect(
                 e.cardId1,e.cardId2,e.boostCardId,e.boostAmount
             );
-
-
         } break;
 
         case GameEventType::CLEAR_INPUT: {
@@ -222,6 +227,11 @@ void PresentationLayer::processEvents() {
             std::swap(swappedCv.ownerId, drawnCv.ownerId);
             std::swap(swappedCv.cardIndex, drawnCv.cardIndex);
 
+            // Update face textures: card going to local player shows face-up, card leaving shows face-down
+            int localId = visualState.getLocalPlayerId();
+            if (swappedCv.ownerId == localId) visualState.flipCardVisualFaceUp(e.swappedCardId);
+            if (drawnCv.ownerId == localId) visualState.flipCardVisualFaceUp(e.drawnCardId);
+
             std::cout << "[PresentationLayer]   after swap: card " << e.swappedCardId
                       << "(owner=" << swappedCv.ownerId << " idx=" << swappedCv.cardIndex
                       << ") card " << e.drawnCardId
@@ -233,6 +243,14 @@ void PresentationLayer::processEvents() {
 
             animationManager.addTeleportSwapAnimation(swappedId, drawnPos, swappedCv.cardIndex, nullptr);
             animationManager.addTeleportSwapAnimation(drawnId,   swappedPos, drawnCv.cardIndex, nullptr);
+        } break;
+
+        case GameEventType::CARDS_REVEALED: {
+            auto& e = std::get<CardsRevealedEvent>(event.data);
+            std::cout << "[PresentationLayer] CARDS_REVEALED: " << e.cardIds.size() << " cards" << std::endl;
+            for (int cardId : e.cardIds) {
+                animationManager.playCardFlip(cardId);
+            }
         } break;
 
         } // switch

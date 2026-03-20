@@ -39,7 +39,15 @@ std::optional<PhaseName> HostHitPhase::onUpdate() {
     Player& currentPlayer = getCurrentPlayer();
 
     //prepare for battle, update game state, turn handler
+    std::vector<int> revealIds;
+    for (int i = 0; i < currentPlayer.getHandSize(); i++) {
+        Card* c = currentPlayer.getCardInHand(i);
+        if (!c->isFaceUp()) revealIds.push_back(c->getId());
+    }
     currentPlayer.flipAllCardsFaceUp();
+    if (!revealIds.empty()) {
+        eventQueue.push({GameEventType::CARDS_REVEALED, CardsRevealedEvent{revealIds}});
+    }
 
     // handle player that is not host or blackjacked
     if (currentPlayer.getHost() == 1 || currentPlayer.getBlackJacked() == 1){

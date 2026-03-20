@@ -10,7 +10,7 @@ class SkillNeuralGambit : public Skill{
     public:
         SkillNeuralGambit(int user) {
             userId = user;
-            uses = 3;
+            uses = 2;
         }
 
         std::string skillNameToString() const override {

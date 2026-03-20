@@ -108,6 +108,7 @@ void Game::SetupGame(int numLocal, int numRemote, int numBots){
 
 void Game::RunGame(){
     TimestampBuf::resetClock();
+    visualState.setLocalPlayerId(networkManager.getLocalPlayerId());
     std::cout << "\n=== GAME START ===\n" << std::endl;
     RoundManager roundManager(
         this->players,
@@ -373,7 +374,7 @@ void Game::clientReceive() {
             clientInitialBuild = true;
             std::cout << "[Client] Initial visual build complete" << std::endl;
         } else {
-            // Reconcile every frame — only updates metadata (ownerId, cardIndex,
+            // Reconcile every frame — only updates metadata (ownerId, cardIndex, rankBonus,
             // faceUp texture), never touches sprite positions, so it's safe
             // even while animations are playing
             visualState.reconcile(gameState);

@@ -75,7 +75,10 @@ UIManager::UIManager(sf::RenderWindow& window, GameState& gameState,VisualState&
     if (!tableTexture.loadFromFile(tableTexturePath)) {
         std::cerr << "[UIManager] Failed to load tableTexture from assets/images/crazyJackBG.png" << std::endl;
     }
-
+    if (!cardRankPatch.loadFromFile("../assets/images/cardBoosted.png")) {
+        std::cerr << "[UIManager] Failed to load cardRankPatch from assets/images/cardBoosted.png" << std::endl;
+    }
+    cardRankPatchSprite = std::make_unique<sf::Sprite>(cardRankPatch);
     clearInput();
 
     std::filesystem::path playerIconPath = "../assets/images/playerIcon.png";
@@ -127,6 +130,9 @@ void UIManager::requestTargetInput(int playerId) {
                 ngStep = NgStep::PICK_PLAYER;
                 ngTargetPlayerIds={};
                 ngTargetCardIds = {};
+                for (auto& playerVisual : playerVisuals){
+                    playerVisual.isTarget = false;
+                }
             } else if (p.skill == SkillName::DELIVERANCE) {
                 showTargetingOverlay_Deliverance = true;
             }
@@ -390,8 +396,41 @@ void UIManager::renderTable() {
 }
 
 void UIManager::renderCards() {
+    auto info = gameState.getAllPlayerInfo();
+    int boostedValue=0;
+    int boostedCardId=-1;
+    for (auto & p : info) {
+        for(auto& c : p.cardsInHand) {
+            if (c.getRankBonus()) {
+                boostedValue = c.getRankBonus();
+                boostedCardId=c.getId();
+            }
+        }
+    }
     for (auto& cv : cardVisuals) {
         window.draw(cv.cardSprite);
+        if( boostedValue && boostedCardId==cv.cardId && cv.faceUp) {
+            cv.rankBonus = boostedValue;
+            // Position patch sprite centered on the card without changing the card's origin
+            auto cardBounds = cv.cardSprite.getGlobalBounds();
+            float cardCenterX = cardBounds.position.x + cardBounds.size.x / 2.f;
+            float cardCenterY = cardBounds.position.y + cardBounds.size.y / 2.f;
+
+            auto patchLocal = cardRankPatchSprite->getLocalBounds();
+            cardRankPatchSprite->setOrigin({patchLocal.size.x / 2.f, patchLocal.size.y / 2.f});
+            cardRankPatchSprite->setPosition({cardCenterX, cardCenterY});
+            cardRankPatchSprite->setScale(cv.cardSprite.getScale());
+            window.draw(*cardRankPatchSprite);
+
+            int cardRank = static_cast<int>(gameState.getCardRank(cv.ownerId, cv.cardIndex));
+            sf::Text boostedRankText(font, std::to_string(cardRank + cv.rankBonus), 30);
+            boostedRankText.setScale(cv.cardSprite.getScale());
+            boostedRankText.setFillColor(sf::Color::White);
+            auto textBounds = boostedRankText.getLocalBounds();
+            boostedRankText.setOrigin({textBounds.size.x / 2.f, textBounds.size.y / 2.f});
+            boostedRankText.setPosition({cardCenterX, cardCenterY});
+            window.draw(boostedRankText);
+        }
     }
 }
 
@@ -646,6 +685,7 @@ void UIManager::renderTargetingOverlay_NeuralGambit() {
         // Highlight both revealed cards
         for (auto& cv : cardVisuals) {
             if (cv.cardId != ngTargetCardIds[0] && cv.cardId != ngTargetCardIds[1]) continue;
+            visualState.flipCardVisualFaceUp(cv.cardId);
             auto bounds = cv.cardSprite.getGlobalBounds();
             bool hovered = bounds.contains(mousePos);
             sf::RectangleShape highlight({ bounds.size.x, bounds.size.y });

@@ -35,7 +35,20 @@ std::optional<PhaseName> BattlePhase::onUpdate(){
                 <<" [" << opponentHandValue << "]" << std::endl;
     //start battle, reprint hand value after host's turn since manipulation might
     //have happenned here
+    std::vector<int> revealIds;
+    for (int i = 0; i < host.getHandSize(); i++) {
+        Card* c = host.getCardInHand(i);
+        if (!c->isFaceUp()) revealIds.push_back(c->getId());
+    }
+    for (int i = 0; i < opponent.getHandSize(); i++) {
+        Card* c = opponent.getCardInHand(i);
+        if (!c->isFaceUp()) revealIds.push_back(c->getId());
+    }
     host.flipAllCardsFaceUp();
+    opponent.flipAllCardsFaceUp();
+    if (!revealIds.empty()) {
+        eventQueue.push({GameEventType::CARDS_REVEALED, CardsRevealedEvent{revealIds}});
+    }
     opponentHandValue = opponent.calculateHandValue();
     hostHandValue = host.calculateHandValue() ;
     std::cout << "[BattlePhase] HOST [" << hostHandValue

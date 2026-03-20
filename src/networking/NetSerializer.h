@@ -317,6 +317,12 @@ inline void writeGameEvent(ByteBuffer& buf, const GameEvent& event) {
             buf.writeI32(payload.drawnCardId);
             buf.writeI32(payload.swappedCardId);
         }
+        else if constexpr (std::is_same_v<T, CardsRevealedEvent>) {
+            buf.writeU16(static_cast<uint16_t>(payload.cardIds.size()));
+            for (int id : payload.cardIds) {
+                buf.writeI32(id);
+            }
+        }
     }, event.data);
 }
 
@@ -431,6 +437,14 @@ inline GameEvent readGameEvent(ByteBuffer& buf) {
             e.fatalDealUserId = buf.readI32();
             e.drawnCardId = buf.readI32();
             e.swappedCardId = buf.readI32();
+            data = e;
+        } break;
+        case GameEventType::CARDS_REVEALED: {
+            CardsRevealedEvent e;
+            uint16_t count = buf.readU16();
+            for (uint16_t i = 0; i < count; i++) {
+                e.cardIds.push_back(buf.readI32());
+            }
             data = e;
         } break;
     }

@@ -68,7 +68,7 @@ void VisualState::buildCardVisuals(Deck& deck, std::vector<Player>& players){
         //build cardVisuals based on cards in deck
     for (auto* card : deck.getCards()) {
 
-        bool showFace = cheatOn || card->isFaceUp();
+        bool showFace = cheatOn || card->isFaceUp() || card->getOwnerId() == localPlayerId;
 
         int col, row;
 
@@ -119,11 +119,12 @@ void VisualState::rebuildFromState(Deck& deck, std::vector<Player>& players) {
 
     // Helper lambda to create a CardVisual from a Card*
     auto makeVisual = [&](Card* card, CardLocation location, sf::Vector2f pos) {
-        bool showFace = cheatOn || card->isFaceUp();
-        int col, row;
+        bool showFace = cheatOn || card->isFaceUp() || card->getOwnerId() == localPlayerId;
+        int col, row, rankBonus = 0;
         if (showFace) {
             col = cardSpriteCol(card->getRank());
             row = cardSpriteRow(card->getSuit());
+            rankBonus = card->getRankBonus();
         } else {
             col = 14;
             row = 2;
@@ -142,6 +143,7 @@ void VisualState::rebuildFromState(Deck& deck, std::vector<Player>& players) {
         cv.highlighted = false;
         cv.isTarget = false;
         cv.faceUp = showFace;
+        cv.rankBonus = rankBonus;
         cardVisuals.emplace_back(cv);
     };
 
@@ -179,17 +181,17 @@ void VisualState::reconcile(GameState& gs) {
     auto allInfo = gs.getAllPlayerInfo();
 
     // Build lookup: cardId → {ownerId, handIndex, faceUp}
-    struct CardMeta { int ownerId; int handIndex; bool faceUp; };
+    struct CardMeta { int ownerId; int handIndex; bool faceUp; int rankBonus;};
     std::unordered_map<int, CardMeta> desired;
     for (const auto& info : allInfo) {
         for (int i = 0; i < (int)info.cardsInHand.size(); i++) {
             const Card& c = info.cardsInHand[i];
-            desired[c.getId()] = {info.playerId, i, c.isFaceUp()};
+            desired[c.getId()] = {info.playerId, i, c.isFaceUp(), c.getRankBonus()};
         }
     }
 
     // Update each existing CardVisual
-    int changedOwner = 0, changedIndex = 0, changedFace = 0, changedLoc = 0;
+    int changedOwner = 0, changedIndex = 0, changedFace = 0, changedLoc = 0, changedRank = 0;
     for (auto& cv : cardVisuals) {
         auto it = desired.find(cv.cardId);
         if (it != desired.end()) {
@@ -197,12 +199,13 @@ void VisualState::reconcile(GameState& gs) {
             if (cv.ownerId != it->second.ownerId) { changedOwner++; }
             if (cv.cardIndex != it->second.handIndex) { changedIndex++; }
             if (cv.location != CardLocation::HAND) { changedLoc++; }
+            if (cv.rankBonus != it->second.rankBonus) { changedRank++; }
             cv.ownerId = it->second.ownerId;
             cv.cardIndex = it->second.handIndex;
             cv.location = CardLocation::HAND;
-
+            cv.rankBonus = it->second.rankBonus;
             // Update face texture if faceUp state changed
-            bool showFace = cheatOn || it->second.faceUp;
+            bool showFace = cheatOn || it->second.faceUp || it->second.ownerId == localPlayerId;
             if (cv.faceUp != showFace) {
                 changedFace++;
                 cv.faceUp = showFace;
@@ -231,13 +234,32 @@ void VisualState::reconcile(GameState& gs) {
             if (cv.location != CardLocation::DECK) { changedLoc++; }
             cv.ownerId = -1;
             cv.cardIndex = -1;
+            cv.rankBonus = 0;
             cv.location = CardLocation::DECK;
         }
     }
-    if (changedOwner || changedIndex || changedFace || changedLoc) {
+    if (changedOwner || changedIndex || changedFace || changedLoc ||changedRank) {
         std::cout << "[Reconcile] owner=" << changedOwner
                   << " index=" << changedIndex
                   << " face=" << changedFace
-                  << " loc=" << changedLoc << std::endl;
+                  << " loc=" << changedLoc
+                  << " rankBonus=" << changedRank << std::endl;
     }
+}
+
+void VisualState::flipCardVisualFaceUp(int cardId) {
+    sf::Vector2u texSize = cardTexture.getSize();
+    int cellW = (int)texSize.x / 15;
+    int cellH = (int)texSize.y / 4;
+
+    CardVisual& cv = getCardVisual(cardId);
+    if (cv.faceUp) return; // already face-up
+
+    // Look up rank/suit from gameState
+    Rank rank = gameState.getCardRank(cv.ownerId, cv.cardIndex);
+    Suit suit = gameState.getCardSuit(cv.ownerId, cv.cardIndex);
+    int col = cardSpriteCol(rank);
+    int row = cardSpriteRow(suit);
+    cv.cardSprite.setTextureRect(sf::IntRect({col * cellW, row * cellH}, {cellW, cellH}));
+    cv.faceUp = true;
 }

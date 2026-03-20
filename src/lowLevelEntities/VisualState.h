@@ -45,7 +45,7 @@ struct CardVisual {
     bool highlighted = false;
     bool isTarget = false;
     bool faceUp = true;
-
+    int rankBonus = 0;
     void draw(sf::RenderWindow& window);
     bool isClicked(sf::Vector2f mousePos);
 };
@@ -59,12 +59,15 @@ class VisualState {
         std::vector<CardVisual> cardVisuals;
         sf::Texture cardTexture;
         sf::Font font;
-        bool cheatOn=1;
+        bool cheatOn=0;
         bool reconcileBlocked = false;
+        int localPlayerId = 0;  // cards owned by this player always show face-up
     public:
         VisualState(sf::RenderWindow& window, GameState& gameState);
         std::vector<CardVisual>& getCardVisuals() { return cardVisuals; }
         void setReconcileBlocked(bool blocked) { reconcileBlocked = blocked; }
+        void setLocalPlayerId(int id) { localPlayerId = id; }
+        int getLocalPlayerId() const { return localPlayerId; }
         //setters
         void buildCardVisuals(Deck& deck, std::vector<Player>& players);
         void rebuildFromState(Deck& deck, std::vector<Player>& players);
@@ -72,7 +75,8 @@ class VisualState {
         //getters
         sf::Font& getFont() { return font; }
 
-        CardVisual& getCardVisual(int cardId) { 
+        void flipCardVisualFaceUp(int cardId);
+        CardVisual& getCardVisual(int cardId) {
             for (auto& card : cardVisuals) {
                 if (card.cardId == cardId) {
                     return card;

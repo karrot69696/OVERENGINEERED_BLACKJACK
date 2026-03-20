@@ -34,20 +34,28 @@ std::optional<PhaseName> BlackJackCheckPhase::onUpdate(){
         if (currentPlayer.getHost() == 1){
 
             std::cout << "[BlackJackCheckPhase] Host player has Black Jack! Host player wins the round!" << std::endl;
-            currentPlayer.gainPoint((int)players.size()-1);
+            currentPlayer.gainPoint((int)players.size()+2);
             eventQueue.push({GameEventType::POINT_CHANGED, PointChangedEvent{
-                currentPlayer.getId(), "BLACKJACK! +" + std::to_string((int)players.size()-1)}});
+                currentPlayer.getId(), "BLACKJACK! +" + std::to_string((int)players.size()+2)}});
             roundManager.updateGameState(PhaseName::ROUND_END, currentPlayer.getId());
             return PhaseName::ROUND_END;
         }
         else {
 
             std::cout << "[BlackJackCheckPhase] Player " << currentPlayer.getId() << " has Black Jack! +2 points" << std::endl;
+            std::vector<int> revealIds;
+            for (int i = 0; i < currentPlayer.getHandSize(); i++) {
+                Card* c = currentPlayer.getCardInHand(i);
+                if (!c->isFaceUp()) revealIds.push_back(c->getId());
+            }
             currentPlayer.flipAllCardsFaceUp();
-            currentPlayer.gainPoint(2);
+            if (!revealIds.empty()) {
+                eventQueue.push({GameEventType::CARDS_REVEALED, CardsRevealedEvent{revealIds}});
+            }
+            currentPlayer.gainPoint(3);
             currentPlayer.blackJackSet();
             eventQueue.push({GameEventType::POINT_CHANGED, PointChangedEvent{
-                currentPlayer.getId(), "BLACKJACK! +2"}});
+                currentPlayer.getId(), "BLACKJACK! +3"}});
         }
     }
 

@@ -81,12 +81,14 @@ class UIManager {
         sf::Texture cardTexture;
         sf::Texture tableTexture;
         sf::Texture playerIcon;
+        sf::Texture cardRankPatch;
+        std::unique_ptr<sf::Sprite> cardRankPatchSprite;
         std::vector<PlayerVisual> playerVisuals;
         sf::Vector2f mousePos = {0.f, 0.f};
         int hoveredCardId = -1;
         int hoveredPlayerId = -1;
         sf::Clock shakeClock;
-        int cheatOn = 1;
+        int cheatOn = 0;
 
     public:
         UIManager(sf::RenderWindow& window, GameState& gameState,VisualState& visualState, std::vector<CardVisual>& cardVisuals);

@@ -107,6 +107,14 @@ public:
         std::cout << "Can't find player "<< playerId << " or card index " << cardIndex << std::endl;
         return Suit::Hearts; //default return to avoid compile error
     }
+    int getCardRankBonus(int playerId, int cardIndex){
+        for (auto& player : playersInfo){
+            if (player.playerId==playerId)
+            return player.cardsInHand[cardIndex].getRankBonus();
+        }
+        std::cout << "Can't find player "<< playerId << " or card index " << cardIndex << std::endl;
+        return 0; //default return to avoid compile error
+    }
     bool isCardFaceUp(int playerId, int cardIndex){
         for (auto& player : playersInfo){
             if (player.playerId==playerId)

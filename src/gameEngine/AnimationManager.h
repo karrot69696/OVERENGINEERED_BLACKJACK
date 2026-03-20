@@ -20,6 +20,7 @@ namespace AnimConfig {
     inline constexpr float CARD_DRAW_DURATION = 0.4f;
     inline constexpr float CARD_RETURN_DURATION = 0.2f;
     inline constexpr float POINT_CHANGE_DURATION = 1.7f;
+    inline constexpr float CARD_FLIP_DURATION = 0.35f;
 }
 struct Animation
 {
@@ -318,6 +319,50 @@ public:
         return t < 0.5f
             ? 4 * t * t * t
             : 1 - std::pow(-2 * t + 2, 3) / 2;
+    }
+
+    void playCardFlip(int cardId, std::function<void()> onFinish = nullptr) {
+        CardVisual& card = visualState.getCardVisual(cardId);
+        if (card.faceUp) {
+            if (onFinish) onFinish();
+            return; // already face-up, nothing to animate
+        }
+        sf::Vector2f origScale = card.cardSprite.getScale();
+
+        // Ensure center origin for symmetric scaling
+        auto localBounds = card.cardSprite.getLocalBounds();
+        sf::Vector2f currentOrigin = card.cardSprite.getOrigin();
+        if (currentOrigin.x < 1.f && currentOrigin.y < 1.f) {
+            auto globalBounds = card.cardSprite.getGlobalBounds();
+            sf::Vector2f worldOffset = {globalBounds.size.x / 2.f, globalBounds.size.y / 2.f};
+            card.cardSprite.setOrigin({localBounds.size.x / 2.f, localBounds.size.y / 2.f});
+            card.cardSprite.setPosition(card.cardSprite.getPosition() + worldOffset);
+        }
+
+        auto flipped = std::make_shared<bool>(false);
+
+        auto func = [this, &card, origScale, cardId, flipped](float t) {
+            if (t <= 0.5f) {
+                float localT = t / 0.5f;
+                float scaleX = origScale.x * (1.f - easeInCubic(localT));
+                card.cardSprite.setScale({scaleX, origScale.y});
+            } else {
+                if (!*flipped) {
+                    visualState.flipCardVisualFaceUp(cardId);
+                    *flipped = true;
+                }
+                float localT = (t - 0.5f) / 0.5f;
+                float scaleX = origScale.x * easeOutCubic(localT);
+                card.cardSprite.setScale({scaleX, origScale.y});
+            }
+        };
+
+        auto finishCb = [&card, origScale, onFinish]() {
+            card.cardSprite.setScale(origScale);
+            if (onFinish) onFinish();
+        };
+
+        add({func, finishCb, 0, AnimConfig::CARD_FLIP_DURATION});
     }
 
     void spawnPhaseText(std::string text, float duration){
