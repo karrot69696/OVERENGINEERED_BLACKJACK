@@ -11,6 +11,10 @@ void SkillManager::createSkills(std::vector<Player>& players) {
                 skills.push_back(std::make_unique<SkillNeuralGambit>(player.getId()));
                 std::cout << "[createSkills] Created [NeuralGambit] for player " << player.getId() << std::endl;
                 break;
+            case SkillName::FATALDEAL:
+                skills.push_back(std::make_unique<SkillFatalDeal>(player.getId()));
+                std::cout << "[createSkills] Created [FatalDeal] for player " << player.getId() << std::endl;
+                break;
             default:
                 std::cout << "[createSkills] Skill: " << player.skillNameToString() << " does not exist" << std::endl;
         }
@@ -85,4 +89,33 @@ bool SkillManager::skillPassiveHandler(GameState& gameState) {
         }
     }
     return false;
+}
+
+std::vector<std::pair<int, SkillName>> SkillManager::getReactiveSkills(
+        ReactiveTrigger trigger, const ReactiveContext& ctx,
+        const GameState& state, int priorityPlayerId, int numPlayers) {
+
+    std::vector<std::pair<int, SkillName>> qualified;
+
+    for (auto& skill : skills) {
+        if (skill->getReactiveTrigger() == trigger && skill->canReact(ctx, state)) {
+            qualified.push_back({skill->getUserId(), skill->getSkillName()});
+            std::cout << "[SkillManager] Reactive skill qualified: "
+                      << skill->skillNameToString() << " (P"
+                      << skill->getUserId() << ")" << std::endl;
+        }
+    }
+
+    // Sort: priorityPlayerId first, then by player ID wrapping around
+    std::sort(qualified.begin(), qualified.end(),
+        [priorityPlayerId, numPlayers](const auto& a, const auto& b) {
+            if (a.first == priorityPlayerId && b.first != priorityPlayerId) return true;
+            if (b.first == priorityPlayerId && a.first != priorityPlayerId) return false;
+            // Wrap-around order from priorityPlayerId
+            int da = (a.first - priorityPlayerId + numPlayers) % numPlayers;
+            int db = (b.first - priorityPlayerId + numPlayers) % numPlayers;
+            return da < db;
+        });
+
+    return qualified;
 }

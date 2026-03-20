@@ -11,6 +11,7 @@
 #include "../lowLevelEntities/VisualState.h"
 #include "../gameEngine/EventQueue.h"
 #include "../skillEngine/SkillManager.h"
+#include "../skillEngine/Skill.h"
 class UIManager;
 class RoundManager;
 class SkillManager;
@@ -40,6 +41,29 @@ class Phase {
         std::optional<NgPendingState> ngPending;
         void ngTickPending(Player& skillUser);
 
+        // Reactive skill check state (fires after events like card draws)
+        struct ReactiveCheckState {
+            ReactiveTrigger trigger;
+            int drawnCardId;
+            int drawerId;
+            int actingPlayerId;       // who to re-prompt when all reactive checks done
+
+            struct QueueEntry { int skillOwnerId; SkillName skillName; };
+            std::vector<QueueEntry> queue;
+            int currentIndex = 0;
+
+            enum Step { PROMPTING, WAITING_RESPONSE, PICKING_CARD, EXECUTING, DONE };
+            Step step = PROMPTING;
+
+            bool requestSent = false;
+            bool waitingForLocalPick = false;
+            float promptTimer = 0.f;
+            static constexpr float PROMPT_TIMEOUT = 5.0f;
+        };
+        std::optional<ReactiveCheckState> reactiveCheck;
+        void reactiveTickPending();
+        bool startReactiveCheck(ReactiveTrigger trigger, int drawnCardId, int drawerId, int actingPlayerId);
+
     public:
         Phase(UIManager& uiManager,
             EventQueue& eventQueue,
@@ -56,6 +80,7 @@ class Phase {
         Player& getCurrentPlayer();
         int getCurrentPlayerId();
         void incrementCurrentPlayerId();
+        bool allPlayersProcessed();
         //ULTRA IMPORTANT TURN HANDLER
         bool turnHandler(Player& player, Player& opponent);
         void skillHandler(Player& player);

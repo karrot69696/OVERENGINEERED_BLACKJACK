@@ -10,6 +10,14 @@ enum class skillType {
     ACTIVE,
     REACTIVE
 };
+
+enum class ReactiveTrigger { NONE, ON_CARD_DRAWN };
+
+struct ReactiveContext {
+    ReactiveTrigger trigger;
+    int drawerId;       // who drew the card
+    int drawnCardId;    // which card was drawn
+};
 struct SkillContext {
     Player& user;
     std::vector<Player*> targetPlayers;
@@ -39,6 +47,10 @@ class Skill{
         virtual void resetUses() { uses = 3; }
         virtual void gainUses(int usesGained) { uses += usesGained; }
         virtual bool activatePassive(GameState&) { return false; }
+
+        // Reactive skill interface — override in reactive subclasses
+        virtual ReactiveTrigger getReactiveTrigger() const { return ReactiveTrigger::NONE; }
+        virtual bool canReact(const ReactiveContext& ctx, const GameState& state) { return false; }
 
         // Pre-targeting validation: can this skill be activated at all right now?
         // Checks everything EXCEPT target-specific conditions.

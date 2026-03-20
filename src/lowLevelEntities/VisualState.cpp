@@ -165,6 +165,10 @@ void VisualState::rebuildFromState(Deck& deck, std::vector<Player>& players) {
 }
 
 void VisualState::reconcile(GameState& gs) {
+    // Block reconcile while PresentationLayer is processing events
+    // Prevents two writers (reconcile + event handlers) from racing on CardVisual metadata
+    if (reconcileBlocked) return;
+
     // Lightweight sync: update CardVisual metadata from GameState
     // Does NOT touch sprite position — animations/PresentationLayer own that
 

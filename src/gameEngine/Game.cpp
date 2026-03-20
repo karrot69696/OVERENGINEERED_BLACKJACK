@@ -1,4 +1,5 @@
 #include "Game.h"
+#include "Log.h"
 
 // ============================================================================
 // Game Implementation
@@ -106,6 +107,7 @@ void Game::SetupGame(int numLocal, int numRemote, int numBots){
 }
 
 void Game::RunGame(){
+    TimestampBuf::resetClock();
     std::cout << "\n=== GAME START ===\n" << std::endl;
     RoundManager roundManager(
         this->players,
@@ -129,21 +131,25 @@ void Game::RunGame(){
             std::cout << "[Client] Sending action: " << static_cast<int>(action) << std::endl;
             networkManager.sendAction(action);
             if (action == PlayerAction::SKILL_REQUEST) {
-                // Show targeting overlay locally; server will validate on execution
+                // Keep action menu visible until server responds with either
+                // REQUEST_TARGET_INPUT (valid) or SKILL_ERROR + REQUEST_ACTION_INPUT (invalid)
                 int activeId = uiManager.getActivePlayerId();
-                uiManager.requestTargetInput(activeId);
+                uiManager.requestActionInput(activeId);
             }
         };
         uiManager.onTargetChosen = [this](PlayerTargeting targeting) {
-            int activeId = uiManager.getActivePlayerId();
-            if (targeting.targetPlayerIds.empty() && targeting.targetCards.empty()) {
-                // Cancel — re-show action menu locally
-                eventQueue.push({GameEventType::REQUEST_ACTION_INPUT,
-                    RequestActionInputEvent{activeId}});
-            } else {
+            if (!targeting.targetPlayerIds.empty() || !targeting.targetCards.empty()) {
                 std::cout << "[Client] Sending targeting" << std::endl;
                 networkManager.sendTarget(targeting);
+                return;
             }
+            // Cancel — re-show action menu locally
+            int activeId = uiManager.getActivePlayerId();
+            eventQueue.push({GameEventType::REQUEST_ACTION_INPUT,
+                RequestActionInputEvent{activeId}});
+        };
+        uiManager.onReactiveResponse = [this](bool accepted) {
+            networkManager.sendReactiveResponse(accepted);
         };
     } else {
         // HOST / LOCAL — logic layer validates before showing targeting UI
@@ -160,9 +166,12 @@ void Game::RunGame(){
                 std::string error = roundManager.getSkillManager()
                     .preValidateSkill(activeId, gameState);
                 if (!error.empty()) {
+                    std::cout << "[Game] preValidateSkill failed for P" << activeId
+                              << ": " << error << std::endl;
                     eventQueue.push({GameEventType::SKILL_ERROR,
                         SkillErrorEvent{activeId, error}});
-                    // Action menu stays visible — don't change UI
+                    // Directly re-show action menu (event queue may be blocked by cutscene)
+                    uiManager.requestActionInput(activeId);
                     return;
                 }
                 active->setPendingAction(action);
@@ -172,21 +181,25 @@ void Game::RunGame(){
             }
         };
         uiManager.onTargetChosen = [this](PlayerTargeting targeting) {
+            // Data path: targeting has content → store for logic layer (ngTickPending / skillHandler)
+            // No player lookup needed — gameState.pendingTarget is read by whoever requested it
+            if (!targeting.targetPlayerIds.empty() || !targeting.targetCards.empty()) {
+                gameState.pendingTarget = targeting;
+                return;
+            }
+            // Cancel path: empty targeting → re-show action menu for the active player
             int activeId = uiManager.getActivePlayerId();
             Player* active = nullptr;
             for (auto& p : players) {
                 if (p.getId() == activeId) { active = &p; break; }
             }
             if (!active) return;
-
-            if (targeting.targetPlayerIds.empty() && targeting.targetCards.empty()) {
-                // Cancel — go back to action menu
-                eventQueue.push({GameEventType::REQUEST_ACTION_INPUT,
-                    RequestActionInputEvent{activeId}});
-                active->setPendingAction(PlayerAction::IDLE);
-            } else {
-                gameState.pendingTarget = targeting;
-            }
+            eventQueue.push({GameEventType::REQUEST_ACTION_INPUT,
+                RequestActionInputEvent{activeId}});
+            active->setPendingAction(PlayerAction::IDLE);
+        };
+        uiManager.onReactiveResponse = [this](bool accepted) {
+            gameState.pendingReactiveResponse = accepted ? ReactiveResponse::YES : ReactiveResponse::NO;
         };
     }
 
@@ -378,10 +391,20 @@ void Game::clientReceive() {
         }
     }
 
+    // Route reactive skill prompts from server
+    if (networkManager.hasPendingReactivePrompt()) {
+        ReactivePromptData prompt = networkManager.consumePendingReactivePrompt();
+        uiManager.requestReactivePrompt(
+            gameState.skillNameToString(prompt.skill), prompt.timerDuration);
+    }
+
     // Push received events into local event queue for presentation
     auto events = networkManager.drainReceivedEvents();
     if (!events.empty()) {
         std::cout << "[Client][clientReceive] Got " << events.size() << " events from server" << std::endl;
+    }
+    if (!events.empty()) {
+        visualState.setReconcileBlocked(true);
     }
     int myId = networkManager.getLocalPlayerId();
     for (auto& e : events) {

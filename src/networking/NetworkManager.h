@@ -61,6 +61,9 @@ private:
     void handleClientTarget(ENetPeer* peer, ByteBuffer& buf);
     void handleClientDisconnect(ENetPeer* peer);
 
+    // Server handlers
+    void handleClientReactiveResponse(ENetPeer* peer, ByteBuffer& buf);
+
     // Client handlers
     void handleServerWelcome(ByteBuffer& buf);
     void handleServerGameState(ByteBuffer& buf);
@@ -68,6 +71,7 @@ private:
     void handleServerEventBatch(ByteBuffer& buf);
     void handleServerGameSetup(ByteBuffer& buf);
     void handleServerTargetRequest(ByteBuffer& buf);
+    void handleServerReactivePrompt(ByteBuffer& buf);
 
     // Find RemotePlayer by peer
     RemotePlayer* findRemoteByPeer(ENetPeer* peer);
@@ -115,6 +119,9 @@ public:
     bool hasRemoteTarget(int playerId) const;
     PlayerTargeting consumeRemoteTarget(int playerId);
 
+    // Flush all stale remote actions/targets (call on turn transitions)
+    void clearAllRemoteInputs();
+
     // ========================================================================
     // Client API
     // ========================================================================
@@ -140,6 +147,12 @@ public:
     // Server: send a target-pick request to a specific client (multi-actor skills)
     void sendTargetRequest(int targetPlayerId, const TargetRequestData& req);
 
+    // Server: send reactive skill prompt to a specific client (yes/no)
+    void sendReactivePrompt(int playerId, SkillName skill, float timerDuration);
+    // Server: check/consume reactive response from a remote player
+    bool hasReactiveResponse(int playerId) const;
+    bool consumeReactiveResponse(int playerId);  // returns accepted (true/false)
+
     // Client: has the server signaled game start?
     bool hasGameStarted() const { return gameStarted; }
 
@@ -149,6 +162,15 @@ public:
         hasPendingTargetRequestFlag = false;
         return pendingTargetRequest;
     }
+
+    // Client: pending reactive prompt from server
+    bool hasPendingReactivePrompt() const { return hasPendingReactivePromptFlag; }
+    ReactivePromptData consumePendingReactivePrompt() {
+        hasPendingReactivePromptFlag = false;
+        return pendingReactivePromptData;
+    }
+    // Client: send reactive response to server
+    void sendReactiveResponse(bool accepted);
 
     // Callbacks for connection events
     std::function<void(int playerId)> onClientConnected;    // server: new client joined
@@ -165,6 +187,11 @@ private:
     // Client: incoming target-pick request from server
     bool hasPendingTargetRequestFlag = false;
     TargetRequestData pendingTargetRequest;
+
+    // Reactive prompt state
+    std::unordered_map<int, bool> pendingReactiveResponses;  // server: playerId → accepted
+    bool hasPendingReactivePromptFlag = false;               // client
+    ReactivePromptData pendingReactivePromptData;            // client
 };
 
 #endif

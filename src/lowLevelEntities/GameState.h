@@ -14,6 +14,7 @@ namespace GameConfig {
     constexpr int FACE_CARD_VALUE = 10;
     constexpr int CARD_RANKS = 13;
     constexpr int HAND_START_VALUE = 2;
+    constexpr int WINNING_POINTS = 15;
     // Bot behavior constants
     constexpr double BURST_RISK_WEIGHT = 0.5;
     constexpr double OPPONENT_PRESSURE_WEIGHT = 0.70;
@@ -49,6 +50,7 @@ enum class PlayerAction{
     STAND,
     IDLE
 };
+enum class ReactiveResponse { NONE, YES, NO };
 struct PlayerTargeting{
     std::vector<int> targetPlayerIds;
     std::vector<Card> targetCards;
@@ -58,10 +60,12 @@ private:
     std::vector<PlayerInfo> playersInfo;
     PhaseName phase;
     int currentPlayerId=0;
+    int playersProcessed=0;
     std::vector<Card> deckCards;
 public:
     PlayerAction pendingPlayerAction = PlayerAction::IDLE;
     PlayerTargeting pendingTarget;
+    ReactiveResponse pendingReactiveResponse = ReactiveResponse::NONE;
     void setAllPlayerInfo(std::vector<PlayerInfo> playersInfo);
     void setPhaseName(PhaseName newPhaseName, int newCurrentPlayerId);
     void setDeckCards(const std::vector<Card>& cards) { deckCards = cards; }
@@ -70,11 +74,11 @@ public:
     const std::vector<Card>& getDeckCards() const { return deckCards; }
     int getCurrentPlayerId() {return currentPlayerId;}
     void incrementCurrentPlayerId(int numPlayers) {
-        currentPlayerId++;
-        if (currentPlayerId >= numPlayers) {
-            //std::cout << "[GameState][incrementCurrentPlayerId] Current player ID exceeded number of players" << std::endl;
-           currentPlayerId = -1;
-        }
+        currentPlayerId = (currentPlayerId + 1) % numPlayers;
+        playersProcessed++;
+    }
+    bool allPlayersProcessed(int numPlayers) const {
+        return playersProcessed >= numPlayers;
     }
     PhaseName getPhaseName() const;
     PlayerInfo getPlayerInfo(int id) const {
@@ -128,7 +132,7 @@ public:
         switch (skill) {
             case SkillName::DELIVERANCE:   return "DELIVERANCE";
             case SkillName::NEURALGAMBIT:  return "NEURAL GAMBIT";
-            case SkillName::MULTIVERSE:    return "MULTIVERSE";
+            case SkillName::FATALDEAL:     return "FATAL DEAL";
             case SkillName::CLONE:         return "CLONE";
             case SkillName::BOOGIEWOOGIE:  return "BOOGIE WOOGIE";
             case SkillName::LOOKMAXXING:   return "LOOKMAXXING";

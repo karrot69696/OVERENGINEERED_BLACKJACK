@@ -29,12 +29,21 @@ void Phase::incrementCurrentPlayerId(){
     std::cout <<"[Phase] To next player..." << std::endl;
     gameState.incrementCurrentPlayerId((int)players.size());
 }
+bool Phase::allPlayersProcessed(){
+    return gameState.allPlayersProcessed((int)players.size());
+}
 
 bool Phase::turnHandler(Player& player, Player& opponent){
 
     // Multi-actor skill in progress — drive it and keep turn alive
     if (ngPending.has_value()) {
         ngTickPending(player);
+        return true;
+    }
+
+    // Reactive skill check in progress — drive it and keep turn alive
+    if (reactiveCheck.has_value()) {
+        reactiveTickPending();
         return true;
     }
 
@@ -46,6 +55,26 @@ bool Phase::turnHandler(Player& player, Player& opponent){
         NetworkManager* net = roundManager.getNetworkManager();
         if (net && net->hasRemoteAction(player.getId())) {
             PlayerAction remoteAction = net->consumeRemoteAction(player.getId());
+
+            // Server-side preValidation for remote skill requests
+            if (remoteAction == PlayerAction::SKILL_REQUEST) {
+                std::string error = skillManager.preValidateSkill(player.getId(), gameState);
+                if (!error.empty()) {
+                    std::cout << "[turnHandler] Remote P" << player.getId()
+                              << " skill rejected: " << error << std::endl;
+                    eventQueue.push({GameEventType::SKILL_ERROR,
+                        SkillErrorEvent{player.getId(), error}});
+                    eventQueue.push({GameEventType::REQUEST_ACTION_INPUT,
+                        RequestActionInputEvent{player.getId()}});
+                    return true; // stay alive, don't set pendingAction
+                }
+                // Valid: tell client to show targeting overlay
+                std::cout << "[turnHandler] Remote P" << player.getId()
+                          << " skill validated, sending REQUEST_TARGET_INPUT" << std::endl;
+                eventQueue.push({GameEventType::REQUEST_TARGET_INPUT,
+                    RequestTargetInputEvent{player.getId()}});
+            }
+
             player.setPendingAction(remoteAction);
 
             // If skill request, also check for targeting
@@ -72,6 +101,13 @@ bool Phase::turnHandler(Player& player, Player& opponent){
                 player.getHost() ? opponent.getId() : player.getId()
             );
             player.setPendingAction(PlayerAction::IDLE);
+
+            // Check reactive skills before re-prompting
+            if (startReactiveCheck(ReactiveTrigger::ON_CARD_DRAWN,
+                    drawnCard->getId(), player.getId(), player.getId())) {
+                break;  // reactiveTickPending will push REQUEST_ACTION_INPUT when done
+            }
+
             // Re-prompt for next action after HIT
             eventQueue.push({GameEventType::REQUEST_ACTION_INPUT, RequestActionInputEvent{player.getId()}});
         } break;
@@ -219,6 +255,19 @@ void Phase::skillProcessAftermath(SkillContext& context, SkillExecutionResult sk
                         context.targetCards[1]->getId(),
                         context.targetCards[2]->getId(),
                         context.targetCards[2]->getRankBonus()
+                    }
+                });
+            }
+        break;
+        //FATAL DEAL
+        case SkillName::FATALDEAL:
+            if (context.targetCards.size() >= 2) {
+                context.eventQueue.push({GameEventType::FATALDEAL_SWAP,
+                    FatalDealSwapEvent{
+                        context.targetPlayers[0]->getId(),  // drawer
+                        context.user.getId(),               // FD user
+                        context.targetCards[0]->getId(),     // drawn card
+                        context.targetCards[1]->getId()      // swapped card
                     }
                 });
             }
@@ -405,4 +454,221 @@ void Phase::ngTickPending(Player& skillUser) {
     skillUser.setPendingAction(PlayerAction::IDLE);
     ngPending = std::nullopt;
     std::cout << "[ngTickPending] NeuralGambit complete for P" << ng.skillUserId << std::endl;
+}
+
+// ============================================================================
+// Reactive skill check orchestration
+// ============================================================================
+bool Phase::startReactiveCheck(ReactiveTrigger trigger, int drawnCardId, int drawerId, int actingPlayerId) {
+    ReactiveContext ctx{trigger, drawerId, drawnCardId};
+    auto qualified = skillManager.getReactiveSkills(trigger, ctx, gameState, actingPlayerId, (int)players.size());
+
+    if (qualified.empty()) return false;
+
+    ReactiveCheckState state;
+    state.trigger = trigger;
+    state.drawnCardId = drawnCardId;
+    state.drawerId = drawerId;
+    state.actingPlayerId = actingPlayerId;
+    for (auto& [ownerId, skillName] : qualified) {
+        state.queue.push_back({ownerId, skillName});
+    }
+    state.currentIndex = 0;
+    state.step = ReactiveCheckState::PROMPTING;
+    state.requestSent = false;
+
+    reactiveCheck = state;
+    std::cout << "[startReactiveCheck] Reactive check started with " << qualified.size()
+              << " qualified skill(s)" << std::endl;
+    return true;
+}
+
+void Phase::reactiveTickPending() {
+    auto& rc = *reactiveCheck;
+    NetworkManager* net = roundManager.getNetworkManager();
+    int localPlayerId = net ? net->getLocalPlayerId() : 0;
+
+    auto isRemotePlayer = [&](const PlayerInfo& info) -> bool {
+        return !info.isBot && net && net->isServer() && info.playerId != localPlayerId;
+    };
+
+    // All skills processed — re-prompt the acting player and clean up
+    if (rc.currentIndex >= (int)rc.queue.size()) {
+        eventQueue.push({GameEventType::REQUEST_ACTION_INPUT,
+            RequestActionInputEvent{rc.actingPlayerId}});
+        reactiveCheck = std::nullopt;
+        std::cout << "[reactiveTickPending] All reactive checks done, re-prompting P"
+                  << rc.actingPlayerId << std::endl;
+        return;
+    }
+
+    auto& entry = rc.queue[rc.currentIndex];
+    PlayerInfo ownerInfo = gameState.getPlayerInfo(entry.skillOwnerId);
+
+    switch (rc.step) {
+    case ReactiveCheckState::PROMPTING: {
+        if (!rc.requestSent) {
+            if (ownerInfo.isBot) {
+                // Bots always accept reactive skills
+                gameState.pendingReactiveResponse = ReactiveResponse::YES;
+                std::cout << "[reactiveTickPending] Bot P" << entry.skillOwnerId
+                          << " auto-accepts " << gameState.skillNameToString(entry.skillName) << std::endl;
+            } else if (isRemotePlayer(ownerInfo)) {
+                // Send prompt to remote client
+                if (net) net->sendReactivePrompt(entry.skillOwnerId, entry.skillName, ReactiveCheckState::PROMPT_TIMEOUT);
+                std::cout << "[reactiveTickPending] Sent reactive prompt to remote P"
+                          << entry.skillOwnerId << std::endl;
+            } else {
+                // Local player: push event for PresentationLayer to show prompt
+                eventQueue.push({GameEventType::REACTIVE_SKILL_PROMPT,
+                    ReactiveSkillPromptEvent{entry.skillOwnerId, entry.skillName, ReactiveCheckState::PROMPT_TIMEOUT}});
+                std::cout << "[reactiveTickPending] Prompting local P" << entry.skillOwnerId
+                          << " for " << gameState.skillNameToString(entry.skillName) << std::endl;
+            }
+            rc.requestSent = true;
+            rc.promptTimer = 0.f;
+            rc.step = ReactiveCheckState::WAITING_RESPONSE;
+        }
+    } break;
+
+    case ReactiveCheckState::WAITING_RESPONSE: {
+        rc.promptTimer += 1.f / 60.f;  // ~1 frame at 60fps
+
+        ReactiveResponse response = ReactiveResponse::NONE;
+
+        if (ownerInfo.isBot) {
+            response = gameState.pendingReactiveResponse;
+        } else if (isRemotePlayer(ownerInfo)) {
+            if (net && net->hasReactiveResponse(entry.skillOwnerId)) {
+                bool accepted = net->consumeReactiveResponse(entry.skillOwnerId);
+                response = accepted ? ReactiveResponse::YES : ReactiveResponse::NO;
+            }
+        } else {
+            response = gameState.pendingReactiveResponse;
+        }
+
+        // Timeout check
+        if (response == ReactiveResponse::NONE && rc.promptTimer >= ReactiveCheckState::PROMPT_TIMEOUT) {
+            response = ReactiveResponse::NO;
+            std::cout << "[reactiveTickPending] Prompt timed out for P" << entry.skillOwnerId << std::endl;
+        }
+
+        if (response == ReactiveResponse::YES) {
+            gameState.pendingReactiveResponse = ReactiveResponse::NONE;
+            rc.step = ReactiveCheckState::PICKING_CARD;
+            rc.requestSent = false;
+            std::cout << "[reactiveTickPending] P" << entry.skillOwnerId << " accepted reactive skill" << std::endl;
+        } else if (response == ReactiveResponse::NO) {
+            gameState.pendingReactiveResponse = ReactiveResponse::NONE;
+            // Advance to next skill in queue
+            rc.currentIndex++;
+            rc.step = ReactiveCheckState::PROMPTING;
+            rc.requestSent = false;
+            std::cout << "[reactiveTickPending] P" << entry.skillOwnerId << " declined reactive skill" << std::endl;
+        }
+        // else: still waiting
+    } break;
+
+    case ReactiveCheckState::PICKING_CARD: {
+        if (!rc.requestSent) {
+            // Get the skill owner's hand card IDs
+            std::vector<int> handCardIds;
+            for (auto& p : players) {
+                if (p.getId() == entry.skillOwnerId) {
+                    for (int i = 0; i < p.getHandSize(); i++)
+                        handCardIds.push_back(p.getCardInHand(i)->getId());
+                    break;
+                }
+            }
+
+            if (ownerInfo.isBot) {
+                // Bot auto-picks a random card from hand
+                if (!handCardIds.empty()) {
+                    int pickedId = handCardIds[rand() % handCardIds.size()];
+                    Card tempCard(Suit::Hearts, Rank::Ace, false);
+                    tempCard.setId(pickedId);
+                    gameState.pendingTarget = PlayerTargeting{{}, {tempCard}};
+                    std::cout << "[reactiveTickPending] Bot P" << entry.skillOwnerId
+                              << " auto-picked card " << pickedId << std::endl;
+                }
+            } else if (isRemotePlayer(ownerInfo)) {
+                if (net) net->sendTargetRequest(entry.skillOwnerId,
+                    TargetRequestData{-1, handCardIds, false});
+                std::cout << "[reactiveTickPending] Sent card pick request to remote P"
+                          << entry.skillOwnerId << std::endl;
+            } else {
+                uiManager.requestPickCard(handCardIds);
+                rc.waitingForLocalPick = true;
+                std::cout << "[reactiveTickPending] Requesting card pick from local P"
+                          << entry.skillOwnerId << std::endl;
+            }
+            rc.requestSent = true;
+        } else {
+            // Poll for the card pick
+            int pickedCardId = -1;
+
+            if (isRemotePlayer(ownerInfo) && net && net->hasRemoteTarget(entry.skillOwnerId)) {
+                auto t = net->consumeRemoteTarget(entry.skillOwnerId);
+                if (!t.targetCards.empty()) pickedCardId = t.targetCards[0].getId();
+            } else if (!gameState.pendingTarget.targetCards.empty()) {
+                pickedCardId = gameState.pendingTarget.targetCards[0].getId();
+                gameState.pendingTarget = {};
+                rc.waitingForLocalPick = false;
+            }
+
+            if (pickedCardId != -1) {
+                std::cout << "[reactiveTickPending] P" << entry.skillOwnerId
+                          << " picked card " << pickedCardId << std::endl;
+                rc.step = ReactiveCheckState::EXECUTING;
+
+                // Find the actual card pointers and execute
+                Card* drawnCard = nullptr;
+                Card* pickedCard = nullptr;
+                Player* drawer = nullptr;
+                Player* skillOwner = nullptr;
+                for (auto& p : players) {
+                    if (p.getId() == rc.drawerId) drawer = &p;
+                    if (p.getId() == entry.skillOwnerId) skillOwner = &p;
+                    for (int i = 0; i < p.getHandSize(); i++) {
+                        Card* c = p.getCardInHand(i);
+                        if (c->getId() == rc.drawnCardId) drawnCard = c;
+                        if (c->getId() == pickedCardId) pickedCard = c;
+                    }
+                }
+
+                if (drawnCard && pickedCard && drawer && skillOwner) {
+                    SkillContext context{
+                        *skillOwner,
+                        {drawer},
+                        {drawnCard, pickedCard},
+                        deck,
+                        gameState,
+                        eventQueue
+                    };
+
+                    SkillExecutionResult result = skillManager.processSkill(context);
+                    if (result.name == SkillName::UNDEFINED) {
+                        eventQueue.push({GameEventType::SKILL_ERROR,
+                            SkillErrorEvent{entry.skillOwnerId, result.errorMsg}});
+                    } else {
+                        skillProcessAftermath(context, result);
+                    }
+
+                    roundManager.updateGameState(gameState.getPhaseName(),
+                        rc.actingPlayerId);
+                } else {
+                    std::cerr << "[reactiveTickPending] ERROR: could not resolve cards/players" << std::endl;
+                }
+
+                // Advance to next skill in queue
+                rc.currentIndex++;
+                rc.step = ReactiveCheckState::PROMPTING;
+                rc.requestSent = false;
+            }
+        }
+    } break;
+
+    default:
+        break;
+    }
 }

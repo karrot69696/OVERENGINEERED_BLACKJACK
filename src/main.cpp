@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include "gameEngine/Game.h"
+#include "gameEngine/Log.h"
 #include "networking/NetMessage.h"
 
 // Simple menu button
@@ -36,6 +37,10 @@ struct MenuButton {
 };
 
 int main() {
+    // Install timestamped logging — every std::cout line gets a [sec.ms] prefix
+    TimestampBuf tsBuf(std::cout.rdbuf());
+    std::cout.rdbuf(&tsBuf);
+
     sf::RenderWindow window(sf::VideoMode({GameConfig::WINDOW_WIDTH, GameConfig::WINDOW_HEIGHT}), "CrazyJack",
         sf::Style::Titlebar | sf::Style::Close);
     window.setFramerateLimit(60);
@@ -247,7 +252,10 @@ int main() {
         newGame.getNetworkManager().broadcastGameStart();
 
         // Setup: 1 local human (host) + connectedCount remote players + 1 bot
-        newGame.SetupGame(1, connectedCount, 1);
+        if (connectedCount == 1){
+            newGame.SetupGame(1, connectedCount, 1);
+        }
+        else newGame.SetupGame(1, connectedCount , 0);
 
     } else if (mode == NetworkMode::CLIENT) {
         if (!newGame.connectToServer(serverIP, port)) {

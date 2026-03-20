@@ -153,6 +153,9 @@ void NetworkManager::handlePacket(ENetPeer* peer, ENetPacket* packet) {
             case NetMsgType::CLIENT_DISCONNECT:
                 handleClientDisconnect(peer);
                 break;
+            case NetMsgType::CLIENT_REACTIVE_RESPONSE:
+                handleClientReactiveResponse(peer, buf);
+                break;
             default:
                 std::cerr << "[NetworkManager] Server got unexpected msg type: "
                           << static_cast<int>(header.type) << std::endl;
@@ -178,6 +181,9 @@ void NetworkManager::handlePacket(ENetPeer* peer, ENetPacket* packet) {
                 break;
             case NetMsgType::SERVER_TARGET_REQUEST:
                 handleServerTargetRequest(buf);
+                break;
+            case NetMsgType::SERVER_REACTIVE_PROMPT:
+                handleServerReactivePrompt(buf);
                 break;
             default:
                 std::cerr << "[NetworkManager] Client got unexpected msg type: "
@@ -389,6 +395,48 @@ PlayerTargeting NetworkManager::consumeRemoteTarget(int playerId) {
     return {};
 }
 
+void NetworkManager::clearAllRemoteInputs() {
+    pendingActions.clear();
+    pendingTargets.clear();
+    pendingReactiveResponses.clear();
+}
+
+void NetworkManager::sendReactivePrompt(int playerId, SkillName skill, float timerDuration) {
+    for (auto& client : remoteClients) {
+        if (client.playerId == playerId) {
+            ByteBuffer buf;
+            NetSerializer::writeReactivePrompt(buf, skill, timerDuration);
+            sendPacket(client.peer, NetMsgType::SERVER_REACTIVE_PROMPT, buf, 0, true);
+            std::cout << "[NetworkManager] Sent reactive prompt to P" << playerId << std::endl;
+            return;
+        }
+    }
+    std::cerr << "[NetworkManager] sendReactivePrompt: player " << playerId << " not found" << std::endl;
+}
+
+bool NetworkManager::hasReactiveResponse(int playerId) const {
+    return pendingReactiveResponses.find(playerId) != pendingReactiveResponses.end();
+}
+
+bool NetworkManager::consumeReactiveResponse(int playerId) {
+    auto it = pendingReactiveResponses.find(playerId);
+    if (it != pendingReactiveResponses.end()) {
+        bool accepted = it->second;
+        pendingReactiveResponses.erase(it);
+        return accepted;
+    }
+    return false;
+}
+
+void NetworkManager::handleClientReactiveResponse(ENetPeer* peer, ByteBuffer& buf) {
+    int playerId;
+    bool accepted;
+    NetSerializer::readReactiveResponse(buf, playerId, accepted);
+    pendingReactiveResponses[playerId] = accepted;
+    std::cout << "[NetworkManager] Received reactive response from P" << playerId
+              << ": " << (accepted ? "YES" : "NO") << std::endl;
+}
+
 // ============================================================================
 // Client API
 // ============================================================================
@@ -405,6 +453,20 @@ void NetworkManager::sendTarget(const PlayerTargeting& targeting) {
     ByteBuffer buf;
     NetSerializer::writePlayerTargeting(buf, localPlayerId, targeting);
     sendPacket(serverPeer, NetMsgType::CLIENT_TARGET, buf, 0, true);
+}
+
+void NetworkManager::sendReactiveResponse(bool accepted) {
+    if (!serverPeer) return;
+    ByteBuffer buf;
+    NetSerializer::writeReactiveResponse(buf, localPlayerId, accepted);
+    sendPacket(serverPeer, NetMsgType::CLIENT_REACTIVE_RESPONSE, buf, 0, true);
+    std::cout << "[NetworkManager] Sent reactive response: " << (accepted ? "YES" : "NO") << std::endl;
+}
+
+void NetworkManager::handleServerReactivePrompt(ByteBuffer& buf) {
+    pendingReactivePromptData = NetSerializer::readReactivePrompt(buf);
+    hasPendingReactivePromptFlag = true;
+    std::cout << "[NetworkManager] Got reactive prompt from server" << std::endl;
 }
 
 std::vector<GameEvent> NetworkManager::drainReceivedEvents() {

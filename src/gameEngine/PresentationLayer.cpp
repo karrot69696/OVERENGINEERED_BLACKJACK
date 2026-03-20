@@ -14,6 +14,9 @@ bool PresentationLayer::isCutscene(GameEventType type) {
         case GameEventType::CARD_DRAWN:
         case GameEventType::CARD_RETURNED:
         case GameEventType::CARD_DELIVERANCE:
+        case GameEventType::HAND_REPOSITIONED:
+        case GameEventType::NEURALGAMBIT_REVEAL:
+        case GameEventType::FATALDEAL_SWAP:
             uiManager.clearInput();
             return true;
         default:
@@ -174,19 +177,62 @@ void PresentationLayer::processEvents() {
                       << e.cardId1 << " & " << e.cardId2
                       << " -> boost card " << e.boostCardId
                       << " +" << e.boostAmount << std::endl;
-            CardVisual& boostCv = visualState.getCardVisual(e.boostCardId);
-            sf::Vector2f pos = boostCv.cardSprite.getPosition();
-            animationManager.spawnFloatingText(
-                "+" + std::to_string(e.boostAmount),
-                { pos.x, pos.y - 20.f },
-                sf::Color(255, 215, 0),
-                1.5f
+            animationManager.playNeuralGambitEffect(
+                e.cardId1,e.cardId2,e.boostCardId,e.boostAmount
             );
+
+
         } break;
 
         case GameEventType::CLEAR_INPUT: {
             std::cout << "[PresentationLayer] CLEAR_INPUT" << std::endl;
             uiManager.clearInput();
+        } break;
+
+        case GameEventType::REACTIVE_SKILL_PROMPT: {
+            auto& e = std::get<ReactiveSkillPromptEvent>(event.data);
+            std::cout << "[PresentationLayer] REACTIVE_SKILL_PROMPT: P" << e.skillOwnerId
+                      << " skill=" << gameState.skillNameToString(e.skillName) << std::endl;
+            PlayerInfo info = gameState.getPlayerInfo(e.skillOwnerId);
+            if (!info.isBot && !info.isRemote) {
+                uiManager.requestReactivePrompt(
+                    gameState.skillNameToString(e.skillName), e.timerDuration);
+            }
+        } break;
+
+        case GameEventType::FATALDEAL_SWAP: {
+            auto& e = std::get<FatalDealSwapEvent>(event.data);
+            std::cout << "[PresentationLayer] FATALDEAL_SWAP: P" << e.fatalDealUserId
+                      << " swapped card " << e.swappedCardId
+                      << " with P" << e.drawerId << "'s card " << e.drawnCardId << std::endl;
+
+            CardVisual& swappedCv = visualState.getCardVisual(e.swappedCardId);  // was FD user's
+            CardVisual& drawnCv   = visualState.getCardVisual(e.drawnCardId);    // was drawer's
+
+            // Play effect at both card positions before the swap
+            animationManager.playFatalDealEffect(
+                swappedCv.cardSprite.getPosition(),
+                drawnCv.cardSprite.getPosition());
+
+            // Save current positions — cards will swap places
+            sf::Vector2f swappedPos = swappedCv.cardSprite.getPosition();
+            sf::Vector2f drawnPos   = drawnCv.cardSprite.getPosition();
+
+            // Swap all metadata between the two cards
+            std::swap(swappedCv.ownerId, drawnCv.ownerId);
+            std::swap(swappedCv.cardIndex, drawnCv.cardIndex);
+
+            std::cout << "[PresentationLayer]   after swap: card " << e.swappedCardId
+                      << "(owner=" << swappedCv.ownerId << " idx=" << swappedCv.cardIndex
+                      << ") card " << e.drawnCardId
+                      << "(owner=" << drawnCv.ownerId << " idx=" << drawnCv.cardIndex << ")" << std::endl;
+
+            // Teleport each card to the other's old position
+            int swappedId = e.swappedCardId;
+            int drawnId   = e.drawnCardId;
+
+            animationManager.addTeleportSwapAnimation(swappedId, drawnPos, swappedCv.cardIndex, nullptr);
+            animationManager.addTeleportSwapAnimation(drawnId,   swappedPos, drawnCv.cardIndex, nullptr);
         } break;
 
         } // switch
@@ -197,4 +243,9 @@ void PresentationLayer::processEvents() {
             break;
         }
     } // while
+
+    // All events processed — unblock reconcile so it can sync latest server state
+    if (eventQueue.empty()) {
+        visualState.setReconcileBlocked(false);
+    }
 }

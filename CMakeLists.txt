@@ -61,6 +61,7 @@ set(SKILL_ENGINE_HEADERS
     src/skillEngine/SkillManager.h
     src/skillEngine/Skill_Deliverance.h
     src/skillEngine/Skill_NeuralGambit.h
+    src/skillEngine/Skill_FatalDeal.h
 )
 
 set(GAME_ENGINE_SOURCES
@@ -78,6 +79,7 @@ set(GAME_ENGINE_HEADERS
     src/gameEngine/AnimationManager.h
     src/gameEngine/EventQueue.h
     src/gameEngine/PresentationLayer.h
+    src/gameEngine/Log.h
 )
 
 set(PHASE_ENGINE_SOURCES

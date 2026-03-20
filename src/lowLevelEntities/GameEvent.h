@@ -1,6 +1,6 @@
 #ifndef GAMEEVENT_H
 #define GAMEEVENT_H
-
+#include "SkillDeck.h"
 #include <variant>
 #include <vector>
 #include <string>
@@ -28,6 +28,9 @@ enum class GameEventType {
     CLEAR_INPUT,
 
     NEURALGAMBIT_REVEAL,         // skill visual: flash both revealed cards
+
+    REACTIVE_SKILL_PROMPT,       // tell presentation to show yes/no prompt
+    FATALDEAL_SWAP,              // skill visual: card swap animation
 };
 
 // Payloads carry IDs only, never screen positions
@@ -107,6 +110,19 @@ struct NeuralGambitRevealEvent {
     int boostAmount;
 };
 
+struct ReactiveSkillPromptEvent {
+    int skillOwnerId;
+    SkillName skillName;
+    float timerDuration;
+};
+
+struct FatalDealSwapEvent {
+    int drawerId;         // player who drew the card
+    int fatalDealUserId;  // Fatal Deal owner
+    int drawnCardId;      // card that was drawn (now going to FD user)
+    int swappedCardId;    // card from FD user's hand (now going to drawer)
+};
+
 using GameEventData = std::variant<
     CardDrawnEvent,
     CardReturnedEvent,
@@ -123,7 +139,9 @@ using GameEventData = std::variant<
     RequestTargetInputEvent,
     ClearInputEvent,
     SkillErrorEvent,
-    NeuralGambitRevealEvent
+    NeuralGambitRevealEvent,
+    ReactiveSkillPromptEvent,
+    FatalDealSwapEvent
 >;
 
 struct GameEvent {

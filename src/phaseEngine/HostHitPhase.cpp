@@ -46,7 +46,7 @@ std::optional<PhaseName> HostHitPhase::onUpdate() {
 
         incrementCurrentPlayerId();
         //if all players have been checked, reset to first player and move to next phase
-        if (getCurrentPlayerId() == -1){
+        if (allPlayersProcessed()){
             roundManager.updateGameState(PhaseName::ROUND_END, 0);
             return PhaseName::ROUND_END;
         }

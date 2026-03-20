@@ -20,6 +20,8 @@ enum class NetMsgType : uint8_t {
     SERVER_GAME_SETUP,      // player list + initial setup info
     SERVER_GAME_START,      // server signals lobby → game transition
     SERVER_TARGET_REQUEST,  // server asks a specific client to pick a card (multi-actor skills)
+    SERVER_REACTIVE_PROMPT, // server asks client: activate reactive skill? (yes/no)
+    CLIENT_REACTIVE_RESPONSE, // client answers yes/no to reactive prompt
 };
 
 enum class NetworkMode : uint8_t {

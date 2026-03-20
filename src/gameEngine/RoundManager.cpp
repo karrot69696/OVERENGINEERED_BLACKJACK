@@ -140,6 +140,10 @@ void RoundManager::changePhase(PhaseName newPhase){
     if (currentPhase)
         currentPhase->onExit();
 
+    // Flush stale remote actions/targets from the previous turn
+    if (networkManager)
+        networkManager->clearAllRemoteInputs();
+
     //change phase
     currentPhase = createPhase(newPhase);
 

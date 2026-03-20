@@ -59,12 +59,15 @@ UIManager::UIManager(sf::RenderWindow& window, GameState& gameState,VisualState&
     actionButtons.emplace_back(font, "Skill", sf::Vector2f{btnStartX + 260.f, btnY}, UILayout::BUTTON_SIZE);
 
     actionButtons[0].onClick = [this]() {
+        showActionMenu = false;
         if (onActionChosen) onActionChosen(PlayerAction::HIT);
     };
     actionButtons[1].onClick = [this]() {
+        showActionMenu = false;
         if (onActionChosen) onActionChosen(PlayerAction::STAND);
     };
     actionButtons[2].onClick = [this]() {
+        showActionMenu = false;
         if (onActionChosen) onActionChosen(PlayerAction::SKILL_REQUEST);
     };
 
@@ -138,6 +141,7 @@ void UIManager::clearInput() {
     showTargetingOverlay_Deliverance = false;
     showTargetingOverlay_NeuralGambit = false;
     showPickCardOverlay = false;
+    showReactivePrompt = false;
     pickCardAllowedIds = {};
     ngStep = NgStep::PICK_PLAYER;
     ngTargetPlayerIds = {};
@@ -160,6 +164,18 @@ void UIManager::requestBoostPickInput(int card1Id, int card2Id) {
     showTargetingOverlay_NeuralGambit = true;
 }
 
+void UIManager::requestReactivePrompt(const std::string& skillName, float timerDuration) {
+    std::cout << "[UIManager] Reactive prompt: " << skillName << " (" << timerDuration << "s)" << std::endl;
+    showReactivePrompt = true;
+    reactivePromptSkillName = skillName;
+    reactivePromptDuration = timerDuration;
+    reactivePromptClock.restart();
+}
+
+void UIManager::hideReactivePrompt() {
+    showReactivePrompt = false;
+}
+
 // ============================================================================
 // Event Handling
 // ============================================================================
@@ -175,6 +191,28 @@ void UIManager::handleEvent(const std::optional<sf::Event>& event) {
         if (mouseBtn->button != sf::Mouse::Button::Left) return;
         sf::Vector2f mousePos = window.mapPixelToCoords({mouseBtn->position.x, mouseBtn->position.y});
         std::cout << "[UIManager] Mouse click at (" << mousePos.x << ", " << mousePos.y << ")\n";
+
+        // Reactive prompt clicks (Yes/No)
+        if (showReactivePrompt) {
+            float centerX = window.getSize().x / 2.f;
+            float centerY = window.getSize().y / 2.f;
+            sf::FloatRect yesBounds({centerX - 90.f, centerY + 10.f}, {70.f, 30.f});
+            sf::FloatRect noBounds({centerX + 20.f, centerY + 10.f}, {70.f, 30.f});
+
+            if (yesBounds.contains(mousePos)) {
+                showReactivePrompt = false;
+                std::cout << "[UIManager] Reactive prompt: YES" << std::endl;
+                if (onReactiveResponse) onReactiveResponse(true);
+                return;
+            }
+            if (noBounds.contains(mousePos)) {
+                showReactivePrompt = false;
+                std::cout << "[UIManager] Reactive prompt: NO" << std::endl;
+                if (onReactiveResponse) onReactiveResponse(false);
+                return;
+            }
+            return;  // block other clicks while prompt is visible
+        }
 
         // Action menu clicks
         if (showActionMenu) {
@@ -258,6 +296,7 @@ void UIManager::handleEvent(const std::optional<sf::Event>& event) {
                         target.targetCards.push_back(chosenCard);
                         pendingTargeting = target;
                         showTargetingOverlay_NeuralGambit = false;
+                        ngTargetPlayerIds = {};
                         std::cout << "[UIManager][NeuralGambit] Boost card chosen: " << cv.cardId << std::endl;
                         confirmTargeting();
                         return;
@@ -337,6 +376,7 @@ void UIManager::render() {
     if (showTargetingOverlay_Deliverance)     renderTargetingOverlay_Deliverance();
     if (showTargetingOverlay_NeuralGambit)    renderTargetingOverlay_NeuralGambit();
     if (showPickCardOverlay)                  renderPickCardOverlay();
+    if (showReactivePrompt)                   renderReactivePrompt();
 }
 
 void UIManager::renderTable() {
@@ -395,7 +435,7 @@ void UIManager::renderPlayerVisuals(){
         bool isCurrentTurn = (playerVisual.playerId == currentTurnId);
 
         // Draw player icon
-        sf::Vector2f iconScale = {0.37f, 0.37f};
+        sf::Vector2f iconScale = {0.18f, 0.18f};
         playerVisual.playerSprite.setPosition({
             playerVisual.seatPostion.x - 86.f,
             playerVisual.seatPostion.y - 26.f
@@ -405,7 +445,7 @@ void UIManager::renderPlayerVisuals(){
 
         // Host label above player icon
         if (playerVisual.isHost) {
-            sf::Text hostLabel(font, "HOST", 12);
+            sf::Text hostLabel(font, "HOST", 18);
             hostLabel.setFillColor(sf::Color(255, 200, 50));
             hostLabel.setStyle(sf::Text::Bold);
             hostLabel.setPosition({ playerVisual.seatPostion.x - 86.f, playerVisual.seatPostion.y - 50.f });
@@ -417,7 +457,7 @@ void UIManager::renderPlayerVisuals(){
                           + "  [" + gameState.skillNameToString(playerVisual.skillName)
                           + " x" + std::to_string(playerVisual.skillUses) + "]";
 
-        sf::Text playerLabel(font, label, 14);
+        sf::Text playerLabel(font, label, 11);
         // Highlight current turn player's name
         if (isCurrentTurn) {
             playerLabel.setFillColor(sf::Color(100, 255, 100));
@@ -425,6 +465,12 @@ void UIManager::renderPlayerVisuals(){
         } else {
             playerLabel.setFillColor(sf::Color::White);
         }
+        //host gets another name label highlight during host hit phase
+        if (gameState.getPhaseName() == PhaseName::HOST_HIT_PHASE && playerVisual.isHost) {
+            playerLabel.setFillColor(sf::Color(255, 200, 20));
+            playerLabel.setStyle(sf::Text::Bold);
+        }
+
         playerLabel.setPosition({ playerVisual.seatPostion.x, playerVisual.seatPostion.y - 20.f });
         window.draw(playerLabel);
 
@@ -511,6 +557,7 @@ void UIManager::renderTargetingOverlay_NeuralGambit() {
     if (ngStep == NgStep::PICK_PLAYER) {
         hoveredPlayerId = -1;
         sf::Text prompt(font, "NEURAL GAMBIT: Choose a target player", 16);
+
         prompt.setFillColor(sf::Color::Cyan);
         prompt.setPosition({ 10.f, (float)window.getSize().y - 65.f });
         window.draw(prompt);
@@ -627,6 +674,30 @@ void UIManager::renderPickCardOverlay() {
     prompt.setPosition({ 10.f, (float)window.getSize().y - 65.f });
     window.draw(prompt);
 
+    
+
+    // Shake the player whose cards are being picked
+    if (!pickCardAllowedIds.empty()) {
+        int ownerId = -1;
+        for (auto& cv : cardVisuals) {
+            if (std::find(pickCardAllowedIds.begin(), pickCardAllowedIds.end(), cv.cardId) != pickCardAllowedIds.end()) {
+                ownerId = cv.ownerId;
+                break;
+            }
+        }
+        for (auto& pv : playerVisuals) {
+            if (pv.playerId != ownerId) continue;
+            float elapsed = shakeClock.getElapsedTime().asSeconds();
+            float shakeOffsetX = std::sin(elapsed * 40.f) * 3.f + std::sin(elapsed * 80.f) * 3.f;
+            float shakeOffsetY = std::cos(elapsed * 40.f) * 3.f + std::sin(elapsed * 80.f) * 3.f;
+            sf::Vector2f origPos = pv.playerSprite.getPosition();
+            pv.playerSprite.setPosition({origPos.x + shakeOffsetX, origPos.y + shakeOffsetY});
+            window.draw(pv.playerSprite);
+            pv.playerSprite.setPosition(origPos);
+            break;
+        }
+    }
+
     // Highlight only allowed cards
     for (auto& cv : cardVisuals) {
         if (std::find(pickCardAllowedIds.begin(), pickCardAllowedIds.end(), cv.cardId) == pickCardAllowedIds.end()) continue;
@@ -658,6 +729,79 @@ void UIManager::renderPickCardOverlay() {
                                   hovered ? sf::Color(255, 240, 100) : UILayout::CARD_HIGHLIGHT);
         window.draw(highlight);
     }
+}
+
+void UIManager::renderReactivePrompt() {
+    float elapsed = reactivePromptClock.getElapsedTime().asSeconds();
+
+    // Auto-decline on timeout
+    if (elapsed >= reactivePromptDuration) {
+        showReactivePrompt = false;
+        std::cout << "[UIManager] Reactive prompt timed out" << std::endl;
+        if (onReactiveResponse) onReactiveResponse(false);
+        return;
+    }
+
+    float centerX = window.getSize().x / 2.f;
+    float centerY = window.getSize().y / 2.f;
+    float boxW = 200.f, boxH = 80.f;
+
+    // Semi-transparent background box
+    sf::RectangleShape bg({boxW, boxH});
+    bg.setFillColor(sf::Color(20, 20, 40, 220));
+    bg.setOutlineThickness(2.f);
+    bg.setOutlineColor(sf::Color(255, 200, 50));
+    bg.setPosition({centerX - boxW / 2.f, centerY - boxH / 2.f});
+    window.draw(bg);
+
+    // Skill name text
+    sf::Text skillText(font, reactivePromptSkillName + "?", 14);
+    skillText.setFillColor(sf::Color(255, 200, 50));
+    sf::FloatRect stBounds = skillText.getLocalBounds();
+    skillText.setPosition({centerX - stBounds.size.x / 2.f, centerY - boxH / 2.f + 6.f});
+    window.draw(skillText);
+
+    // Timer bar
+    float barW = boxW - 20.f;
+    float barH = 6.f;
+    float progress = 1.f - (elapsed / reactivePromptDuration);
+    sf::RectangleShape barBg({barW, barH});
+    barBg.setFillColor(sf::Color(60, 60, 60));
+    barBg.setPosition({centerX - barW / 2.f, centerY - boxH / 2.f + 28.f});
+    window.draw(barBg);
+
+    sf::RectangleShape barFill({barW * progress, barH});
+    barFill.setFillColor(progress > 0.3f ? sf::Color(100, 255, 100) : sf::Color(255, 80, 80));
+    barFill.setPosition({centerX - barW / 2.f, centerY - boxH / 2.f + 28.f});
+    window.draw(barFill);
+
+    // Yes button
+    sf::RectangleShape yesBtn({70.f, 30.f});
+    yesBtn.setFillColor(sf::Color(50, 150, 50));
+    yesBtn.setOutlineThickness(1.f);
+    yesBtn.setOutlineColor(sf::Color::White);
+    yesBtn.setPosition({centerX - 90.f, centerY + 10.f});
+    window.draw(yesBtn);
+
+    sf::Text yesText(font, "Yes", 14);
+    yesText.setFillColor(sf::Color::White);
+    sf::FloatRect ytBounds = yesText.getLocalBounds();
+    yesText.setPosition({centerX - 90.f + 35.f - ytBounds.size.x / 2.f, centerY + 14.f});
+    window.draw(yesText);
+
+    // No button
+    sf::RectangleShape noBtn({70.f, 30.f});
+    noBtn.setFillColor(sf::Color(150, 50, 50));
+    noBtn.setOutlineThickness(1.f);
+    noBtn.setOutlineColor(sf::Color::White);
+    noBtn.setPosition({centerX + 20.f, centerY + 10.f});
+    window.draw(noBtn);
+
+    sf::Text noText(font, "No", 14);
+    noText.setFillColor(sf::Color::White);
+    sf::FloatRect ntBounds = noText.getLocalBounds();
+    noText.setPosition({centerX + 20.f + 35.f - ntBounds.size.x / 2.f, centerY + 14.f});
+    window.draw(noText);
 }
 
 sf::Color UIManager::getPhaseNameColor() {

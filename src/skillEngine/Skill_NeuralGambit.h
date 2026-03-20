@@ -63,15 +63,6 @@ class SkillNeuralGambit : public Skill{
                       << " boosted by +" << boost << " (new bonus: "
                       << boostCard->getRankBonus() << ")" << std::endl;
 
-            context.eventQueue.push({ GameEventType::NEURALGAMBIT_REVEAL,
-                NeuralGambitRevealEvent{
-                    userCard->getId(),
-                    targetCard->getId(),
-                    boostCard->getId(),
-                    boost
-                }
-            });
-
             uses--;
             return true;
         }

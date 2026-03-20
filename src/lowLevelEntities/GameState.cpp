@@ -3,6 +3,7 @@
 void GameState::setPhaseName(PhaseName newPhaseName,int newCurrentPlayerId){
     phase = newPhaseName;
     currentPlayerId = newCurrentPlayerId;
+    if (newCurrentPlayerId == 0) playersProcessed = 0;
 }
 PhaseName GameState::getPhaseName() const{
     return phase;

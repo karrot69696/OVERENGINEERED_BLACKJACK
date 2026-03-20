@@ -76,7 +76,7 @@ std::optional<PhaseName> BattlePhase::onUpdate(){
     //after battle, indexing next player
     incrementCurrentPlayerId();
 
-    if (getCurrentPlayerId() == -1){
+    if (allPlayersProcessed()){
         std::cout<< "[BattlePhase] All battles resolved for round " << round << "." << std::endl;
         std::cout << "Moving to ROUND_END phase." << std::endl;
         roundManager.updateGameState(PhaseName::ROUND_END, 0);

@@ -71,6 +71,12 @@ class UIManager {
         // Pick-card overlay (shown to target players or skill user for boost pick)
         bool showPickCardOverlay = false;
         std::vector<int> pickCardAllowedIds;
+
+        // Reactive skill prompt overlay (Yes/No with timer)
+        bool showReactivePrompt = false;
+        std::string reactivePromptSkillName;
+        float reactivePromptDuration = 5.f;
+        sf::Clock reactivePromptClock;
         sf::Font font;
         sf::Texture cardTexture;
         sf::Texture tableTexture;
@@ -95,8 +101,6 @@ class UIManager {
         void requestActionInput(int playerId);                          // show Hit/Stand/Skill buttons
         void requestTargetInput(int playerId);                          // show card targeting overlay
         void clearInput();                                              // hide all overlays
-        //void buildCardVisuals();
-        //void targetStateHandler();
 
         // Targeting state
         PlayerTargeting pendingTargeting;
@@ -108,11 +112,16 @@ class UIManager {
         // Callbacks — set these from RoundManager
         std::function<void(PlayerAction)> onActionChosen;
         std::function<void(PlayerTargeting)> onTargetChosen;
+        std::function<void(bool accepted)> onReactiveResponse;
         
         // Called by Phase::ngTickPending — target player must pick one of allowedCardIds
         void requestPickCard(const std::vector<int>& allowedCardIds);
         // Called by Phase::ngTickPending — skill user picks which of two cards gets boosted
         void requestBoostPickInput(int card1Id, int card2Id);
+
+        // Reactive skill prompt (Yes/No with timer countdown)
+        void requestReactivePrompt(const std::string& skillName, float timerDuration);
+        void hideReactivePrompt();
 
         // Sub-renderers
         void renderTable();
@@ -123,6 +132,7 @@ class UIManager {
         void renderTargetingOverlay_Deliverance();
         void renderTargetingOverlay_NeuralGambit();
         void renderPickCardOverlay();
+        void renderReactivePrompt();
 };
 
 #endif

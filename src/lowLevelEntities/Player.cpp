@@ -64,10 +64,10 @@ void Player::addCardToHand(Card* card, bool isSync){
     cardsInHand.push_back(card);
     
     if (!isSync){
-        std::cout << "[Player] Card " << card->getRankAsString() 
-        << " of " << card->getSuitAsString()
-        << " owned by Player "<< card->getOwnerId() 
-        << " at index "<< card->getHandIndex()
+        std::cout << "[Player] Card " << "[id:"<< card->getId() <<"] ["<< card->getRankAsString() 
+        << "][" << card->getSuitAsString()
+        << "] owned by Player "<< card->getOwnerId() 
+        << " at index ["<< card->getHandIndex() << "]"
         <<std::endl;
     }
 }
@@ -247,7 +247,7 @@ std::string Player::skillNameToString(){
     switch (skillName){
         case SkillName::DELIVERANCE:   return "DELIVERANCE";
         case SkillName::NEURALGAMBIT:  return "NEURAL GAMBIT";
-        case SkillName::MULTIVERSE:    return "MULTIVERSE";
+        case SkillName::FATALDEAL:    return "FATALDEAL";
         case SkillName::CLONE:         return "CLONE";
         case SkillName::BOOGIEWOOGIE:  return "BOOGIE WOOGIE";
         case SkillName::LOOKMAXXING:   return "LOOKMAXXING";

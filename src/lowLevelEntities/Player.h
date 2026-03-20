@@ -109,6 +109,24 @@ class Player{
         void flipAllCardsFaceUp();
         void clearHand() { cardsInHand.clear(); }  // for network sync (doesn't touch card ownership)
 
+        // Remove a card from hand by ID without returning to deck (for direct swaps)
+        Card* removeCardFromHand(int cardId) {
+            for (auto it = cardsInHand.begin(); it != cardsInHand.end(); ++it) {
+                if ((*it)->getId() == cardId) {
+                    Card* card = *it;
+                    card->setOwnerId(-1);
+                    card->setHandIndex(-1);
+                    cardsInHand.erase(it);
+                    // Re-index remaining cards so handIndex stays sequential
+                    for (int i = 0; i < (int)cardsInHand.size(); i++) {
+                        cardsInHand[i]->setHandIndex(i);
+                    }
+                    return card;
+                }
+            }
+            return nullptr;
+        }
+
 
         
         //bot logic - run when it's bot's turn

@@ -7,20 +7,25 @@ void RoundEndPhase::onEnter() {
 
     roundManager.incrementRound();
 
-    if (roundManager.getRound() >= (int)players.size()){
-        std::cout << "[RoundEndPhase] Maximum rounds reached. Ending game..." << std::endl;
-        roundManager.updateGameState(PhaseName::GAME_OVER, 0);
-        return;
+    // Check if any player has reached the winning point threshold
+    for (auto& player : players) {
+        if (player.getPoint() >= GameConfig::WINNING_POINTS) {
+            std::cout << "[RoundEndPhase] Player " << player.getId()
+                      << " reached " << GameConfig::WINNING_POINTS << " points. Ending game..." << std::endl;
+            roundManager.updateGameState(PhaseName::GAME_OVER, player.getId());
+            return;
+        }
     }
 
     //New round setup (runs once)
     std::cout << "[RoundEndPhase] Starting new round..." << std::endl;
     Player& hostPlayer = roundManager.getHostPlayer();
 
-    //give host to next player
-    players[hostPlayer.getId() + 1].setHost();
+    //give host to next player (wrap around)
+    int nextHostId = (hostPlayer.getId() + 1) % (int)players.size();
+    players[nextHostId].setHost();
     std::cout << "[roundEndHandler] Player "
-    << hostPlayer.getId() + 1
+    << nextHostId
     << " is the new host." << std::endl;
     hostPlayer.resetHost();
 
@@ -54,8 +59,9 @@ void RoundEndPhase::onEnter() {
 std::optional<PhaseName> RoundEndPhase::onUpdate(){
 
     // If game over was set in onEnter
-    if (roundManager.getRound() >= (int)players.size()){
-        return PhaseName::GAME_OVER;
+    for (auto& player : players) {
+        if (player.getPoint() >= GameConfig::WINNING_POINTS)
+            return PhaseName::GAME_OVER;
     }
 
     // Animate one card returning per update call

@@ -7,7 +7,7 @@
 enum class SkillName {
     DELIVERANCE,
     NEURALGAMBIT,
-    MULTIVERSE,
+    FATALDEAL,
     CLONE,
     BOOGIEWOOGIE,
     LOOKMAXXING,

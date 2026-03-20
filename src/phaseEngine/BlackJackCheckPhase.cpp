@@ -55,7 +55,7 @@ std::optional<PhaseName> BlackJackCheckPhase::onUpdate(){
     incrementCurrentPlayerId();
 
     //if all players have been checked move to next phase
-    if ( getCurrentPlayerId() == -1 ){
+    if ( allPlayersProcessed() ){
         std::cout << "[BlackJackCheckPhase] All players checked for blackjack. Moving to PLAYER_HIT_PHASE." << std::endl;
         roundManager.updateGameState(PhaseName::PLAYER_HIT_PHASE, 0);
         return PhaseName::PLAYER_HIT_PHASE;

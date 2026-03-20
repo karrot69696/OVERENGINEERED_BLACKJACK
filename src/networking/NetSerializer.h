@@ -93,6 +93,11 @@ struct TargetRequestData {
     bool isBoostPick = false;         // false = pick your card, true = pick which card to boost
 };
 
+struct ReactivePromptData {
+    SkillName skill;
+    float timerDuration;
+};
+
 // ============================================================================
 // Card serialization (Suit, Rank, faceUp, id, ownerId, handIndex)
 // ============================================================================
@@ -301,6 +306,17 @@ inline void writeGameEvent(ByteBuffer& buf, const GameEvent& event) {
             buf.writeI32(payload.boostCardId);
             buf.writeI32(payload.boostAmount);
         }
+        else if constexpr (std::is_same_v<T, ReactiveSkillPromptEvent>) {
+            buf.writeI32(payload.skillOwnerId);
+            buf.writeU8(static_cast<uint8_t>(payload.skillName));
+            buf.writeFloat(payload.timerDuration);
+        }
+        else if constexpr (std::is_same_v<T, FatalDealSwapEvent>) {
+            buf.writeI32(payload.drawerId);
+            buf.writeI32(payload.fatalDealUserId);
+            buf.writeI32(payload.drawnCardId);
+            buf.writeI32(payload.swappedCardId);
+        }
     }, event.data);
 }
 
@@ -402,6 +418,21 @@ inline GameEvent readGameEvent(ByteBuffer& buf) {
             e.boostAmount = buf.readI32();
             data = e;
         } break;
+        case GameEventType::REACTIVE_SKILL_PROMPT: {
+            ReactiveSkillPromptEvent e;
+            e.skillOwnerId = buf.readI32();
+            e.skillName = static_cast<SkillName>(buf.readU8());
+            e.timerDuration = buf.readFloat();
+            data = e;
+        } break;
+        case GameEventType::FATALDEAL_SWAP: {
+            FatalDealSwapEvent e;
+            e.drawerId = buf.readI32();
+            e.fatalDealUserId = buf.readI32();
+            e.drawnCardId = buf.readI32();
+            e.swappedCardId = buf.readI32();
+            data = e;
+        } break;
     }
 
     return GameEvent{type, data};
@@ -442,6 +473,31 @@ inline TargetRequestData readTargetRequest(ByteBuffer& buf) {
     uint16_t n = buf.readU16();
     for (uint16_t i = 0; i < n; i++) req.allowedCardIds.push_back(buf.readI32());
     return req;
+}
+
+// ============================================================================
+// ReactivePrompt serialization
+// ============================================================================
+inline void writeReactivePrompt(ByteBuffer& buf, SkillName skill, float timerDuration) {
+    buf.writeU8(static_cast<uint8_t>(skill));
+    buf.writeFloat(timerDuration);
+}
+
+inline ReactivePromptData readReactivePrompt(ByteBuffer& buf) {
+    ReactivePromptData data;
+    data.skill = static_cast<SkillName>(buf.readU8());
+    data.timerDuration = buf.readFloat();
+    return data;
+}
+
+inline void writeReactiveResponse(ByteBuffer& buf, int playerId, bool accepted) {
+    buf.writeI32(playerId);
+    buf.writeBool(accepted);
+}
+
+inline void readReactiveResponse(ByteBuffer& buf, int& playerId, bool& accepted) {
+    playerId = buf.readI32();
+    accepted = buf.readBool();
 }
 
 } // namespace NetSerializer

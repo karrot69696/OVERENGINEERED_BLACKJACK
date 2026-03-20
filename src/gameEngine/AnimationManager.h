@@ -42,9 +42,14 @@ private:
     std::unique_ptr<sf::Sprite> shockSprite;
     sf::Texture explosionTexture;
     std::unique_ptr<sf::Sprite> explosionSprite;
-    sf::Texture holyTexture; 
+    sf::Texture holyTexture;
     std::unique_ptr<sf::Sprite> holySprite;
-
+    sf::Texture fatalDealTexture;
+    std::unique_ptr<sf::Sprite> fatalDealSprite1;
+    std::unique_ptr<sf::Sprite> fatalDealSprite2;
+    sf::Texture neuralGambitTexture;
+    std::unique_ptr<sf::Sprite> neuralGambitSprite1;
+    std::unique_ptr<sf::Sprite> neuralGambitSprite2;
 public:
     AnimationManager(sf::RenderWindow& window, GameState& gameState, VisualState& visualState) : 
     window(window), gameState(gameState), visualState(visualState) {
@@ -52,7 +57,9 @@ public:
         shockTexture.loadFromFile(shockTextPath);
         std::filesystem::path explosionPath = "../assets/images/Explosion02_spritesheet.png";
         explosionTexture.loadFromFile(explosionPath);
-        holyTexture.loadFromFile("../assets/images/holySpellEffect.png"); 
+        holyTexture.loadFromFile("../assets/images/holySpellEffect.png");
+        fatalDealTexture.loadFromFile("../assets/images/fatalDealEffect.png");
+        neuralGambitTexture.loadFromFile("../assets/images/neuralGambitEffect.png");
     }
     void add(Animation anim){
         animations.push_back(anim);
@@ -63,6 +70,8 @@ public:
         renderShockAnimation();
         renderExplosionAnimation();
         renderHolyAnimation();
+        renderFatalDealEffect();
+        renderNeuralGambitEffect();
     }
 
 /**
@@ -177,6 +186,63 @@ public:
         add(returnAnim);
 
     }
+    // Teleport swap animation: shake in place → shrink to nothing → pop in at target position
+    void addTeleportSwapAnimation(int cardId, sf::Vector2f targetPos, int targetIndex, std::function<void()> onFinish = nullptr) {
+        CardVisual& card = visualState.getCardVisual(cardId);
+        sf::Vector2f origPos = card.cardSprite.getPosition();
+        sf::Vector2f origScale = card.cardSprite.getScale();
+        sf::Vector2f endPos = targetPos;
+
+        // Ensure center origin
+        auto localBounds = card.cardSprite.getLocalBounds();
+        card.cardSprite.setOrigin({localBounds.size.x / 2.f, localBounds.size.y / 2.f});
+
+        // Phase 1: shake in place, then shrink to nothing
+        auto phase1 = [&card, origPos, origScale](float t) {
+            if (t < 0.7f) {
+                float localT = t / 0.7f;
+                float intensity = localT * 4.f;
+                float shakeX = std::sin(localT * 40.f) * intensity + std::sin(localT * 80.f) * intensity * 0.5f;
+                float shakeY = std::cos(localT * 40.f) * intensity * 0.7f;
+                card.cardSprite.setPosition({origPos.x + shakeX, origPos.y + shakeY});
+                card.cardSprite.setScale(origScale);
+            } else {
+                float localT = (t - 0.7f) / 0.3f;
+                float eased = localT * localT;
+                float s = 1.f - eased; // 1.0 → 0.0
+                card.cardSprite.setPosition(origPos);
+                card.cardSprite.setScale({origScale.x * s, origScale.y * s});
+            }
+        };
+
+        // Phase 2 (chained): appear at new position with pop-in
+        auto phase2 = [&card, endPos, origScale](float t) {
+            card.cardSprite.setPosition(endPos);
+            float eased;
+            if (t < 0.5f) {
+                float lt = t / 0.5f;
+                eased = lt * lt * 1.15f;
+            } else {
+                float lt = (t - 0.5f) / 0.5f;
+                eased = 1.15f + (1.f - 1.15f) * lt;
+            }
+            card.cardSprite.setScale({origScale.x * eased, origScale.y * eased});
+        };
+
+        auto phase2Finish = [&card, targetIndex, origScale, onFinish]() {
+            card.cardIndex = targetIndex;
+            card.cardSprite.setScale(origScale);
+            card.cardSprite.setRotation(sf::degrees(0));
+            if (onFinish) onFinish();
+        };
+
+        auto chainPhase2 = [this, phase2, phase2Finish]() {
+            add({phase2, phase2Finish, 0, 0.25f});
+        };
+
+        add({phase1, chainPhase2, 0, 0.45f});
+    }
+
     void addSpinAnimation(int cardId, std::function<void()> onFinish = nullptr){
         CardVisual& card = visualState.getCardVisual(cardId);
         sf::Vector2f startPosition = card.cardSprite.getPosition();
@@ -256,7 +322,7 @@ public:
 
     void spawnPhaseText(std::string text, float duration){
 
-        phaseText = std::make_unique<sf::Text>(visualState.getFont(), text, 64.f);
+        phaseText = std::make_unique<sf::Text>(visualState.getFont(), text, 32.f);
 
         sf::Text* textPtr = phaseText.get();
         auto bounds = textPtr->getLocalBounds();
@@ -327,57 +393,51 @@ public:
         auto ptr = ft; // shared_ptr keeps it alive
         sf::Vector2f startPos = position;
 
-        auto func = [this,ptr, startPos, color](float t){
+        auto func = [this, ptr, startPos, color](float t)
+        {
+            float floatDistance = 30.f;   // stronger upward motion
+            float peakScale = 1.5f;
 
-            float flyInEnd   = 0.33f;
-            float holdEnd    = 0.66f;
-            float flyOutEnd  = 1.0f;
+            // --- POSITION (fast start, slows down) ---
+            float y = startPos.y - floatDistance * easeOutCubic(t);
 
-            float startY  = startPos.y;
-            float centerY = startPos.y - 10.f;
-            float endY    = startPos.y - 20.f;
+            // --- SCALE (quick pop + overshoot + settle) ---
+            float scaleT = std::min(t * 3.0f, 1.0f); // VERY fast scale phase
+            float s;
 
-            float y = startY;
-            float x = startPos.x;
-            sf::Color c = color;
-            float peakScale = 1.1f;
-            sf::Vector2f scale = {1.f, 1.f};
-            if (t < flyInEnd)
+            if (scaleT < 0.7f)
             {
-                float localT = t / flyInEnd;
-                float eased = easeInCubic(localT);
-
-                y = startY + (centerY - startY) * eased;
-
-                float s = 1.f + (peakScale - 1.f) * eased;
-                scale = {s, s};
-                c.a = static_cast<uint8_t>(255.f * localT);
-
-            }
-            else if (t < holdEnd)
-            {
-                y = centerY;
-                scale = {peakScale, peakScale};
+                // explode outward
+                float local = scaleT / 0.7f;
+                s = 1.f + (peakScale - 1.f) * easeOutCubic(local);
             }
             else
             {
-                float flyOutDuration = flyOutEnd - holdEnd;
-                float localT = (t - holdEnd) / flyOutDuration;
-                float eased = easeOutCubic(localT);
-
-                c.a = static_cast<uint8_t>(255.f * (1.f - localT));
-                y = centerY + (endY - centerY) * eased;
-
-                float s = peakScale * (1.f - eased);
-                scale = {s, s};
+                // snap back slightly (overshoot feel)
+                float local = (scaleT - 0.7f) / 0.7f;
+                s = peakScale - 0.15f * easeInCubic(local);
             }
 
+            // --- ALPHA (stays visible, then drops fast) ---
+            float fadeStart = 0.3f;
+            float alpha = 1.f;
 
-            //ptr->setPosition({startPos.x, startPos.y - 40.f * eased});
-            ptr->setScale(scale);
+            if (t > fadeStart)
+            {
+                float fadeT = (t - fadeStart) / (1.f - fadeStart);
+                alpha = 1.f - easeInCubic(fadeT); // fast disappear
+            }
+
+            sf::Color c = color;
+            c.a = static_cast<uint8_t>(255.f * alpha);
+
+            // --- OPTIONAL: tiny horizontal shake (adds impact) ---
+            float shake = (1.f - t) * 4.f * std::sin(t * 40.f);
+            float x = startPos.x + shake;
+
+            ptr->setScale({s, s});
             ptr->setPosition({x, y});
             ptr->setFillColor(c);
-
         };
 
         Animation floatAnim = {func, nullptr, 0, duration};
@@ -513,6 +573,117 @@ public:
     void renderHolyAnimation(){
         if (holySprite)
             window.draw(*holySprite);
+    }
+    void playFatalDealEffect(sf::Vector2f pos1, sf::Vector2f pos2, float scale = 2.f, float duration = 1.0f){
+        fatalDealSprite1 = std::make_unique<sf::Sprite>(fatalDealTexture);
+        fatalDealSprite1->setOrigin({32,32});
+        fatalDealSprite1->setPosition(pos1);
+        fatalDealSprite1->setScale({scale,scale});
+        auto onDone1 = [this](){ fatalDealSprite1.reset(); };
+        playSpriteAnimation(fatalDealSprite1.get(),
+            19, 0, 512, 64, 64, duration, 64, onDone1);
+
+        fatalDealSprite2 = std::make_unique<sf::Sprite>(fatalDealTexture);
+        fatalDealSprite2->setOrigin({32,32});
+        fatalDealSprite2->setPosition(pos2);
+        fatalDealSprite2->setScale({scale,scale});
+        auto onDone2 = [this](){ fatalDealSprite2.reset(); };
+        playSpriteAnimation(fatalDealSprite2.get(),
+            19, 0, 512, 64, 64, duration, 64, onDone2);
+    }
+    void playNeuralGambitEffect(int cardId1, int cardId2, int boostCardId, int boostAmount,
+        float scale = 2.f, float duration = 1.0f, std::function<void()> onFinish = nullptr)
+    {
+        CardVisual& cardCv1 = visualState.getCardVisual(cardId1);
+        CardVisual& cardCv2 = visualState.getCardVisual(cardId2);
+        CardVisual& boostCv = visualState.getCardVisual(boostCardId);
+
+        auto bounds = cardCv1.cardSprite.getLocalBounds();
+        cardCv1.cardSprite.setOrigin({bounds.size.x / 2.f, bounds.size.y / 2.f});
+        bounds = cardCv2.cardSprite.getLocalBounds();
+        cardCv2.cardSprite.setOrigin({bounds.size.x / 2.f, bounds.size.y / 2.f});
+        bounds = boostCv.cardSprite.getLocalBounds();
+        boostCv.cardSprite.setOrigin({bounds.size.x / 2.f, bounds.size.y / 2.f});
+
+        sf::Vector2f pos1 = cardCv1.cardSprite.getPosition();
+        sf::Vector2f pos2 = cardCv2.cardSprite.getPosition();
+        sf::Vector2f posBoosted = boostCv.cardSprite.getPosition();
+        sf::Vector2f origScale = boostCv.cardSprite.getScale();
+
+        // Phase 2: shake boosted card, then pop-scale it
+        auto phase2 = [this, posBoosted, &boostCv, origScale](float t){
+            if (t < 0.7f) {
+                // Shake in place
+                float localT = t / 0.7f;
+                float intensity = localT * 4.f;
+                float shakeX = std::sin(localT * 40.f) * intensity + std::sin(localT * 80.f) * intensity * 0.5f;
+                float shakeY = std::cos(localT * 40.f) * intensity * 0.7f;
+                boostCv.cardSprite.setPosition({posBoosted.x + shakeX, posBoosted.y + shakeY});
+                boostCv.cardSprite.setScale(origScale);
+            } else {
+                // Pop-scale: overshoot then settle
+                float localT = (t - 0.7f) / 0.3f;
+                float eased;
+                if (localT < 0.5f) {
+                    float lt = localT / 0.5f;
+                    eased = lt * lt * 1.15f;
+                } else {
+                    float lt = (localT - 0.5f) / 0.5f;
+                    eased = 1.15f + (1.f - 1.15f) * lt;
+                }
+                boostCv.cardSprite.setPosition(posBoosted);
+                boostCv.cardSprite.setScale({origScale.x * eased, origScale.y * eased});
+            }
+        };
+        auto phase2Finish = [this, &boostCv, origScale, posBoosted, boostAmount, onFinish]() {
+            boostCv.cardSprite.setScale(origScale);
+            boostCv.cardSprite.setRotation(sf::degrees(0));
+            spawnFloatingText(
+                "+" + std::to_string(boostAmount),
+                { posBoosted.x, posBoosted.y - 20.f },
+                sf::Color(255, 215, 0),
+                1.5f
+            );
+            if (onFinish) onFinish();
+        };
+
+        neuralGambitSprite1 = std::make_unique<sf::Sprite>(neuralGambitTexture);
+        neuralGambitSprite1->setOrigin({32,32});
+        neuralGambitSprite1->setPosition(pos1);
+        neuralGambitSprite1->setScale({scale,scale});
+        auto onDone1 = [this, cardId1, boostCardId, phase2, phase2Finish](){
+            neuralGambitSprite1.reset();
+            if (cardId1 == boostCardId){
+                add({phase2, phase2Finish, 0, 0.7f});
+            }
+        };
+        playSpriteAnimation(neuralGambitSprite1.get(),
+            19, 0, 124, 64, 64, duration, 64, onDone1);
+
+        neuralGambitSprite2 = std::make_unique<sf::Sprite>(neuralGambitTexture);
+        neuralGambitSprite2->setOrigin({32,32});
+        neuralGambitSprite2->setPosition(pos2);
+        neuralGambitSprite2->setScale({scale,scale});
+        auto onDone2 = [this, cardId2, boostCardId, phase2, phase2Finish](){
+            neuralGambitSprite2.reset();
+            if (cardId2 == boostCardId){
+                add({phase2, phase2Finish, 0, 0.7f});
+            }
+        };
+        playSpriteAnimation(neuralGambitSprite2.get(),
+            19, 0, 124, 64, 64, duration, 64, onDone2);
+    }
+    void renderFatalDealEffect(){
+        if (fatalDealSprite1)
+            window.draw(*fatalDealSprite1);
+        if (fatalDealSprite2)
+            window.draw(*fatalDealSprite2);
+    }
+    void renderNeuralGambitEffect(){
+        if (neuralGambitSprite1)
+            window.draw(*neuralGambitSprite1);
+        if (neuralGambitSprite2)
+            window.draw(*neuralGambitSprite2);
     }
 };
 

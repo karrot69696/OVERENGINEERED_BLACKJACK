@@ -4,6 +4,7 @@
 #include "Skill.h"
 #include "Skill_Deliverance.h"
 #include "Skill_NeuralGambit.h"
+#include "Skill_FatalDeal.h"
 #include <vector>
 #include <memory>
 #include <iostream>
@@ -27,6 +28,12 @@ class SkillManager {
         int getSkillUses(SkillName name);
         void resetSkillUses(std::vector<Player>& players);
         bool skillPassiveHandler(GameState& gameState);
+
+        // Returns (skillOwnerId, skillName) pairs for skills that can react to this trigger
+        // Sorted by turn order starting from priorityPlayerId
+        std::vector<std::pair<int, SkillName>> getReactiveSkills(
+            ReactiveTrigger trigger, const ReactiveContext& ctx,
+            const GameState& state, int priorityPlayerId, int numPlayers);
 };
 
 #endif
