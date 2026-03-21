@@ -65,6 +65,10 @@ public:
         context.user.addCardToHand(drawnCard);
         drawer.addCardToHand(chosenCard);
 
+        // Cards go face-down after swap — only visible to their new owner
+        if (drawnCard->isFaceUp()) drawnCard->flip();
+        if (chosenCard->isFaceUp()) chosenCard->flip();
+
         std::cout << "[FatalDeal] P" << context.user.getId()
                   << " swapped card " << chosenCard->getRankAsString() << chosenCard->getSuitAsString() << " id:" << chosenCard->getId()
                   << " with P" << drawer.getId()

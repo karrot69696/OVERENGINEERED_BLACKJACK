@@ -390,10 +390,13 @@ void Phase::ngTickPending(Player& skillUser) {
 
     // --- Both picks received: reveal cards first ---
     if (!ng.revealSent) {
-        Card* first = findCard(ng.firstCardId);
-        Card* second = findCard(ng.secondCardId);
-        if (first && !first->isFaceUp()) first->flip();
-        if (second && !second->isFaceUp()) second->flip();
+        // Flip face-up in game logic so ALL players see the reveal (not just skill user)
+        Card* c1 = findCard(ng.firstCardId);
+        Card* c2 = findCard(ng.secondCardId);
+        if (c1 && !c1->isFaceUp()) c1->flip();
+        if (c2 && !c2->isFaceUp()) c2->flip();
+        // Sync gameState so broadcast includes the faceUp change
+        roundManager.updateGameState(gameState.getPhaseName(), gameState.getCurrentPlayerId());
         eventQueue.push({GameEventType::CARDS_REVEALED, CardsRevealedEvent{{ng.firstCardId, ng.secondCardId}}});
         ng.revealSent = true;
         return; // let the flip animation play before showing boost pick UI
@@ -460,6 +463,11 @@ void Phase::ngTickPending(Player& skillUser) {
     } else {
         skillProcessAftermath(context, result);
     }
+
+    // Flip cards back face-down in game logic — reveal is over
+    if (firstCard->isFaceUp()) firstCard->flip();
+    if (secondCard->isFaceUp()) secondCard->flip();
+    roundManager.updateGameState(gameState.getPhaseName(), gameState.getCurrentPlayerId());
 
     eventQueue.push({GameEventType::REQUEST_ACTION_INPUT,
         RequestActionInputEvent{ng.skillUserId}});
@@ -687,34 +695,35 @@ void Phase::reactiveTickPending() {
 
 void Phase::blackJackAndQuintetCheck(std::vector<Player>& players){
     for (auto& player : players) {
-        if (player.getHandSize() == 5 && player.calculateHandValue() <= 21) {
+        int handValue = player.calculateHandValue();
+        auto currentIds = [&]() {
+            std::vector<int> ids;
+            for (int i = 0; i < player.getHandSize(); i++)
+                ids.push_back(player.getCardInHand(i)->getId());
+            std::sort(ids.begin(), ids.end());
+            return ids;
+        }();
+        if (player.getHandSize() == 5 && handValue <= GameConfig::BLACKJACK_VALUE && currentIds != player.lastQuintetHand) {
+            player.lastQuintetHand = currentIds;
+            // Collect all card IDs for reveal — cards stay logically face-down
             std::vector<int> revealIds;
-            for (int i = 0; i < player.getHandSize(); i++) {
-                Card* c = player.getCardInHand(i);
-                if (!c->isFaceUp()) revealIds.push_back(c->getId());
-            }
-            player.flipAllCardsFaceUp();
-            if (!revealIds.empty()) {
-                eventQueue.push({GameEventType::CARDS_REVEALED, CardsRevealedEvent{revealIds}});
-            }
-            player.gainPoint(5);
+            for (int i = 0; i < player.getHandSize(); i++)
+                revealIds.push_back(player.getCardInHand(i)->getId());
+            eventQueue.push({GameEventType::CARDS_REVEALED, CardsRevealedEvent{revealIds}});
+            player.gainPoint(GameConfig::POINTS_GAIN_QUINTET);
             eventQueue.push({GameEventType::POINT_CHANGED, PointChangedEvent{
-            player.getId(), "QUINTET! +5" + std::to_string((int)players.size()+2)}});
+            player.getId(), "QUINTET! +"+ std::to_string(GameConfig::POINTS_GAIN_QUINTET)}});
 
         }
-        else if (player.getHandSize() == 2 && player.calculateHandValue() == 21) {
+        else if (player.getHandSize() == 2 && handValue == GameConfig::BLACKJACK_VALUE && currentIds != player.lastBlackjackHand) {
+            player.lastBlackjackHand = currentIds;
             std::vector<int> revealIds;
-            for (int i = 0; i < player.getHandSize(); i++) {
-                Card* c = player.getCardInHand(i);
-                if (!c->isFaceUp()) revealIds.push_back(c->getId());
-            }
-            player.flipAllCardsFaceUp();
-            if (!revealIds.empty()) {
-                eventQueue.push({GameEventType::CARDS_REVEALED, CardsRevealedEvent{revealIds}});
-            }
-            player.gainPoint(3);
+            for (int i = 0; i < player.getHandSize(); i++)
+                revealIds.push_back(player.getCardInHand(i)->getId());
+            eventQueue.push({GameEventType::CARDS_REVEALED, CardsRevealedEvent{revealIds}});
+            player.gainPoint(GameConfig::POINTS_GAIN_BLACKJACK);
             eventQueue.push({GameEventType::POINT_CHANGED, PointChangedEvent{
-            player.getId(), "BLACKJACK! +3"}});
+            player.getId(), "BLACKJACK! +" + std::to_string(GameConfig::POINTS_GAIN_BLACKJACK)}});
         }
     }
     roundManager.updateGameState(gameState.getPhaseName(), gameState.getCurrentPlayerId());

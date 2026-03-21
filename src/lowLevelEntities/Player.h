@@ -29,6 +29,8 @@ class Player{
         int battleCount = 0;
         PlayerAction pendingAction = PlayerAction::IDLE;
     public:
+        std::vector<int> lastQuintetHand;
+        std::vector<int> lastBlackjackHand;
         bool isBot = 1;
         bool isRemote = false;  // true for players whose input comes over network
         Player( int id, SkillName skillName, int isBot, int isHost) : skillName(skillName), isBot(isBot), isHost(isHost), id(id) {};

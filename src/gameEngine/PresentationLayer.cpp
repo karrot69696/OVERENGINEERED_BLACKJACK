@@ -43,9 +43,6 @@ void PresentationLayer::processEvents() {
             card.location = CardLocation::HAND;
             card.ownerId = e.playerId;
             card.cardIndex = e.handIndex;
-            if (e.playerId == visualState.getLocalPlayerId()) {
-                visualState.flipCardVisualFaceUp(e.cardId);
-            }
             animationManager.addDrawAnimation(e.playerId, e.handIndex, e.cardId);
         } break;
 
@@ -130,7 +127,7 @@ void PresentationLayer::processEvents() {
             );
             sf::Vector2f textPos = {seat.x, seat.y - 40.f};
             sf::Color textColor(255, 69, 69);
-            animationManager.spawnFloatingText(e.reason, textPos, textColor, 0.5);
+            animationManager.spawnFloatingText(e.reason, textPos, textColor, 0.7f);
         } break;
 
         case GameEventType::SHOCK_EFFECT: {
@@ -184,8 +181,15 @@ void PresentationLayer::processEvents() {
             // Flip the two revealed cards with animation, then play the NG effect
             animationManager.playCardFlip(e.cardId1);
             animationManager.playCardFlip(e.cardId2);
+            int cid1 = e.cardId1, cid2 = e.cardId2;
             animationManager.playNeuralGambitEffect(
-                e.cardId1,e.cardId2,e.boostCardId,e.boostAmount
+                e.cardId1, e.cardId2, e.boostCardId, e.boostAmount,
+                2.f, 1.0f,
+                [this, cid1, cid2]() {
+                    // Just unpin — enforceVisibility() handles face state
+                    visualState.getCardVisual(cid1).unpin();
+                    visualState.getCardVisual(cid2).unpin();
+                }
             );
         } break;
 
@@ -226,11 +230,10 @@ void PresentationLayer::processEvents() {
             // Swap all metadata between the two cards
             std::swap(swappedCv.ownerId, drawnCv.ownerId);
             std::swap(swappedCv.cardIndex, drawnCv.cardIndex);
-
-            // Update face textures: card going to local player shows face-up, card leaving shows face-down
-            int localId = visualState.getLocalPlayerId();
-            if (swappedCv.ownerId == localId) visualState.flipCardVisualFaceUp(e.swappedCardId);
-            if (drawnCv.ownerId == localId) visualState.flipCardVisualFaceUp(e.drawnCardId);
+            std::swap(swappedCv.faceUp, drawnCv.faceUp);
+            // Force-clear all pins — card is changing hands, enforceVisibility() decides face state
+            swappedCv.pinCount = 0;
+            drawnCv.pinCount = 0;
 
             std::cout << "[PresentationLayer]   after swap: card " << e.swappedCardId
                       << "(owner=" << swappedCv.ownerId << " idx=" << swappedCv.cardIndex
@@ -249,7 +252,11 @@ void PresentationLayer::processEvents() {
             auto& e = std::get<CardsRevealedEvent>(event.data);
             std::cout << "[PresentationLayer] CARDS_REVEALED: " << e.cardIds.size() << " cards" << std::endl;
             for (int cardId : e.cardIds) {
-                animationManager.playCardFlip(cardId);
+                visualState.getCardVisual(cardId).pin();
+                animationManager.playCardFlip(cardId, [this, cardId]() {
+                    visualState.getCardVisual(cardId).unpin();
+                    // enforceVisibility() handles face state from here
+                });
             }
         } break;
 

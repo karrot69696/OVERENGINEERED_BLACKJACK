@@ -19,6 +19,8 @@ void Player::returnCards(Deck& deck){
         deck.addCard(card);
     }
     cardsInHand.clear();
+    lastQuintetHand.clear();
+    lastBlackjackHand.clear();
 }
 
 //return cards inside card pointers inside a vector

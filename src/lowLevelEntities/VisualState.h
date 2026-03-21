@@ -45,6 +45,10 @@ struct CardVisual {
     bool highlighted = false;
     bool isTarget = false;
     bool faceUp = true;
+    int pinCount = 0;      // >0 means pinned: reconcile + enforceVisibility skip this card
+    bool isPinned() const { return pinCount > 0; }
+    void pin() { pinCount++; }
+    void unpin() { if (pinCount > 0) pinCount--; }
     int rankBonus = 0;
     void draw(sf::RenderWindow& window);
     bool isClicked(sf::Vector2f mousePos);
@@ -76,6 +80,8 @@ class VisualState {
         sf::Font& getFont() { return font; }
 
         void flipCardVisualFaceUp(int cardId);
+        void flipCardVisualFaceDown(int cardId);
+        void enforceVisibility();  // iron rule: local player's cards face-up, others follow game logic
         CardVisual& getCardVisual(int cardId) {
             for (auto& card : cardVisuals) {
                 if (card.cardId == cardId) {

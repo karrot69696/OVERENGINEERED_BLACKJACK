@@ -46,8 +46,11 @@ std::optional<PhaseName> BattlePhase::onUpdate(){
     }
     host.flipAllCardsFaceUp();
     opponent.flipAllCardsFaceUp();
+    roundManager.updateGameState(PhaseName::BATTLE_PHASE, opponent.getId());
     if (!revealIds.empty()) {
         eventQueue.push({GameEventType::CARDS_REVEALED, CardsRevealedEvent{revealIds}});
+        eventQueue.push({GameEventType::REQUEST_ACTION_INPUT,
+                        RequestActionInputEvent{host.getId()}});
     }
     opponentHandValue = opponent.calculateHandValue();
     hostHandValue = host.calculateHandValue() ;
@@ -57,11 +60,13 @@ std::optional<PhaseName> BattlePhase::onUpdate(){
     //helper: award win to winner, loss to loser, emit events
     auto resolveWin = [&](Player& winner, Player& loser, const std::string& msg){
         std::cout << "[BattlePhase] " << msg << std::endl;
-        winner.gainPoint();
+        winner.gainPoint(GameConfig::POINTS_GAIN_WON);
         loser.gainLoss();
-        eventQueue.push({GameEventType::POINT_CHANGED, PointChangedEvent{winner.getId(), "+1 POINT"}});
-        eventQueue.push({GameEventType::SHOCK_EFFECT, ShockEffectEvent{winner.getId(), loser.getId(), 0.9f}});
-        eventQueue.push({GameEventType::EXPLOSION_EFFECT, ExplosionEffectEvent{loser.getId(), 3.0f, 0.9f}});
+        eventQueue.push({GameEventType::POINT_CHANGED, PointChangedEvent{
+            winner.getId(), "+"+ std::to_string(GameConfig::POINTS_GAIN_WON)+ "POINT"
+        }});
+        eventQueue.push({GameEventType::SHOCK_EFFECT, ShockEffectEvent{winner.getId(), loser.getId(), 1.2f}});
+        eventQueue.push({GameEventType::EXPLOSION_EFFECT, ExplosionEffectEvent{loser.getId(), 3.0f, 1.2f}});
     };
 
     //determine outcome
@@ -78,9 +83,10 @@ std::optional<PhaseName> BattlePhase::onUpdate(){
         resolveWin(opponent, host, "Player " + std::to_string(opponent.getId()) + " WINS");
     } else {
         std::cout << "[BattlePhase] TIE " << opponent.getId() << std::endl;
-        host.gainLoss();
-        eventQueue.push({GameEventType::POINT_CHANGED, PointChangedEvent{opponent.getId(), "+0"}});
-        eventQueue.push({GameEventType::POINT_CHANGED, PointChangedEvent{host.getId(), "+0"}});
+        host.gainPoint(GameConfig::POINTS_GAIN_TIE);
+        opponent.gainPoint(GameConfig::POINTS_GAIN_TIE);
+        eventQueue.push({GameEventType::POINT_CHANGED, PointChangedEvent{opponent.getId(), "+"+std::to_string(GameConfig::POINTS_GAIN_TIE)}});
+        eventQueue.push({GameEventType::POINT_CHANGED, PointChangedEvent{host.getId(), "+"+std::to_string(GameConfig::POINTS_GAIN_TIE)}});
     }
     host.gainBattleCount();
     opponent.gainBattleCount();

@@ -45,8 +45,11 @@ std::optional<PhaseName> HostHitPhase::onUpdate() {
         if (!c->isFaceUp()) revealIds.push_back(c->getId());
     }
     currentPlayer.flipAllCardsFaceUp();
+    roundManager.updateGameState(PhaseName::HOST_HIT_PHASE, currentPlayer.getId());
     if (!revealIds.empty()) {
         eventQueue.push({GameEventType::CARDS_REVEALED, CardsRevealedEvent{revealIds}});
+        eventQueue.push({GameEventType::REQUEST_ACTION_INPUT,
+                        RequestActionInputEvent{hostPlayer.getId()}});
     }
 
     // handle player that is not host or blackjacked

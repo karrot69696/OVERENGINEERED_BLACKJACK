@@ -94,7 +94,7 @@ void VisualState::buildCardVisuals(Deck& deck, std::vector<Player>& players){
         cardVisual.highlighted = false;
         cardVisual.isTarget = false;
         cardVisual.faceUp = showFace;
-
+        cardVisual.rankBonus=0;
         cardVisuals.emplace_back(cardVisual);
 
         i++;
@@ -193,6 +193,7 @@ void VisualState::reconcile(GameState& gs) {
     // Update each existing CardVisual
     int changedOwner = 0, changedIndex = 0, changedFace = 0, changedLoc = 0, changedRank = 0;
     for (auto& cv : cardVisuals) {
+        if (cv.isPinned()) continue;
         auto it = desired.find(cv.cardId);
         if (it != desired.end()) {
             // Card is in a player's hand
@@ -238,13 +239,7 @@ void VisualState::reconcile(GameState& gs) {
             cv.location = CardLocation::DECK;
         }
     }
-    if (changedOwner || changedIndex || changedFace || changedLoc ||changedRank) {
-        std::cout << "[Reconcile] owner=" << changedOwner
-                  << " index=" << changedIndex
-                  << " face=" << changedFace
-                  << " loc=" << changedLoc
-                  << " rankBonus=" << changedRank << std::endl;
-    }
+    (void)changedOwner; (void)changedIndex; (void)changedFace; (void)changedLoc; (void)changedRank;
 }
 
 void VisualState::flipCardVisualFaceUp(int cardId) {
@@ -262,4 +257,61 @@ void VisualState::flipCardVisualFaceUp(int cardId) {
     int row = cardSpriteRow(suit);
     cv.cardSprite.setTextureRect(sf::IntRect({col * cellW, row * cellH}, {cellW, cellH}));
     cv.faceUp = true;
+}
+
+void VisualState::flipCardVisualFaceDown(int cardId) {
+    sf::Vector2u texSize = cardTexture.getSize();
+    int cellW = (int)texSize.x / 15;
+    int cellH = (int)texSize.y / 4;
+
+    CardVisual& cv = getCardVisual(cardId);
+    if (!cv.faceUp) return;
+
+    cv.cardSprite.setTextureRect(sf::IntRect({14 * cellW, 2 * cellH}, {cellW, cellH}));
+    cv.faceUp = false;
+}
+
+void VisualState::enforceVisibility() {
+    sf::Vector2u texSize = cardTexture.getSize();
+    int cellW = (int)texSize.x / 15;
+    int cellH = (int)texSize.y / 4;
+
+    // Build lookup from game logic: cardId → {logicFaceUp, ownerId, rank, suit}
+    struct FaceInfo { bool logicFaceUp; int ownerId; Rank rank; Suit suit; };
+    std::unordered_map<int, FaceInfo> logic;
+    auto allInfo = gameState.getAllPlayerInfo();
+    for (const auto& info : allInfo) {
+        for (const Card& c : info.cardsInHand) {
+            logic[c.getId()] = {c.isFaceUp(), info.playerId, c.getRank(), c.getSuit()};
+        }
+    }
+
+    for (auto& cv : cardVisuals) {
+        if (cv.isPinned()) continue;
+
+        auto it = logic.find(cv.cardId);
+        bool shouldBeUp;
+        if (it != logic.end()) {
+            // Card is in a player's hand
+            shouldBeUp = cheatOn || it->second.logicFaceUp || it->second.ownerId == localPlayerId;
+        } else {
+            // Card is in the deck — face-down (unless cheat)
+            shouldBeUp = cheatOn;
+        }
+
+        if (shouldBeUp && it != logic.end()) {
+            // Always verify correct face texture (guards against stale cardIndex flips)
+            sf::IntRect expected({cardSpriteCol(it->second.rank) * cellW,
+                                  cardSpriteRow(it->second.suit) * cellH}, {cellW, cellH});
+            if (!cv.faceUp || cv.cardSprite.getTextureRect() != expected) {
+                cv.cardSprite.setTextureRect(expected);
+                cv.faceUp = true;
+            }
+        } else {
+            if (cv.faceUp) {
+                cv.cardSprite.setTextureRect(sf::IntRect({14 * cellW, 2 * cellH}, {cellW, cellH}));
+                cv.faceUp = false;
+            }
+        }
+    }
 }

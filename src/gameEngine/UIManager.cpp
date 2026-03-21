@@ -149,6 +149,10 @@ void UIManager::clearInput() {
     showPickCardOverlay = false;
     showReactivePrompt = false;
     pickCardAllowedIds = {};
+    // Unpin any NG cards before clearing IDs (prevent pin leaks)
+    for (int cid : ngTargetCardIds) {
+        visualState.getCardVisual(cid).unpin();
+    }
     ngStep = NgStep::PICK_PLAYER;
     ngTargetPlayerIds = {};
     ngTargetCardIds = {};
@@ -168,6 +172,11 @@ void UIManager::requestBoostPickInput(int card1Id, int card2Id) {
     ngTargetCardIds = {card1Id, card2Id};
     ngStep = NgStep::PICK_BOOST_CARD;
     showTargetingOverlay_NeuralGambit = true;
+    // Pin + flip so enforceVisibility() doesn't override during pick
+    visualState.flipCardVisualFaceUp(card1Id);
+    visualState.flipCardVisualFaceUp(card2Id);
+    visualState.getCardVisual(card1Id).pin();
+    visualState.getCardVisual(card2Id).pin();
 }
 
 void UIManager::requestReactivePrompt(const std::string& skillName, float timerDuration) {
@@ -301,6 +310,10 @@ void UIManager::handleEvent(const std::optional<sf::Event>& event) {
                         chosenCard.setHandIndex(cv.cardIndex);
                         target.targetCards.push_back(chosenCard);
                         pendingTargeting = target;
+                        // Unpin revealed cards — enforceVisibility() takes over
+                        for (int cid : ngTargetCardIds) {
+                            visualState.getCardVisual(cid).unpin();
+                        }
                         showTargetingOverlay_NeuralGambit = false;
                         ngTargetPlayerIds = {};
                         std::cout << "[UIManager][NeuralGambit] Boost card chosen: " << cv.cardId << std::endl;
@@ -397,40 +410,42 @@ void UIManager::renderTable() {
 
 void UIManager::renderCards() {
     auto info = gameState.getAllPlayerInfo();
-    int boostedValue=0;
-    int boostedCardId=-1;
-    for (auto & p : info) {
-        for(auto& c : p.cardsInHand) {
+    std::unordered_map<int, int> boostedMap;
+
+    for (auto &p : info) {
+        for (auto &c : p.cardsInHand) {
             if (c.getRankBonus()) {
-                boostedValue = c.getRankBonus();
-                boostedCardId=c.getId();
+                boostedMap[c.getId()] = c.getRankBonus();
             }
         }
     }
     for (auto& cv : cardVisuals) {
         window.draw(cv.cardSprite);
-        if( boostedValue && boostedCardId==cv.cardId && cv.faceUp) {
-            cv.rankBonus = boostedValue;
-            // Position patch sprite centered on the card without changing the card's origin
-            auto cardBounds = cv.cardSprite.getGlobalBounds();
-            float cardCenterX = cardBounds.position.x + cardBounds.size.x / 2.f;
-            float cardCenterY = cardBounds.position.y + cardBounds.size.y / 2.f;
+        if (boostedMap.empty()) continue;
+        if (!cv.faceUp) continue;
+        auto it = boostedMap.find(cv.cardId);
+        if (it == boostedMap.end()) continue;
+        cv.rankBonus = it->second;
+        // Position patch sprite centered on the card without changing the card's origin
+        auto cardBounds = cv.cardSprite.getGlobalBounds();
+        float cardCenterX = cardBounds.position.x + cardBounds.size.x / 2.f;
+        float cardCenterY = cardBounds.position.y + cardBounds.size.y / 2.f;
 
-            auto patchLocal = cardRankPatchSprite->getLocalBounds();
-            cardRankPatchSprite->setOrigin({patchLocal.size.x / 2.f, patchLocal.size.y / 2.f});
-            cardRankPatchSprite->setPosition({cardCenterX, cardCenterY});
-            cardRankPatchSprite->setScale(cv.cardSprite.getScale());
-            window.draw(*cardRankPatchSprite);
+        auto patchLocal = cardRankPatchSprite->getLocalBounds();
+        cardRankPatchSprite->setOrigin({patchLocal.size.x / 2.f, patchLocal.size.y / 2.f});
+        cardRankPatchSprite->setPosition({cardCenterX, cardCenterY});
+        cardRankPatchSprite->setScale(cv.cardSprite.getScale());
+        window.draw(*cardRankPatchSprite);
 
-            int cardRank = static_cast<int>(gameState.getCardRank(cv.ownerId, cv.cardIndex));
-            sf::Text boostedRankText(font, std::to_string(cardRank + cv.rankBonus), 30);
-            boostedRankText.setScale(cv.cardSprite.getScale());
-            boostedRankText.setFillColor(sf::Color::White);
-            auto textBounds = boostedRankText.getLocalBounds();
-            boostedRankText.setOrigin({textBounds.size.x / 2.f, textBounds.size.y / 2.f});
-            boostedRankText.setPosition({cardCenterX, cardCenterY});
-            window.draw(boostedRankText);
-        }
+        int cardRank = static_cast<int>(gameState.getCardRank(cv.ownerId, cv.cardIndex));
+        sf::Text boostedRankText(font, std::to_string(cardRank + cv.rankBonus), 30);
+        boostedRankText.setScale(cv.cardSprite.getScale());
+        boostedRankText.setFillColor(sf::Color::White);
+        auto textBounds = boostedRankText.getLocalBounds();
+        boostedRankText.setOrigin({textBounds.size.x / 2.f, textBounds.size.y / 2.f});
+        boostedRankText.setPosition({cardCenterX, cardCenterY});
+        window.draw(boostedRankText);
+        
     }
 }
 
@@ -685,7 +700,6 @@ void UIManager::renderTargetingOverlay_NeuralGambit() {
         // Highlight both revealed cards
         for (auto& cv : cardVisuals) {
             if (cv.cardId != ngTargetCardIds[0] && cv.cardId != ngTargetCardIds[1]) continue;
-            visualState.flipCardVisualFaceUp(cv.cardId);
             auto bounds = cv.cardSprite.getGlobalBounds();
             bool hovered = bounds.contains(mousePos);
             sf::RectangleShape highlight({ bounds.size.x, bounds.size.y });

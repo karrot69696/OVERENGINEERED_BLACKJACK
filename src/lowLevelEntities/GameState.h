@@ -14,7 +14,11 @@ namespace GameConfig {
     constexpr int FACE_CARD_VALUE = 10;
     constexpr int CARD_RANKS = 13;
     constexpr int HAND_START_VALUE = 2;
-    constexpr int WINNING_POINTS = 15;
+    constexpr int WINNING_POINTS = 10;
+    constexpr int POINTS_GAIN_WON = 2;
+    constexpr int POINTS_GAIN_TIE = 1;
+    constexpr int POINTS_GAIN_BLACKJACK = 3;
+    constexpr int POINTS_GAIN_QUINTET = 5;
     // Bot behavior constants
     constexpr double BURST_RISK_WEIGHT = 0.5;
     constexpr double OPPONENT_PRESSURE_WEIGHT = 0.70;

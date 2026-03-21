@@ -245,6 +245,7 @@ void Game::RunGame(){
         // Drain event queue → trigger animations/UI
         presentationLayer.processEvents();
         animationManager.update(deltaTime);
+        visualState.enforceVisibility();
 
         window.clear();
 
