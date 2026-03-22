@@ -401,11 +401,11 @@ void NetworkManager::clearAllRemoteInputs() {
     pendingReactiveResponses.clear();
 }
 
-void NetworkManager::sendReactivePrompt(int playerId, SkillName skill, float timerDuration) {
+void NetworkManager::sendReactivePrompt(int playerId, SkillName skill,std::string extraInfo, float timerDuration) {
     for (auto& client : remoteClients) {
         if (client.playerId == playerId) {
             ByteBuffer buf;
-            NetSerializer::writeReactivePrompt(buf, skill, timerDuration);
+            NetSerializer::writeReactivePrompt(buf, skill, extraInfo, timerDuration);
             sendPacket(client.peer, NetMsgType::SERVER_REACTIVE_PROMPT, buf, 0, true);
             std::cout << "[NetworkManager] Sent reactive prompt to P" << playerId << std::endl;
             return;

@@ -80,15 +80,32 @@ void SkillManager::resetSkillUses(std::vector<Player>& players) {
     }
 }
 
-bool SkillManager::skillPassiveHandler(GameState& gameState) {
+std::vector<std::pair<int, SkillName>> SkillManager::skillPassiveHandler(
+    ReactiveTrigger trigger, const ReactiveContext& ctx,
+    GameState& state, int priorityPlayerId, int numPlayers) {
+    std::vector<std::pair<int, SkillName>> qualified;
     std::cout << "[SkillManager] Activating skill passive..." << std::endl;
     for (auto& skill : skills) {
-        if (skill->activatePassive(gameState)) {
-            std::cout << "[SkillManager] Passive activated for player " << skill->getUserId() << std::endl;
-            return true;
+        if (skill->activatePassive(state)) {
+            qualified.push_back({skill->getUserId(), skill->getSkillName()});
+            std::cout << "[SkillManager] Skill passive activated: "
+                      << skill->skillNameToString() << " (P"
+                      << skill->getUserId() << ")" << std::endl;
         }
     }
-    return false;
+        // Sort: priorityPlayerId first, then by player ID wrapping around
+    std::sort(
+        qualified.begin(), qualified.end(),
+        [priorityPlayerId, numPlayers](const auto& a, const auto& b) {
+            if (a.first == priorityPlayerId && b.first != priorityPlayerId) return true;
+            if (b.first == priorityPlayerId && a.first != priorityPlayerId) return false;
+            // Wrap-around order from priorityPlayerId
+            int da = (a.first - priorityPlayerId + numPlayers) % numPlayers;
+            int db = (b.first - priorityPlayerId + numPlayers) % numPlayers;
+            return da < db;
+        }
+    );
+    return qualified;
 }
 
 std::vector<std::pair<int, SkillName>> SkillManager::getReactiveSkills(
@@ -107,7 +124,8 @@ std::vector<std::pair<int, SkillName>> SkillManager::getReactiveSkills(
     }
 
     // Sort: priorityPlayerId first, then by player ID wrapping around
-    std::sort(qualified.begin(), qualified.end(),
+    std::sort(
+        qualified.begin(), qualified.end(),
         [priorityPlayerId, numPlayers](const auto& a, const auto& b) {
             if (a.first == priorityPlayerId && b.first != priorityPlayerId) return true;
             if (b.first == priorityPlayerId && a.first != priorityPlayerId) return false;
@@ -115,7 +133,8 @@ std::vector<std::pair<int, SkillName>> SkillManager::getReactiveSkills(
             int da = (a.first - priorityPlayerId + numPlayers) % numPlayers;
             int db = (b.first - priorityPlayerId + numPlayers) % numPlayers;
             return da < db;
-        });
+        }
+    );
 
     return qualified;
 }

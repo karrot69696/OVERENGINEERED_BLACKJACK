@@ -88,7 +88,7 @@ bool Phase::turnHandler(Player& player, Player& opponent){
         case PlayerAction::HIT: {
             Card* drawnCard = deck.draw();
             player.addCardToHand(drawnCard);
-            blackJackAndQuintetCheck(players);
+
             // Emit event — PresentationLayer handles visual state + animation
             eventQueue.push({GameEventType::CARD_DRAWN, CardDrawnEvent{
                 player.getId(),
@@ -107,6 +107,7 @@ bool Phase::turnHandler(Player& player, Player& opponent){
                     drawnCard->getId(), player.getId(), player.getId())) {
                 break;  // reactiveTickPending will push REQUEST_ACTION_INPUT when done
             }
+            blackJackAndQuintetCheck(players);
 
             // Re-prompt for next action after HIT
             eventQueue.push({GameEventType::REQUEST_ACTION_INPUT, RequestActionInputEvent{player.getId()}});
@@ -277,6 +278,27 @@ void Phase::skillProcessAftermath(SkillContext& context, SkillExecutionResult sk
 }
 
 // ============================================================================
+// Passive skill processing
+// ============================================================================
+void Phase::processPassiveSkills(int priorityPlayerId) {
+    ReactiveContext context = {ReactiveTrigger::NONE, 0, 0};
+    std::vector<std::pair<int, SkillName>> executedPassives = skillManager.skillPassiveHandler(
+        ReactiveTrigger::NONE, context, gameState, priorityPlayerId, (int)players.size()
+    );
+    for (auto& [playerId, skillName] : executedPassives) {
+        switch (skillName) {
+            case SkillName::DELIVERANCE:
+                std::cout << "[Phase] Deliverance passive activated for P" << playerId << std::endl;
+                eventQueue.push({GameEventType::DELIVERANCE_EFFECT, DeliveranceEffectEvent{playerId}});
+                eventQueue.push({GameEventType::POINT_CHANGED, PointChangedEvent{playerId,"+1 SKILL USES"}});
+                break;
+            default:
+                break;
+        }
+    }
+}
+
+// ============================================================================
 // Multi-actor skill orchestration (NeuralGambit and future cross-player skills)
 // ============================================================================
 void Phase::ngTickPending(Player& skillUser) {
@@ -390,9 +412,12 @@ void Phase::ngTickPending(Player& skillUser) {
 
     // --- Both picks received: reveal cards first ---
     if (!ng.revealSent) {
-        // Flip face-up in game logic so ALL players see the reveal (not just skill user)
+        // Remember original face state so we only flip back cards that were face-down
         Card* c1 = findCard(ng.firstCardId);
         Card* c2 = findCard(ng.secondCardId);
+        ng.firstWasFaceDown  = c1 && !c1->isFaceUp();
+        ng.secondWasFaceDown = c2 && !c2->isFaceUp();
+        // Flip face-up in game logic so ALL players see the reveal (not just skill user)
         if (c1 && !c1->isFaceUp()) c1->flip();
         if (c2 && !c2->isFaceUp()) c2->flip();
         // Sync gameState so broadcast includes the faceUp change
@@ -464,9 +489,10 @@ void Phase::ngTickPending(Player& skillUser) {
         skillProcessAftermath(context, result);
     }
 
-    // Flip cards back face-down in game logic — reveal is over
-    if (firstCard->isFaceUp()) firstCard->flip();
-    if (secondCard->isFaceUp()) secondCard->flip();
+    // Flip cards back face-down only if they were face-down before NG revealed them.
+    // During battle phase cards are already face-up — don't flip them back down.
+    if (ng.firstWasFaceDown && firstCard->isFaceUp()) firstCard->flip();
+    if (ng.secondWasFaceDown && secondCard->isFaceUp()) secondCard->flip();
     roundManager.updateGameState(gameState.getPhaseName(), gameState.getCurrentPlayerId());
 
     eventQueue.push({GameEventType::REQUEST_ACTION_INPUT,
@@ -490,6 +516,21 @@ bool Phase::startReactiveCheck(ReactiveTrigger trigger, int drawnCardId, int dra
     state.drawnCardId = drawnCardId;
     state.drawerId = drawerId;
     state.actingPlayerId = actingPlayerId;
+    for (auto& skillEntry : qualified) {
+        switch (skillEntry.second) {
+            case SkillName::FATALDEAL: {
+                int actualRankofCardDrawn = static_cast<int>(gameState.getCardRankById(drawnCardId));
+                int halfAndRoundUp = (actualRankofCardDrawn + 1) / 2;
+                std::string peekInfo = "Half rank of card drawn + 1 = "+std::to_string(halfAndRoundUp) + ". You can math, right?";
+                std::cout<<"[startReactiveCheck] FATALDEAL PEEK: HALF AND ROUND UF="<< peekInfo <<std::endl;
+                state.extraInfo = peekInfo;
+                break;
+            }
+            default:
+                break;
+        }
+    }
+    
     for (auto& [ownerId, skillName] : qualified) {
         state.queue.push_back({ownerId, skillName});
     }
@@ -512,8 +553,9 @@ void Phase::reactiveTickPending() {
         return !info.isBot && net && net->isServer() && info.playerId != localPlayerId;
     };
 
-    // All skills processed — re-prompt the acting player and clean up
+    // All skills processed — check blackjack/quintet, then re-prompt the acting player
     if (rc.currentIndex >= (int)rc.queue.size()) {
+        blackJackAndQuintetCheck(players);
         eventQueue.push({GameEventType::REQUEST_ACTION_INPUT,
             RequestActionInputEvent{rc.actingPlayerId}});
         reactiveCheck = std::nullopt;
@@ -524,7 +566,7 @@ void Phase::reactiveTickPending() {
 
     auto& entry = rc.queue[rc.currentIndex];
     PlayerInfo ownerInfo = gameState.getPlayerInfo(entry.skillOwnerId);
-
+    std::string extraInfo = rc.extraInfo;
     switch (rc.step) {
     case ReactiveCheckState::PROMPTING: {
         if (!rc.requestSent) {
@@ -535,15 +577,15 @@ void Phase::reactiveTickPending() {
                           << " auto-accepts " << gameState.skillNameToString(entry.skillName) << std::endl;
             } else if (isRemotePlayer(ownerInfo)) {
                 // Send prompt to remote client
-                if (net) net->sendReactivePrompt(entry.skillOwnerId, entry.skillName, ReactiveCheckState::PROMPT_TIMEOUT);
+                if (net) net->sendReactivePrompt(entry.skillOwnerId, entry.skillName,rc.extraInfo,ReactiveCheckState::PROMPT_TIMEOUT);
                 std::cout << "[reactiveTickPending] Sent reactive prompt to remote P"
                           << entry.skillOwnerId << std::endl;
             } else {
                 // Local player: push event for PresentationLayer to show prompt
                 eventQueue.push({GameEventType::REACTIVE_SKILL_PROMPT,
-                    ReactiveSkillPromptEvent{entry.skillOwnerId, entry.skillName, ReactiveCheckState::PROMPT_TIMEOUT}});
+                    ReactiveSkillPromptEvent{entry.skillOwnerId, entry.skillName, rc.extraInfo, ReactiveCheckState::PROMPT_TIMEOUT}});
                 std::cout << "[reactiveTickPending] Prompting local P" << entry.skillOwnerId
-                          << " for " << gameState.skillNameToString(entry.skillName) << std::endl;
+                          << " for " << gameState.skillNameToString(entry.skillName) << " with extra info: "<< rc.extraInfo << std::endl;
             }
             rc.requestSent = true;
             rc.promptTimer = 0.f;

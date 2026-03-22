@@ -172,26 +172,22 @@ void VisualState::reconcile(GameState& gs) {
     if (reconcileBlocked) return;
 
     // Lightweight sync: update CardVisual metadata from GameState
-    // Does NOT touch sprite position — animations/PresentationLayer own that
-
-    sf::Vector2u texSize = cardTexture.getSize();
-    int cellW = (int)texSize.x / 15;
-    int cellH = (int)texSize.y / 4;
+    // Does NOT touch sprite position or faceUp — animations/PresentationLayer own position,
+    // enforceVisibility() owns face state.
 
     auto allInfo = gs.getAllPlayerInfo();
 
-    // Build lookup: cardId → {ownerId, handIndex, faceUp}
-    struct CardMeta { int ownerId; int handIndex; bool faceUp; int rankBonus;};
+    struct CardMeta { int ownerId; int handIndex; int rankBonus; };
     std::unordered_map<int, CardMeta> desired;
     for (const auto& info : allInfo) {
         for (int i = 0; i < (int)info.cardsInHand.size(); i++) {
             const Card& c = info.cardsInHand[i];
-            desired[c.getId()] = {info.playerId, i, c.isFaceUp(), c.getRankBonus()};
+            desired[c.getId()] = {info.playerId, i, c.getRankBonus()};
         }
     }
 
     // Update each existing CardVisual
-    int changedOwner = 0, changedIndex = 0, changedFace = 0, changedLoc = 0, changedRank = 0;
+    int changedOwner = 0, changedIndex = 0, changedLoc = 0, changedRank = 0;
     for (auto& cv : cardVisuals) {
         if (cv.isPinned()) continue;
         auto it = desired.find(cv.cardId);
@@ -205,31 +201,9 @@ void VisualState::reconcile(GameState& gs) {
             cv.cardIndex = it->second.handIndex;
             cv.location = CardLocation::HAND;
             cv.rankBonus = it->second.rankBonus;
-            // Update face texture if faceUp state changed
-            bool showFace = cheatOn || it->second.faceUp || it->second.ownerId == localPlayerId;
-            if (cv.faceUp != showFace) {
-                changedFace++;
-                cv.faceUp = showFace;
-                // We need suit/rank to pick the right texture rect — find from allInfo
-                const Card& infoCard = allInfo[0].cardsInHand[0]; // placeholder
-                for (const auto& info : allInfo) {
-                    for (const Card& c : info.cardsInHand) {
-                        if (c.getId() == cv.cardId) {
-                            int col, row;
-                            if (showFace) {
-                                col = cardSpriteCol(c.getRank());
-                                row = cardSpriteRow(c.getSuit());
-                            } else {
-                                col = 14;
-                                row = 2;
-                            }
-                            cv.cardSprite.setTextureRect(sf::IntRect(
-                                {col * cellW, row * cellH}, {cellW, cellH}));
-                            break;
-                        }
-                    }
-                }
-            }
+            // faceUp is NOT touched here — enforceVisibility() is the sole
+            // authority on card face state. This prevents reconcile from
+            // flipping cards face-up before CARDS_REVEALED animations play.
         } else {
             // Card not in any player's hand → it's in the deck
             if (cv.location != CardLocation::DECK) { changedLoc++; }
@@ -239,7 +213,7 @@ void VisualState::reconcile(GameState& gs) {
             cv.location = CardLocation::DECK;
         }
     }
-    (void)changedOwner; (void)changedIndex; (void)changedFace; (void)changedLoc; (void)changedRank;
+    (void)changedOwner; (void)changedIndex; (void)changedLoc; (void)changedRank;
 }
 
 void VisualState::flipCardVisualFaceUp(int cardId) {
@@ -292,15 +266,12 @@ void VisualState::enforceVisibility() {
         auto it = logic.find(cv.cardId);
         bool shouldBeUp;
         if (it != logic.end()) {
-            // Card is in a player's hand
             shouldBeUp = cheatOn || it->second.logicFaceUp || it->second.ownerId == localPlayerId;
         } else {
-            // Card is in the deck — face-down (unless cheat)
             shouldBeUp = cheatOn;
         }
 
         if (shouldBeUp && it != logic.end()) {
-            // Always verify correct face texture (guards against stale cardIndex flips)
             sf::IntRect expected({cardSpriteCol(it->second.rank) * cellW,
                                   cardSpriteRow(it->second.suit) * cellH}, {cellW, cellH});
             if (!cv.faceUp || cv.cardSprite.getTextureRect() != expected) {

@@ -24,7 +24,7 @@ void Player::returnCards(Deck& deck){
 }
 
 //return cards inside card pointers inside a vector
-void Player::returnCards(Deck& deck, const std::vector<Card*>& cards) {
+void Player::returnCards(Deck& deck, const std::vector<Card*>& cards, bool toBotDeck) {
 
     std::cout << "Card(s) returned:\n";
 
@@ -36,12 +36,13 @@ void Player::returnCards(Deck& deck, const std::vector<Card*>& cards) {
     }
 
     for (Card* card : cards) {
-
         card->setOwnerId(-1);
         card->setHandIndex(-1);
+        card->resetRankBonus();
 
-        deck.addCard(card);
-
+        if (!toBotDeck) deck.addCard(card);
+        else deck.addCardToBottom(card);
+        
         auto it = std::find(cardsInHand.begin(), cardsInHand.end(), card);
 
         if (it != cardsInHand.end()) {

@@ -1,4 +1,5 @@
 #include "UIManager.h"
+#include "Log.h"
 #include <map>
 // ============================================================================
 // Button
@@ -179,10 +180,11 @@ void UIManager::requestBoostPickInput(int card1Id, int card2Id) {
     visualState.getCardVisual(card2Id).pin();
 }
 
-void UIManager::requestReactivePrompt(const std::string& skillName, float timerDuration) {
+void UIManager::requestReactivePrompt(const std::string& skillName, std::string& extraInfo, float timerDuration) {
     std::cout << "[UIManager] Reactive prompt: " << skillName << " (" << timerDuration << "s)" << std::endl;
     showReactivePrompt = true;
     reactivePromptSkillName = skillName;
+    reactivePromptExtraInfo = extraInfo;
     reactivePromptDuration = timerDuration;
     reactivePromptClock.restart();
 }
@@ -196,6 +198,19 @@ void UIManager::hideReactivePrompt() {
 // ============================================================================
 void UIManager::handleEvent(const std::optional<sf::Event>& event) {
     if (!event.has_value()) return;
+
+    // F3 toggles debug hover tooltip, F4 cycles game log (off → recent → full)
+    if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>()) {
+        if (keyPressed->scancode == sf::Keyboard::Scancode::F3) {
+            showDebugTooltip = !showDebugTooltip;
+            std::cout << "[UIManager] Debug tooltip: " << (showDebugTooltip ? "ON" : "OFF") << std::endl;
+        }
+        if (keyPressed->scancode == sf::Keyboard::Scancode::F4) {
+            gameLogMode = (gameLogMode + 1) % 3;
+            const char* modes[] = {"OFF", "RECENT", "FULL"};
+            std::cout << "[UIManager] Game log: " << modes[gameLogMode] << std::endl;
+        }
+    }
 
     // Track mouse position for hover effects (map pixel → world coords for resized window)
     if (const auto* mouseMoved = event->getIf<sf::Event::MouseMoved>()) {
@@ -396,6 +411,8 @@ void UIManager::render() {
     if (showTargetingOverlay_NeuralGambit)    renderTargetingOverlay_NeuralGambit();
     if (showPickCardOverlay)                  renderPickCardOverlay();
     if (showReactivePrompt)                   renderReactivePrompt();
+    if (showDebugTooltip)                     renderHoverTooltip();
+    if (gameLogMode > 0)                      renderGameLog();
 }
 
 void UIManager::renderTable() {
@@ -488,14 +505,22 @@ void UIManager::renderPlayerVisuals(){
     for (auto& playerVisual : playerVisuals ) {
         bool isCurrentTurn = (playerVisual.playerId == currentTurnId);
 
-        // Draw player icon
-        sf::Vector2f iconScale = {0.18f, 0.18f};
-        playerVisual.playerSprite.setPosition({
-            playerVisual.seatPostion.x - 86.f,
-            playerVisual.seatPostion.y - 26.f
-        });
-        playerVisual.playerSprite.setScale(iconScale);
-        window.draw(playerVisual.playerSprite);
+        // Check if this player visual is borrowed by AnimationManager
+        bool isBorrowed = false;
+        for (int borrowedId : borrowedPlayerVisualIds){
+            if(playerVisual.playerId == borrowedId) isBorrowed = true;
+        }
+
+        // Draw player icon — skip position/scale/draw if borrowed (AnimationManager controls it)
+        if (!isBorrowed) {
+            sf::Vector2f iconScale = {0.18f, 0.18f};
+            playerVisual.playerSprite.setPosition({
+                playerVisual.seatPostion.x - 66.f,
+                playerVisual.seatPostion.y - 26.f
+            });
+            playerVisual.playerSprite.setScale(iconScale);
+            window.draw(playerVisual.playerSprite);
+        }
 
         // Host label above player icon
         if (playerVisual.isHost) {
@@ -697,11 +722,24 @@ void UIManager::renderTargetingOverlay_NeuralGambit() {
         prompt.setPosition({ 10.f, (float)window.getSize().y - 65.f });
         window.draw(prompt);
 
+         
         // Highlight both revealed cards
         for (auto& cv : cardVisuals) {
+
             if (cv.cardId != ngTargetCardIds[0] && cv.cardId != ngTargetCardIds[1]) continue;
+
+            auto cardBounds = cv.cardSprite.getGlobalBounds();
+            bool hovered = cardBounds.contains(mousePos);
+
+            if (hovered) {
+                sf::Vector2f origScale = cv.cardSprite.getScale();
+                cv.cardSprite.setScale(origScale * 1.15f);
+                cardBounds = cv.cardSprite.getGlobalBounds();
+                window.draw(cv.cardSprite);
+                cv.cardSprite.setScale(origScale);
+            }
             auto bounds = cv.cardSprite.getGlobalBounds();
-            bool hovered = bounds.contains(mousePos);
+            hovered = bounds.contains(mousePos);
             sf::RectangleShape highlight({ bounds.size.x, bounds.size.y });
             highlight.setPosition({ bounds.position.x, bounds.position.y });
             highlight.setFillColor(sf::Color(255, 215, 0, hovered ? 60 : 30));
@@ -815,6 +853,13 @@ void UIManager::renderReactivePrompt() {
     skillText.setPosition({centerX - stBounds.size.x / 2.f, centerY - boxH / 2.f + 6.f});
     window.draw(skillText);
 
+    //Extra info text
+    sf::Text extraInfo(font, reactivePromptExtraInfo, 14);
+    extraInfo.setFillColor(sf::Color(255, 200, 50));
+    sf::FloatRect eiBounds = extraInfo.getLocalBounds();
+    extraInfo.setPosition({centerX - eiBounds.size.x / 2.f, centerY - boxH / 2.f + 6.f + eiBounds.size.y});
+    window.draw(extraInfo);
+
     // Timer bar
     float barW = boxW - 20.f;
     float barH = 6.f;
@@ -856,6 +901,197 @@ void UIManager::renderReactivePrompt() {
     sf::FloatRect ntBounds = noText.getLocalBounds();
     noText.setPosition({centerX + 20.f + 35.f - ntBounds.size.x / 2.f, centerY + 14.f});
     window.draw(noText);
+}
+
+// ============================================================================
+// Debug Hover Tooltip
+// ============================================================================
+static std::string cardLocationStr(CardLocation loc) {
+    switch (loc) {
+        case CardLocation::HAND:         return "HAND";
+        case CardLocation::DECK:         return "DECK";
+        case CardLocation::DISCARD_PILE: return "DISCARD";
+        default:                         return "?";
+    }
+}
+
+void UIManager::renderHoverTooltip() {
+    std::vector<std::string> lines;
+
+    // Cards first (overlap player areas, higher priority)
+    for (auto& cv : cardVisuals) {
+        if (cv.location != CardLocation::HAND) continue;
+        if (!cv.cardSprite.getGlobalBounds().contains(mousePos)) continue;
+
+        lines.push_back("cardId: " + std::to_string(cv.cardId));
+        lines.push_back("ownerId: " + std::to_string(cv.ownerId));
+        lines.push_back("cardIndex: " + std::to_string(cv.cardIndex));
+        lines.push_back("faceUp: " + std::string(cv.faceUp ? "true" : "false"));
+        lines.push_back("pinCount: " + std::to_string(cv.pinCount));
+        lines.push_back("location: " + cardLocationStr(cv.location));
+
+        // CardVisual's own rankBonus
+        lines.push_back("cv.rankBonus: " + std::to_string(cv.rankBonus));
+
+        // Game-logic card info from GameState
+        if (cv.ownerId >= 0 && cv.cardIndex >= 0) {
+            PlayerInfo info = gameState.getPlayerInfo(cv.ownerId);
+            if (cv.cardIndex < (int)info.cardsInHand.size()) {
+                const Card& c = info.cardsInHand[cv.cardIndex];
+                lines.push_back("gs.cardId: " + std::to_string(c.getId()));
+                lines.push_back("rank: " + c.getRankAsString());
+                lines.push_back("suit: " + c.getSuitAsString());
+                lines.push_back("gs.rankBonus: " + std::to_string(c.getRankBonus()));
+                lines.push_back("logic faceUp: " + std::string(c.isFaceUp() ? "true" : "false"));
+            }
+        }
+        if (cv.highlighted) lines.push_back("highlighted: true");
+        if (cv.isTarget)    lines.push_back("isTarget: true");
+        break;
+    }
+
+    // Player areas
+    if (lines.empty()) {
+        for (auto& pv : playerVisuals) {
+            if (!pv.playerSprite.getGlobalBounds().contains(mousePos)) continue;
+
+            PlayerInfo info = gameState.getPlayerInfo(pv.playerId);
+            lines.push_back("playerId: " + std::to_string(info.playerId));
+            lines.push_back("handValue: " + std::to_string(info.handValue));
+            lines.push_back("cards: " + std::to_string(info.cardsInHand.size()));
+            lines.push_back("skill: " + gameState.skillNameToString(info.skill));
+            lines.push_back("skillUses: " + std::to_string(info.skillUses));
+            lines.push_back("points: " + std::to_string(info.points));
+            if (info.isBot)    lines.push_back("isBot: true");
+            if (info.isHost)   lines.push_back("isHost: true");
+            if (info.isRemote) lines.push_back("isRemote: true");
+            break;
+        }
+    }
+
+    if (lines.empty()) return;
+
+    // Measure and render
+    const unsigned int fontSize = 10;
+    const float padding = 4.f;
+    const float lineHeight = fontSize + 2.f;
+    float maxWidth = 0.f;
+
+    for (auto& line : lines) {
+        sf::Text measure(font, line, fontSize);
+        float w = measure.getLocalBounds().size.x;
+        if (w > maxWidth) maxWidth = w;
+    }
+
+    float tooltipW = maxWidth + padding * 2.f;
+    float tooltipH = lineHeight * lines.size() + padding * 2.f;
+
+    // Position near cursor, clamp to window
+    float tx = mousePos.x + 12.f;
+    float ty = mousePos.y + 12.f;
+    float winW = static_cast<float>(window.getSize().x);
+    float winH = static_cast<float>(window.getSize().y);
+
+    if (tx + tooltipW > winW) tx = mousePos.x - tooltipW - 4.f;
+    if (ty + tooltipH > winH) ty = mousePos.y - tooltipH - 4.f;
+    if (tx < 0.f) tx = 0.f;
+    if (ty < 0.f) ty = 0.f;
+
+    // Background
+    sf::RectangleShape bg({tooltipW, tooltipH});
+    bg.setFillColor(sf::Color(10, 10, 10, 210));
+    bg.setOutlineThickness(1.f);
+    bg.setOutlineColor(sf::Color(180, 180, 180, 200));
+    bg.setPosition({tx, ty});
+    window.draw(bg);
+
+    // Text lines
+    for (int i = 0; i < (int)lines.size(); i++) {
+        sf::Text text(font, lines[i], fontSize);
+        text.setFillColor(sf::Color(220, 220, 220));
+        text.setPosition({tx + padding, ty + padding + i * lineHeight});
+        window.draw(text);
+    }
+}
+
+// ============================================================================
+// In-Game Log Overlay (Minecraft-style)
+// ============================================================================
+void UIManager::renderGameLog() {
+    const auto& entries = TimestampBuf::getEntries();
+    if (entries.empty()) return;
+
+    const unsigned int fontSize = 9;
+    const float lineHeight = fontSize + 3.f;
+    const float padding = 3.f;
+    const float marginBottom = 8.f;
+    const float marginLeft = 4.f;
+    const float fadeDuration = 2.f;   // seconds to fade out
+    const float visibleDuration = 6.f; // seconds before fading starts
+    const int maxRecentLines = 15;
+    const int maxFullLines = 40;
+
+    float now = TimestampBuf::currentTime();
+    float winH = static_cast<float>(window.getSize().y);
+    float winW = static_cast<float>(window.getSize().x);
+
+    // Collect visible lines
+    struct VisibleLine { std::string text; float alpha; };
+    std::vector<VisibleLine> visible;
+
+    bool fullMode = (gameLogMode == 2);
+    int maxLines = fullMode ? maxFullLines : maxRecentLines;
+
+    // Walk backwards from most recent
+    int startIdx = std::max(0, (int)entries.size() - maxLines);
+    for (int i = startIdx; i < (int)entries.size(); i++) {
+        const LogEntry& e = entries[i];
+        float age = now - e.timestamp;
+
+        float alpha = 1.f;
+        if (!fullMode) {
+            if (age > visibleDuration + fadeDuration) continue; // fully faded
+            if (age > visibleDuration) {
+                alpha = 1.f - (age - visibleDuration) / fadeDuration;
+            }
+        }
+        visible.push_back({e.text, alpha});
+    }
+
+    if (visible.empty()) return;
+
+    // Render from bottom up
+    float bottomY = winH - marginBottom;
+
+    // Truncate long lines to fit screen width
+    float maxTextWidth = winW * 0.65f;
+
+    for (int i = (int)visible.size() - 1; i >= 0; i--) {
+        float y = bottomY - ((int)visible.size() - i) * lineHeight;
+        if (y < 0.f) break;  // off-screen
+
+        uint8_t a = static_cast<uint8_t>(visible[i].alpha * 220.f);
+
+        // Background strip
+        sf::RectangleShape bg({maxTextWidth + padding * 2.f, lineHeight});
+        bg.setFillColor(sf::Color(0, 0, 0, static_cast<uint8_t>(visible[i].alpha * 120.f)));
+        bg.setPosition({marginLeft, y});
+        window.draw(bg);
+
+        // Text
+        std::string display = visible[i].text;
+        sf::Text text(font, display, fontSize);
+        // Truncate if too wide
+        if (text.getLocalBounds().size.x > maxTextWidth) {
+            while (display.size() > 3 && text.getLocalBounds().size.x > maxTextWidth) {
+                display.pop_back();
+                text.setString(display + "...");
+            }
+        }
+        text.setFillColor(sf::Color(200, 200, 200, a));
+        text.setPosition({marginLeft + padding, y + 1.f});
+        window.draw(text);
+    }
 }
 
 sf::Color UIManager::getPhaseNameColor() {

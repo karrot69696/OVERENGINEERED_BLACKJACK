@@ -17,6 +17,9 @@ class Deck {
         void addCard(Card* card){
             cards.push_back(card);
         }
+        void addCardToBottom(Card* card){
+            cards.insert(cards.begin(), card);
+        }
         bool isEmpty();
         void printDeck();
         void sortDeck();

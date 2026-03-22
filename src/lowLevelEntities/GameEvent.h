@@ -87,7 +87,7 @@ struct ExplosionEffectEvent {
 };
 
 struct DeliveranceEffectEvent {
-    int cardId;
+    int playerId;
 };
 
 struct RequestActionInputEvent {
@@ -114,6 +114,7 @@ struct NeuralGambitRevealEvent {
 struct ReactiveSkillPromptEvent {
     int skillOwnerId;
     SkillName skillName;
+    std::string extraInfo;
     float timerDuration;
 };
 

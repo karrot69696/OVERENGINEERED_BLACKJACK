@@ -106,7 +106,7 @@ class Player{
         //hand manipulation
         void Stand();
         void returnCards(Deck& deck);
-        void returnCards(Deck& deck, const std::vector<Card*>& cards);
+        void returnCards(Deck& deck, const std::vector<Card*>& cards, bool toBotDeck = false);
         void addCardToHand(Card* card, bool isSync = false);
         void flipAllCardsFaceUp();
         void clearHand() { cardsInHand.clear(); }  // for network sync (doesn't touch card ownership)

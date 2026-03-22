@@ -148,7 +148,7 @@ public:
     void sendTargetRequest(int targetPlayerId, const TargetRequestData& req);
 
     // Server: send reactive skill prompt to a specific client (yes/no)
-    void sendReactivePrompt(int playerId, SkillName skill, float timerDuration);
+    void sendReactivePrompt(int playerId, SkillName skill,std::string extraInfo, float timerDuration);
     // Server: check/consume reactive response from a remote player
     bool hasReactiveResponse(int playerId) const;
     bool consumeReactiveResponse(int playerId);  // returns accepted (true/false)

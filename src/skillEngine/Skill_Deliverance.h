@@ -55,13 +55,13 @@ class SkillDeliverance : public Skill{
         bool execute(SkillContext& context) override{
             // During your hit phase, 
             // you can return 1 card from you hand
-            // to the deck, then shuffle it.
-            context.user.returnCards(context.deck,context.targetCards);
-            context.deck.shuffle();
+            // to the bottom of the deck.
+            context.user.returnCards(context.deck,context.targetCards, true); //true for bot deck return
+            //context.deck.shuffle();
             uses--;
             return true;
         }
-        bool activatePassive(GameState& gameState){ 
+        bool activatePassive(GameState& gameState) override { 
             //At the beginning of your host phase, gain 1 uses
             if  (gameState.getPhaseName() == PhaseName::HOST_HIT_PHASE){
                     uses++;

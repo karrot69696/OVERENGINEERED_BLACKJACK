@@ -48,6 +48,7 @@ void RoundManager::updateGameState(PhaseName phase, int playerId){
             player.getSkillName(),
             skillManager.getSkillUses(player.getSkillName()),
             player.getPoint(),
+            player.calculateHandValue(),
             player._isBot(),
             (bool)player.getHost(),
             player.isRemote

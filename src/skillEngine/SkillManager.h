@@ -27,7 +27,10 @@ class SkillManager {
         std::string preValidateSkill(int playerId, const GameState& state);
         int getSkillUses(SkillName name);
         void resetSkillUses(std::vector<Player>& players);
-        bool skillPassiveHandler(GameState& gameState);
+        std::vector<std::pair<int, SkillName>> skillPassiveHandler(    
+            ReactiveTrigger trigger, const ReactiveContext& ctx,
+            GameState& state, int priorityPlayerId, int numPlayers
+        );
 
         // Returns (skillOwnerId, skillName) pairs for skills that can react to this trigger
         // Sorted by turn order starting from priorityPlayerId

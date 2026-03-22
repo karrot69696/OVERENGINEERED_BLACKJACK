@@ -28,7 +28,7 @@ class SkillNeuralGambit : public Skill{
             return SkillName::NEURALGAMBIT;
         }
 
-        
+        void resetUses() override { uses = 2; }
         std::string canUse(const SkillContext& context) override {
             if (context.user.getId() != this->userId)
                 return "CAN ONLY BE USED IN YOUR TURN";

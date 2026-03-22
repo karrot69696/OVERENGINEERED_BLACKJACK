@@ -20,7 +20,7 @@ namespace AnimConfig {
     inline constexpr float CARD_DRAW_DURATION = 0.4f;
     inline constexpr float CARD_RETURN_DURATION = 0.2f;
     inline constexpr float POINT_CHANGE_DURATION = 1.7f;
-    inline constexpr float CARD_FLIP_DURATION = 0.35f;
+    inline constexpr float CARD_FLIP_DURATION = 1.0f;
 }
 struct Animation
 {
@@ -51,6 +51,7 @@ private:
     sf::Texture neuralGambitTexture;
     std::unique_ptr<sf::Sprite> neuralGambitSprite1;
     std::unique_ptr<sf::Sprite> neuralGambitSprite2;
+    PlayerVisual* borrowedPlayerVisual;
 public:
     AnimationManager(sf::RenderWindow& window, GameState& gameState, VisualState& visualState) : 
     window(window), gameState(gameState), visualState(visualState) {
@@ -73,6 +74,7 @@ public:
         renderHolyAnimation();
         renderFatalDealEffect();
         renderNeuralGambitEffect();
+        renderBorrowedPlayerVisual();
     }
 
 /**
@@ -341,23 +343,57 @@ public:
 
         auto flipped = std::make_shared<bool>(false);
 
-        auto func = [this, &card, origScale, cardId, flipped](float t) {
-            if (t <= 0.5f) {
-                float localT = t / 0.5f;
-                float scaleX = origScale.x * (1.f - easeInCubic(localT));
-                card.cardSprite.setScale({scaleX, origScale.y});
-            } else {
-                if (!*flipped) {
-                    visualState.flipCardVisualFaceUp(cardId);
-                    *flipped = true;
+        auto func = [this,
+                    &card,
+                    origScale,
+                    cardId,
+                    flipped,
+                    startPos = card.cardSprite.getPosition()](float t)
+        {
+            float scaleX = origScale.x;
+            float scaleY = origScale.y;
+
+            // --- 1. RISE + FLIP (0 → 0.45) — scale up toward camera, flip midway ---
+            if (t < 0.45f) {
+                float localT = t / 0.45f;
+                float grow = 1.f + 0.35f * easeOutCubic(localT);
+
+                if (localT <= 0.45f) {
+                    float s = 1.f - easeInCubic(localT / 0.45f);
+                    scaleX *= grow * s;
+                } else {
+                    if (!*flipped) {
+                        visualState.flipCardVisualFaceUp(cardId);
+                        *flipped = true;
+                    }
+                    float s = easeOutCubic((localT - 0.45f) / 0.55f);
+                    scaleX *= grow * s;
                 }
-                float localT = (t - 0.5f) / 0.5f;
-                float scaleX = origScale.x * easeOutCubic(localT);
-                card.cardSprite.setScale({scaleX, origScale.y});
+                scaleY *= grow;
             }
+
+            // --- 2. SLAM (0.45 → 0.6) — snap back past normal, impact squash ---
+            else if (t < 0.6f) {
+                float localT = (t - 0.45f) / 0.15f;
+                float e = localT * localT;
+                scaleX *= 1.35f + (0.88f - 1.35f) * e;
+                scaleY *= 1.35f + (0.92f - 1.35f) * e;
+            }
+
+            // --- 3. SETTLE (0.6 → 1.0) — spring back to normal ---
+            else {
+                float localT = (t - 0.6f) / 0.4f;
+                float spring = std::exp(-6.f * localT) * std::sin(localT * 14.f);
+                scaleX *= 1.f + (0.88f - 1.f) * (1.f - easeOutCubic(localT)) + spring * 0.04f;
+                scaleY *= 1.f + (0.92f - 1.f) * (1.f - easeOutCubic(localT)) + spring * 0.03f;
+            }
+
+            card.cardSprite.setPosition(startPos);
+            card.cardSprite.setScale({scaleX, scaleY});
         };
 
-        auto finishCb = [&card, origScale, onFinish]() {
+        auto finishCb = [&card, origScale, startPos = card.cardSprite.getPosition(), onFinish]() {
+            card.cardSprite.setPosition(startPos);
             card.cardSprite.setScale(origScale);
             if (onFinish) onFinish();
         };
@@ -718,6 +754,38 @@ public:
         playSpriteAnimation(neuralGambitSprite2.get(),
             19, 0, 124, 64, 64, duration, 64, onDone2);
     }
+    void shakeBorrowedPlayerVisual(PlayerVisual& playerVisual, float duration, std::function<void()> onFinish = nullptr){
+        sf::Vector2f pos = playerVisual.playerSprite.getPosition();
+        sf::Vector2f origScale = playerVisual.playerSprite.getScale();
+        // Phase 2: shake boosted card, then pop-scale it
+        auto phase1 = [this, pos, &playerVisual, origScale](float t){
+            if (t < 0.7f) {
+                float localT = t / 0.7f;
+                float intensity = localT * 4.f;
+
+                float shakeX = std::sin(localT * 40.f) * intensity
+                            + std::sin(localT * 80.f) * intensity * 0.5f;
+                float shakeY = std::cos(localT * 40.f) * intensity * 0.7f;
+
+                playerVisual.playerSprite.setPosition({pos.x + shakeX, pos.y + shakeY});
+            } else {
+                // reset cleanly after shake
+                playerVisual.playerSprite.setPosition(pos);
+            }
+        };
+
+        auto phase1Finish = [this, &playerVisual, origScale, pos, onFinish]() {
+            playerVisual.playerSprite.setScale(origScale);
+            playerVisual.playerSprite.setRotation(sf::degrees(0));
+            if (onFinish) {
+                onFinish();
+                borrowedPlayerVisual = nullptr;
+            }
+        };
+        add({phase1, phase1Finish, 0, duration});
+
+        borrowedPlayerVisual = &playerVisual;
+    }
     void renderFatalDealEffect(){
         if (fatalDealSprite1)
             window.draw(*fatalDealSprite1);
@@ -729,6 +797,9 @@ public:
             window.draw(*neuralGambitSprite1);
         if (neuralGambitSprite2)
             window.draw(*neuralGambitSprite2);
+    }
+    void renderBorrowedPlayerVisual(){
+        if (borrowedPlayerVisual) window.draw(borrowedPlayerVisual->playerSprite);
     }
 };
 

@@ -95,6 +95,7 @@ struct TargetRequestData {
 
 struct ReactivePromptData {
     SkillName skill;
+    std::string extraInfo;
     float timerDuration;
 };
 
@@ -131,6 +132,7 @@ inline void writePlayerInfo(ByteBuffer& buf, const PlayerInfo& info) {
     buf.writeU8(static_cast<uint8_t>(info.skill));
     buf.writeI32(info.skillUses);
     buf.writeI32(info.points);
+    buf.writeI32(info.handValue);
     buf.writeBool(info.isBot);
     buf.writeBool(info.isHost);
     buf.writeU16(static_cast<uint16_t>(info.cardsInHand.size()));
@@ -145,6 +147,7 @@ inline PlayerInfo readPlayerInfo(ByteBuffer& buf) {
     info.skill = static_cast<SkillName>(buf.readU8());
     info.skillUses = buf.readI32();
     info.points = buf.readI32();
+    info.handValue = buf.readI32();
     info.isBot = buf.readBool();
     info.isHost = buf.readBool();
     uint16_t cardCount = buf.readU16();
@@ -285,7 +288,7 @@ inline void writeGameEvent(ByteBuffer& buf, const GameEvent& event) {
             buf.writeFloat(payload.duration);
         }
         else if constexpr (std::is_same_v<T, DeliveranceEffectEvent>) {
-            buf.writeI32(payload.cardId);
+            buf.writeI32(payload.playerId);
         }
         else if constexpr (std::is_same_v<T, RequestActionInputEvent>) {
             buf.writeI32(payload.playerId);
@@ -394,7 +397,7 @@ inline GameEvent readGameEvent(ByteBuffer& buf) {
         } break;
         case GameEventType::DELIVERANCE_EFFECT: {
             DeliveranceEffectEvent e;
-            e.cardId = buf.readI32();
+            e.playerId = buf.readI32();
             data = e;
         } break;
         case GameEventType::REQUEST_ACTION_INPUT: {
@@ -492,14 +495,16 @@ inline TargetRequestData readTargetRequest(ByteBuffer& buf) {
 // ============================================================================
 // ReactivePrompt serialization
 // ============================================================================
-inline void writeReactivePrompt(ByteBuffer& buf, SkillName skill, float timerDuration) {
+inline void writeReactivePrompt(ByteBuffer& buf, SkillName skill, std::string extraInfo, float timerDuration) {
     buf.writeU8(static_cast<uint8_t>(skill));
+    buf.writeString(extraInfo);
     buf.writeFloat(timerDuration);
 }
 
 inline ReactivePromptData readReactivePrompt(ByteBuffer& buf) {
     ReactivePromptData data;
     data.skill = static_cast<SkillName>(buf.readU8());
+    data.extraInfo = buf.readString();
     data.timerDuration = buf.readFloat();
     return data;
 }

@@ -54,6 +54,25 @@ struct CardVisual {
     bool isClicked(sf::Vector2f mousePos);
 };
 // ============================================================================
+// Player Visual
+// ============================================================================
+struct PlayerVisual {
+    PlayerVisual(sf::Sprite sprite)
+        : playerSprite(std::move(sprite)) {}
+    sf::Sprite playerSprite;
+    int playerId = -1;
+    bool isTarget = false;
+    bool highlighted = false;
+    bool isHost = false;
+    SkillName skillName = SkillName::UNDEFINED;
+    int skillUses = 100;
+    int points = 0;
+    sf::Vector2f seatPostion = {0.f, 0.f};
+
+    void draw(sf::RenderWindow& window);
+    bool isClicked(sf::Vector2f mousePos);
+};
+// ============================================================================
 // VisualState
 // ============================================================================
 class VisualState {

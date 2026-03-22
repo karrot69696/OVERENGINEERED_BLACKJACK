@@ -23,11 +23,10 @@ void HostHitPhase::onEnter() {
     //update player info in game state
     roundManager.updateGameState(PhaseName::HOST_HIT_PHASE,currentPlayer.getId());
 
-    //check and execute skill passive if existed
-    if(skillManager.skillPassiveHandler(this->gameState)){
-        std::cout << "[HostHitPhase] Passive handler done" << std::endl;
-        roundManager.updateGameState(PhaseName::HOST_HIT_PHASE,currentPlayer.getId());
-    }
+    //check and execute skill passives
+    processPassiveSkills(hostPlayer.getId());
+    roundManager.updateGameState(PhaseName::HOST_HIT_PHASE,currentPlayer.getId());
+
 }
 
 std::optional<PhaseName> HostHitPhase::onUpdate() {

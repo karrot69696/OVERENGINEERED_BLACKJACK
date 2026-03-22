@@ -14,7 +14,7 @@ namespace GameConfig {
     constexpr int FACE_CARD_VALUE = 10;
     constexpr int CARD_RANKS = 13;
     constexpr int HAND_START_VALUE = 2;
-    constexpr int WINNING_POINTS = 10;
+    constexpr int WINNING_POINTS = 15;
     constexpr int POINTS_GAIN_WON = 2;
     constexpr int POINTS_GAIN_TIE = 1;
     constexpr int POINTS_GAIN_BLACKJACK = 3;
@@ -44,6 +44,7 @@ struct PlayerInfo {
     SkillName skill;
     int skillUses;
     int points;
+    int handValue = 0;
     bool isBot = false;
     bool isHost = false;
     bool isRemote = false;
@@ -95,6 +96,13 @@ public:
     }
     std::vector<PlayerInfo> getAllPlayerInfo() { return playersInfo; }
 
+    Rank getCardRankById(int cardId){
+        for (auto& player : playersInfo)
+            for (auto& card : player.cardsInHand)
+                if (card.getId() == cardId) return card.getRank();
+        std::cout << "Can't find card id " << cardId << std::endl;
+        return Rank::Ace;
+    }
     Rank getCardRank(int playerId, int cardIndex){
         for (auto& player : playersInfo){
             if (player.playerId==playerId)

@@ -142,15 +142,23 @@ void PresentationLayer::processEvents() {
             std::cout << "[PresentationLayer] EXPLOSION_EFFECT: target=" << e.targetPlayerId << std::endl;
             sf::Vector2f seat = visualState.getPlayerSeatPos(
                 e.targetPlayerId, (int)gameState.getAllPlayerInfo().size());
+            uiManager.getBorrowedPlayerVisualIds().push_back(e.targetPlayerId);
+            PlayerVisual& targetPlayerPv = uiManager.getPlayerVisuals()[e.targetPlayerId];
+            auto onDone = [this]() {
+                    uiManager.getBorrowedPlayerVisualIds().clear();
+                    
+            };
             sf::Vector2f pos = {seat.x - 50.f, seat.y - 10.f};
+
+            animationManager.shakeBorrowedPlayerVisual(targetPlayerPv, e.duration,onDone);
             animationManager.playExplosionAnimation(pos, e.scale, e.duration);
         } break;
 
         case GameEventType::DELIVERANCE_EFFECT: {
             auto& e = std::get<DeliveranceEffectEvent>(event.data);
-            std::cout << "[PresentationLayer] DELIVERANCE_EFFECT: cardId=" << e.cardId << std::endl;
-            CardVisual& cv = visualState.getCardVisual(e.cardId);
-            animationManager.playDeliveranceEffect(cv.cardSprite.getPosition());
+            std::cout << "[PresentationLayer] DELIVERANCE_EFFECT: playerId=" << e.playerId << std::endl;
+            sf::Vector2f playerPos = visualState.getPlayerSeatPos(e.playerId, (int)gameState.getAllPlayerInfo().size());
+            animationManager.playDeliveranceEffect(playerPos);
         } break;
 
         case GameEventType::REQUEST_ACTION_INPUT: {
@@ -205,7 +213,7 @@ void PresentationLayer::processEvents() {
             PlayerInfo info = gameState.getPlayerInfo(e.skillOwnerId);
             if (!info.isBot && !info.isRemote) {
                 uiManager.requestReactivePrompt(
-                    gameState.skillNameToString(e.skillName), e.timerDuration);
+                    gameState.skillNameToString(e.skillName),e.extraInfo, e.timerDuration);
             }
         } break;
 
@@ -227,10 +235,11 @@ void PresentationLayer::processEvents() {
             sf::Vector2f swappedPos = swappedCv.cardSprite.getPosition();
             sf::Vector2f drawnPos   = drawnCv.cardSprite.getPosition();
 
-            // Swap all metadata between the two cards
+            // Swap ownership metadata — enforceVisibility() decides face state from ownerId
             std::swap(swappedCv.ownerId, drawnCv.ownerId);
             std::swap(swappedCv.cardIndex, drawnCv.cardIndex);
-            std::swap(swappedCv.faceUp, drawnCv.faceUp);
+            // Do NOT swap faceUp — it desynchronizes the flag from the texture rect,
+            // causing enforceVisibility() to skip the texture correction.
             // Force-clear all pins — card is changing hands, enforceVisibility() decides face state
             swappedCv.pinCount = 0;
             drawnCv.pinCount = 0;
@@ -252,10 +261,11 @@ void PresentationLayer::processEvents() {
             auto& e = std::get<CardsRevealedEvent>(event.data);
             std::cout << "[PresentationLayer] CARDS_REVEALED: " << e.cardIds.size() << " cards" << std::endl;
             for (int cardId : e.cardIds) {
-                visualState.getCardVisual(cardId).pin();
+                // HOST: pin here. CLIENT: already pre-pinned in clientReceive.
+                if (!visualState.getCardVisual(cardId).isPinned())
+                    visualState.getCardVisual(cardId).pin();
                 animationManager.playCardFlip(cardId, [this, cardId]() {
                     visualState.getCardVisual(cardId).unpin();
-                    // enforceVisibility() handles face state from here
                 });
             }
         } break;

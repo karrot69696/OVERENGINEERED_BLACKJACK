@@ -375,10 +375,41 @@ void Game::clientReceive() {
             clientInitialBuild = true;
             std::cout << "[Client] Initial visual build complete" << std::endl;
         } else {
-            // Reconcile every frame — only updates metadata (ownerId, cardIndex, rankBonus,
-            // faceUp texture), never touches sprite positions, so it's safe
-            // even while animations are playing
+            // Reconcile: updates ownership, cardIndex, location, rankBonus.
+            // Does NOT touch faceUp — enforceVisibility() owns that.
             visualState.reconcile(gameState);
+        }
+
+        auto events = networkManager.drainReceivedEvents();
+        if (!events.empty()) {
+            std::cout << "[Client][clientReceive] Got " << events.size() << " events from server" << std::endl;
+            visualState.setReconcileBlocked(true);
+        }
+
+        // Pre-pin CARDS_REVEALED cards so enforceVisibility doesn't flip them
+        // face-up while they're stuck behind a cutscene in the queue.
+        for (const auto& e : events) {
+            if (e.type == GameEventType::CARDS_REVEALED) {
+                const auto& data = std::get<CardsRevealedEvent>(e.data);
+                for (int cardId : data.cardIds) {
+                    visualState.getCardVisual(cardId).pin();
+                }
+            }
+        }
+
+        // Push events into local event queue for presentation
+        int myId = networkManager.getLocalPlayerId();
+        for (auto& e : events) {
+            // Only show action/target input for this client's player
+            if (e.type == GameEventType::REQUEST_ACTION_INPUT) {
+                auto& data = std::get<RequestActionInputEvent>(e.data);
+                if (data.playerId != myId) continue;
+            }
+            if (e.type == GameEventType::REQUEST_TARGET_INPUT) {
+                auto& data = std::get<RequestTargetInputEvent>(e.data);
+                if (data.playerId != myId) continue;
+            }
+            eventQueue.push(std::move(e));
         }
     }
 
@@ -397,29 +428,8 @@ void Game::clientReceive() {
     if (networkManager.hasPendingReactivePrompt()) {
         ReactivePromptData prompt = networkManager.consumePendingReactivePrompt();
         uiManager.requestReactivePrompt(
-            gameState.skillNameToString(prompt.skill), prompt.timerDuration);
-    }
-
-    // Push received events into local event queue for presentation
-    auto events = networkManager.drainReceivedEvents();
-    if (!events.empty()) {
-        std::cout << "[Client][clientReceive] Got " << events.size() << " events from server" << std::endl;
-    }
-    if (!events.empty()) {
-        visualState.setReconcileBlocked(true);
-    }
-    int myId = networkManager.getLocalPlayerId();
-    for (auto& e : events) {
-        // Only show action/target input for this client's player
-        if (e.type == GameEventType::REQUEST_ACTION_INPUT) {
-            auto& data = std::get<RequestActionInputEvent>(e.data);
-            if (data.playerId != myId) continue;
-        }
-        if (e.type == GameEventType::REQUEST_TARGET_INPUT) {
-            auto& data = std::get<RequestTargetInputEvent>(e.data);
-            if (data.playerId != myId) continue;
-        }
-        eventQueue.push(std::move(e));
+            gameState.skillNameToString(prompt.skill), prompt.extraInfo
+            ,prompt.timerDuration);
     }
 }
 

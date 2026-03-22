@@ -29,22 +29,6 @@ struct Button {
     void draw(sf::RenderWindow& window);
     bool isClicked(sf::Vector2f mousePos);
 };
-struct PlayerVisual {
-    PlayerVisual(sf::Sprite sprite)
-        : playerSprite(std::move(sprite)) {}
-    sf::Sprite playerSprite;
-    int playerId = -1;
-    bool isTarget = false;
-    bool highlighted = false;
-    bool isHost = false;
-    SkillName skillName = SkillName::UNDEFINED;
-    int skillUses = 100;
-    int points = 0;
-    sf::Vector2f seatPostion = {0.f, 0.f};
-
-    void draw(sf::RenderWindow& window);
-    bool isClicked(sf::Vector2f mousePos);
-};
 // ============================================================================
 // UIManager
 // ============================================================================
@@ -75,6 +59,7 @@ class UIManager {
         // Reactive skill prompt overlay (Yes/No with timer)
         bool showReactivePrompt = false;
         std::string reactivePromptSkillName;
+        std::string reactivePromptExtraInfo;
         float reactivePromptDuration = 5.f;
         sf::Clock reactivePromptClock;
         sf::Font font;
@@ -89,6 +74,9 @@ class UIManager {
         int hoveredPlayerId = -1;
         sf::Clock shakeClock;
         int cheatOn = 0;
+        bool showDebugTooltip = false;
+        int gameLogMode = 0;  // 0=off, 1=recent (fading), 2=full history
+        std::vector<int> borrowedPlayerVisualIds;
 
     public:
         UIManager(sf::RenderWindow& window, GameState& gameState,VisualState& visualState, std::vector<CardVisual>& cardVisuals);
@@ -98,7 +86,8 @@ class UIManager {
         void render();
 
         int getActivePlayerId() const { return activePlayerId; }
-
+        std::vector<PlayerVisual>& getPlayerVisuals() { return playerVisuals; }
+        std::vector<int>& getBorrowedPlayerVisualIds() { return borrowedPlayerVisualIds; }
         // Called by game logic to tell UI what input is needed
         void requestActionInput(int playerId);                          // show Hit/Stand/Skill buttons
         void requestTargetInput(int playerId);                          // show card targeting overlay
@@ -122,7 +111,7 @@ class UIManager {
         void requestBoostPickInput(int card1Id, int card2Id);
 
         // Reactive skill prompt (Yes/No with timer countdown)
-        void requestReactivePrompt(const std::string& skillName, float timerDuration);
+        void requestReactivePrompt(const std::string& skillName, std::string& extraInfo, float timerDuration);
         void hideReactivePrompt();
 
         // Sub-renderers
@@ -135,6 +124,8 @@ class UIManager {
         void renderTargetingOverlay_NeuralGambit();
         void renderPickCardOverlay();
         void renderReactivePrompt();
+        void renderHoverTooltip();
+        void renderGameLog();
 };
 
 #endif

@@ -38,6 +38,8 @@ class Phase {
             bool revealSent          = false;
             bool boostRequested      = false;
             bool waitingForLocalPick = false;
+            bool firstWasFaceDown    = false;
+            bool secondWasFaceDown   = false;
         };
         std::optional<NgPendingState> ngPending;
         void ngTickPending(Player& skillUser);
@@ -48,7 +50,8 @@ class Phase {
             int drawnCardId;
             int drawerId;
             int actingPlayerId;       // who to re-prompt when all reactive checks done
-
+            std::string extraInfo;
+            
             struct QueueEntry { int skillOwnerId; SkillName skillName; };
             std::vector<QueueEntry> queue;
             int currentIndex = 0;
@@ -86,6 +89,7 @@ class Phase {
         bool turnHandler(Player& player, Player& opponent);
         void skillHandler(Player& player);
         void skillProcessAftermath(SkillContext& context, SkillExecutionResult skillResult);
+        void processPassiveSkills(int priorityPlayerId);
         void blackJackAndQuintetCheck(std::vector<Player>& players);
 };
 

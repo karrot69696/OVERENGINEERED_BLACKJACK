@@ -7,7 +7,7 @@ Fatal Deal is a **reactive** skill. When another player draws a card, the Fatal 
 - Triggers: `ON_CARD_DRAWN` (any player except self)
 - Uses: 3 per game
 - Cannot be activated manually (pressing Skill button shows error)
-
+- The trigger prompt also includes extraInfo - containing the rank of the drawn card
 ---
 
 ## Key Implementation Steps
@@ -49,7 +49,7 @@ Two new events:
 
 **File**: `UIManager.h/cpp`
 
-Reactive prompt overlay: skill name, countdown timer bar, Yes/No buttons. Same pattern as action menu — buttons hide overlay before firing callback. Auto-declines on timeout.
+Reactive prompt overlay: skill name, extra info, countdown timer bar, Yes/No buttons. Same pattern as action menu — buttons hide overlay before firing callback. Auto-declines on timeout.
 
 ### 6. Visual Animation
 

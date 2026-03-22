@@ -62,6 +62,12 @@ struct Animation {
 
 `playSpriteAnimation()` is the reusable helper for spritesheet frame animations. Sprite-specific methods (explosion, shock, holy) set up the sprite then delegate to it.
 
+`PlayerVisual` lives in `VisualState.h` (alongside `CardVisual`). UIManager owns the vector but AnimationManager can "borrow" a player visual for effects (e.g., shake during explosion). While borrowed, UIManager skips setting position/scale/draw for that visual — AnimationManager has full control and renders it via `renderBorrowedPlayerVisual()`.
+
+### Card visibility — see `docs/card_visibility.md`
+
+Three systems with strict lanes: `enforceVisibility` (local player only), `reconcile` (no faceUp), events (non-local face state). Pin system prevents races. CLIENT pre-pins `CARDS_REVEALED` cards on arrival. Full details in the doc.
+
 ### Skill system (`skillEngine/`)
 
 Skills inherit from `Skill` base class. Each skill is fully self-contained in its own `Skill_Name.h`.
@@ -116,12 +122,13 @@ Three modes: `LOCAL` (no networking), `HOST` (server + local player), `CLIENT` (
 ```
 1. window.pollEvent()        — SFML events
 2. networkManager.poll()     — ENet receive
-3. clientReceive()           — CLIENT only: apply GameState, sync Card*/Player, reconcile visuals, push received events into local EventQueue
+3. clientReceive()           — CLIENT only: apply GameState, sync Card*/Player, reconcile (no faceUp), pre-pin CARDS_REVEALED cards, push events into local EventQueue
 4. roundManager.update()     — HOST/LOCAL only, gated on !animationManager.playing()
 5. serverBroadcast()         — HOST only, called right after roundManager.update() with snapshot index
 6. presentationLayer.processEvents() — pops events from EventQueue, triggers animations (blocks on cutscene events)
 7. animationManager.update() — tick animations
-8. render
+8. visualState.enforceVisibility() — local player face-up, skips pinned cards
+9. render
 ```
 
 #### Event broadcast (the critical path)
@@ -151,7 +158,8 @@ Events stay in the queue for the local PresentationLayer — **no drain/re-push*
 - **Event duplication**: check if events are being broadcast more than once per logic tick
 - **Desync**: compare `[Server]` and `[Client]` console logs for phase/turn/card count
 - **Animation stalls**: PresentationLayer blocks on cutscene events — if an event is pushed but animation never starts, the queue stalls
-- **reconcile vs rebuildFromState**: reconcile only updates metadata (ownerId, cardIndex, faceUp texture), never sprite positions. rebuildFromState is destructive — only used once on initial connect
+- **reconcile vs rebuildFromState**: reconcile only updates metadata (ownerId, cardIndex, rankBonus, location) — never faceUp or sprite positions. rebuildFromState is destructive — only used once on initial connect
+- **Card visibility race**: if a flip animation isn't playing on CLIENT, check that CARDS_REVEALED cards are being pre-pinned in `clientReceive()` before `enforceVisibility` gets to them
 
 ## Adding new features
 
