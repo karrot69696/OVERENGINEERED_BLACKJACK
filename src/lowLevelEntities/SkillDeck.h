@@ -18,13 +18,15 @@ class SkillDeck {
     private:
         std::vector<SkillName> skills;
     public:
-        SkillDeck(){
-            for (int i = 0; i <= 6; i++) {
-                skills.emplace_back(
-                    static_cast<SkillName>(i)
-                );
+        SkillDeck(){};
+        void buildDeck(int numPlayers){
+            if (numPlayers>=7){
+                throw std::out_of_range("Too many players");
             }
-        };
+            for (int i = 0; i < numPlayers; i++){
+                skills.push_back(SkillName(i));
+            }
+        }
         void shuffle(){
             std::random_device rd;
             std::mt19937 g(rd());

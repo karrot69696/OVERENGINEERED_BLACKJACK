@@ -56,11 +56,15 @@ class UIManager {
         bool showPickCardOverlay = false;
         std::vector<int> pickCardAllowedIds;
 
+        // Input timer (shared across action menu / targeting overlays)
+        sf::Clock inputTimerClock;
+        float inputTimerDuration = 0.f;
+
         // Reactive skill prompt overlay (Yes/No with timer)
         bool showReactivePrompt = false;
         std::string reactivePromptSkillName;
         std::string reactivePromptExtraInfo;
-        float reactivePromptDuration = 5.f;
+        float reactivePromptDuration = GameConfig::REACTIVE_PROMPT_DURATION_DEFAULT;
         sf::Clock reactivePromptClock;
         sf::Font font;
         sf::Texture cardTexture;
@@ -89,8 +93,8 @@ class UIManager {
         std::vector<PlayerVisual>& getPlayerVisuals() { return playerVisuals; }
         std::vector<int>& getBorrowedPlayerVisualIds() { return borrowedPlayerVisualIds; }
         // Called by game logic to tell UI what input is needed
-        void requestActionInput(int playerId);                          // show Hit/Stand/Skill buttons
-        void requestTargetInput(int playerId);                          // show card targeting overlay
+        void requestActionInput(int playerId, float duration = GameConfig::ACTION_PROMPT_DURATION);
+        void requestTargetInput(int playerId, float duration = GameConfig::TARGET_PROMPT_DURATION);
         void clearInput();                                              // hide all overlays
 
         // Targeting state
@@ -124,6 +128,7 @@ class UIManager {
         void renderTargetingOverlay_NeuralGambit();
         void renderPickCardOverlay();
         void renderReactivePrompt();
+        void renderInputTimerBar();
         void renderHoverTooltip();
         void renderGameLog();
 };

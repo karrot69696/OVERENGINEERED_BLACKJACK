@@ -109,19 +109,23 @@ UIManager::UIManager(sf::RenderWindow& window, GameState& gameState,VisualState&
 // ============================================================================
 // Public Interface
 // ============================================================================
-void UIManager::requestActionInput(int playerId) {
+void UIManager::requestActionInput(int playerId, float duration) {
     if(!showActionMenu) std::cout << "[UIManager] Request Action Input Menu" << std::endl;
     activePlayerId = playerId;
     showActionMenu = true;
     showTargetingOverlay_Deliverance = false;
     pendingTargeting = {};
+    inputTimerClock.restart();
+    inputTimerDuration = duration;
 }
 
-void UIManager::requestTargetInput(int playerId) {
+void UIManager::requestTargetInput(int playerId, float duration) {
     std::cout << "[UIManager] Request Target Input Menu" << std::endl;
     activePlayerId = playerId;
     showActionMenu = false;
     pendingTargeting = {};
+    inputTimerClock.restart();
+    inputTimerDuration = duration;
     // Choose overlay based on player's skill
     auto players = gameState.getAllPlayerInfo();
     for (auto& p : players) {
@@ -166,6 +170,8 @@ void UIManager::requestPickCard(const std::vector<int>& allowedCardIds) {
     showPickCardOverlay = true;
     pickCardAllowedIds = allowedCardIds;
     pendingTargeting = {};
+    inputTimerClock.restart();
+    inputTimerDuration = GameConfig::TARGET_PROMPT_DURATION;
 }
 
 void UIManager::requestBoostPickInput(int card1Id, int card2Id) {
@@ -173,6 +179,8 @@ void UIManager::requestBoostPickInput(int card1Id, int card2Id) {
     ngTargetCardIds = {card1Id, card2Id};
     ngStep = NgStep::PICK_BOOST_CARD;
     showTargetingOverlay_NeuralGambit = true;
+    inputTimerClock.restart();
+    inputTimerDuration = GameConfig::TARGET_PROMPT_DURATION;
     // Pin + flip so enforceVisibility() doesn't override during pick
     visualState.flipCardVisualFaceUp(card1Id);
     visualState.flipCardVisualFaceUp(card2Id);
@@ -475,6 +483,14 @@ void UIManager::renderHUD() {
 }
 
 void UIManager::renderActionMenu() {
+    // Auto-stand on timeout
+    if (inputTimerDuration > 0.f && inputTimerClock.getElapsedTime().asSeconds() >= inputTimerDuration) {
+        showActionMenu = false;
+        std::cout << "[UIManager] Action prompt timed out, auto-standing" << std::endl;
+        if (onActionChosen) onActionChosen(PlayerAction::STAND);
+        return;
+    }
+
     // Dark strip at bottom
     sf::RectangleShape strip({ (float)window.getSize().x, 70.f });
     strip.setFillColor(UILayout::HUD_BG);
@@ -487,6 +503,7 @@ void UIManager::renderActionMenu() {
     window.draw(prompt);
 
     for (auto& btn : actionButtons) btn.draw(window);
+    renderInputTimerBar();
 }
 
 void UIManager::renderPlayerVisuals(){
@@ -565,6 +582,31 @@ void UIManager::renderPlayerVisuals(){
 }
 
 void UIManager::renderTargetingOverlay_Deliverance() {
+    // Auto-pick random card on timeout
+    if (inputTimerDuration > 0.f && inputTimerClock.getElapsedTime().asSeconds() >= inputTimerDuration) {
+        for (auto& cv : cardVisuals) {
+            if (cv.ownerId == activePlayerId) {
+                PlayerTargeting target;
+                Card chosenCard(
+                    gameState.getCardSuit(activePlayerId, cv.cardIndex),
+                    gameState.getCardRank(activePlayerId, cv.cardIndex),
+                    gameState.isCardFaceUp(activePlayerId, cv.cardIndex)
+                );
+                chosenCard.setId(cv.cardId);
+                chosenCard.setOwnerId(cv.ownerId);
+                chosenCard.setHandIndex(cv.cardIndex);
+                target.targetCards.push_back(chosenCard);
+                target.targetPlayerIds.push_back(cv.ownerId);
+                pendingTargeting = target;
+                break;
+            }
+        }
+        showTargetingOverlay_Deliverance = false;
+        std::cout << "[UIManager] Deliverance targeting timed out, auto-picking" << std::endl;
+        confirmTargeting();
+        return;
+    }
+
     hoveredCardId = -1;
 
     // Highlight cards belonging to the active player
@@ -621,10 +663,59 @@ void UIManager::renderTargetingOverlay_Deliverance() {
     prompt.setFillColor(sf::Color::Yellow);
     prompt.setPosition({ 10.f, (float)window.getSize().y - 65.f });
     window.draw(prompt);
+    renderInputTimerBar();
 }
 void UIManager::renderTargetingOverlay_NeuralGambit() {
     auto players = gameState.getAllPlayerInfo();
     int totalPlayers = (int)players.size();
+
+    // Auto-pick on timeout (PICK_PLAYER and PICK_BOOST_CARD steps only)
+    if (inputTimerDuration > 0.f && inputTimerClock.getElapsedTime().asSeconds() >= inputTimerDuration) {
+        if (ngStep == NgStep::PICK_PLAYER) {
+            // Auto-pick 2 random distinct players
+            ngTargetPlayerIds.clear();
+            std::vector<int> candidates;
+            for (auto& p : players) candidates.push_back(p.playerId);
+            while ((int)ngTargetPlayerIds.size() < 2 && !candidates.empty()) {
+                int idx = rand() % (int)candidates.size();
+                ngTargetPlayerIds.push_back(candidates[idx]);
+                candidates.erase(candidates.begin() + idx);
+            }
+            std::sort(ngTargetPlayerIds.begin(), ngTargetPlayerIds.end());
+            PlayerTargeting partial;
+            partial.targetPlayerIds = ngTargetPlayerIds;
+            if (onTargetChosen) onTargetChosen(partial);
+            ngStep = NgStep::WAITING_FOR_PICKS;
+            std::cout << "[UIManager] NeuralGambit PICK_PLAYER timed out, auto-picking" << std::endl;
+            return;
+        }
+        else if (ngStep == NgStep::PICK_BOOST_CARD) {
+            // Auto-pick one of the two revealed cards
+            int chosenId = ngTargetCardIds[rand() % 2];
+            for (auto& cv : cardVisuals) {
+                if (cv.cardId == chosenId) {
+                    PlayerTargeting target;
+                    Card chosenCard(
+                        gameState.getCardSuit(cv.ownerId, cv.cardIndex),
+                        gameState.getCardRank(cv.ownerId, cv.cardIndex),
+                        gameState.isCardFaceUp(cv.ownerId, cv.cardIndex)
+                    );
+                    chosenCard.setId(cv.cardId);
+                    chosenCard.setOwnerId(cv.ownerId);
+                    chosenCard.setHandIndex(cv.cardIndex);
+                    target.targetCards.push_back(chosenCard);
+                    pendingTargeting = target;
+                    break;
+                }
+            }
+            for (int cid : ngTargetCardIds) visualState.getCardVisual(cid).unpin();
+            showTargetingOverlay_NeuralGambit = false;
+            ngTargetPlayerIds = {};
+            std::cout << "[UIManager] NeuralGambit PICK_BOOST timed out, auto-picking" << std::endl;
+            confirmTargeting();
+            return;
+        }
+    }
 
     // Bottom strip prompt
     sf::RectangleShape strip({ (float)window.getSize().x, 70.f });
@@ -748,6 +839,8 @@ void UIManager::renderTargetingOverlay_NeuralGambit() {
             window.draw(highlight);
         }
     }
+    // Timer bar (skip during WAITING_FOR_PICKS — server-driven, no local timeout)
+    if (ngStep != NgStep::WAITING_FOR_PICKS) renderInputTimerBar();
 }
 
 // ============================================================================
@@ -755,6 +848,33 @@ void UIManager::renderTargetingOverlay_NeuralGambit() {
 // ============================================================================
 
 void UIManager::renderPickCardOverlay() {
+    // Auto-pick random allowed card on timeout
+    if (inputTimerDuration > 0.f && inputTimerClock.getElapsedTime().asSeconds() >= inputTimerDuration
+        && !pickCardAllowedIds.empty()) {
+        int randomId = pickCardAllowedIds[rand() % (int)pickCardAllowedIds.size()];
+        for (auto& cv : cardVisuals) {
+            if (cv.cardId == randomId) {
+                PlayerTargeting target;
+                Card chosenCard(
+                    gameState.getCardSuit(cv.ownerId, cv.cardIndex),
+                    gameState.getCardRank(cv.ownerId, cv.cardIndex),
+                    gameState.isCardFaceUp(cv.ownerId, cv.cardIndex)
+                );
+                chosenCard.setId(cv.cardId);
+                chosenCard.setOwnerId(cv.ownerId);
+                chosenCard.setHandIndex(cv.cardIndex);
+                target.targetCards.push_back(chosenCard);
+                pendingTargeting = target;
+                break;
+            }
+        }
+        showPickCardOverlay = false;
+        pickCardAllowedIds = {};
+        std::cout << "[UIManager] Pick-card timed out, auto-picking" << std::endl;
+        confirmTargeting();
+        return;
+    }
+
     // Bottom strip
     sf::RectangleShape strip({ (float)window.getSize().x, 70.f });
     strip.setFillColor(UILayout::HUD_BG);
@@ -821,6 +941,28 @@ void UIManager::renderPickCardOverlay() {
                                   hovered ? sf::Color(255, 240, 100) : UILayout::CARD_HIGHLIGHT);
         window.draw(highlight);
     }
+    renderInputTimerBar();
+}
+
+void UIManager::renderInputTimerBar() {
+    if (inputTimerDuration <= 0.f) return;
+    float elapsed = inputTimerClock.getElapsedTime().asSeconds();
+    float progress = std::max(0.f, 1.f - (elapsed / inputTimerDuration));
+
+    float barW = 300.f;
+    float barH = 6.f;
+    float centerX = window.getSize().x / 2.f;
+    float barY = (float)window.getSize().y - 80.f;
+
+    sf::RectangleShape barBg({barW, barH});
+    barBg.setFillColor(sf::Color(60, 60, 60));
+    barBg.setPosition({centerX - barW / 2.f, barY});
+    window.draw(barBg);
+
+    sf::RectangleShape barFill({barW * progress, barH});
+    barFill.setFillColor(progress > 0.3f ? sf::Color(100, 255, 100) : sf::Color(255, 80, 80));
+    barFill.setPosition({centerX - barW / 2.f, barY});
+    window.draw(barFill);
 }
 
 void UIManager::renderReactivePrompt() {
@@ -836,70 +978,75 @@ void UIManager::renderReactivePrompt() {
 
     float centerX = window.getSize().x / 2.f;
     float centerY = window.getSize().y / 2.f;
-    float boxW = 200.f, boxH = 80.f;
+    float boxW = window.getSize().x * 0.65f, boxH = window.getSize().y * 0.65f;
+    float boxTop = centerY - boxH / 2.f;
 
     // Semi-transparent background box
     sf::RectangleShape bg({boxW, boxH});
     bg.setFillColor(sf::Color(20, 20, 40, 220));
     bg.setOutlineThickness(2.f);
     bg.setOutlineColor(sf::Color(255, 200, 50));
-    bg.setPosition({centerX - boxW / 2.f, centerY - boxH / 2.f});
+    bg.setPosition({centerX - boxW / 2.f, boxTop});
     window.draw(bg);
 
     // Skill name text
     sf::Text skillText(font, reactivePromptSkillName + "?", 14);
     skillText.setFillColor(sf::Color(255, 200, 50));
     sf::FloatRect stBounds = skillText.getLocalBounds();
-    skillText.setPosition({centerX - stBounds.size.x / 2.f, centerY - boxH / 2.f + 6.f});
+    float skillTextY = boxTop + boxH * 0.25f;
+    skillText.setPosition({centerX - stBounds.size.x / 2.f, skillTextY});
     window.draw(skillText);
 
-    //Extra info text
-    sf::Text extraInfo(font, reactivePromptExtraInfo, 14);
+    // Extra info text
+    sf::Text extraInfo(font, reactivePromptExtraInfo, 10);
     extraInfo.setFillColor(sf::Color(255, 200, 50));
     sf::FloatRect eiBounds = extraInfo.getLocalBounds();
-    extraInfo.setPosition({centerX - eiBounds.size.x / 2.f, centerY - boxH / 2.f + 6.f + eiBounds.size.y});
+    float extraInfoY = skillTextY + stBounds.size.y + 10.f;
+    extraInfo.setPosition({centerX - eiBounds.size.x / 2.f, extraInfoY});
     window.draw(extraInfo);
 
     // Timer bar
     float barW = boxW - 20.f;
     float barH = 6.f;
     float progress = 1.f - (elapsed / reactivePromptDuration);
+    float barY = extraInfoY + eiBounds.size.y + 12.f;
     sf::RectangleShape barBg({barW, barH});
     barBg.setFillColor(sf::Color(60, 60, 60));
-    barBg.setPosition({centerX - barW / 2.f, centerY - boxH / 2.f + 28.f});
+    barBg.setPosition({centerX - barW / 2.f, barY});
     window.draw(barBg);
 
     sf::RectangleShape barFill({barW * progress, barH});
     barFill.setFillColor(progress > 0.3f ? sf::Color(100, 255, 100) : sf::Color(255, 80, 80));
-    barFill.setPosition({centerX - barW / 2.f, centerY - boxH / 2.f + 28.f});
+    barFill.setPosition({centerX - barW / 2.f, barY});
     window.draw(barFill);
 
-    // Yes button
+    // Yes/No buttons — positions must match click handler hitboxes
+    float btnY = centerY + 10.f;
+
     sf::RectangleShape yesBtn({70.f, 30.f});
     yesBtn.setFillColor(sf::Color(50, 150, 50));
     yesBtn.setOutlineThickness(1.f);
     yesBtn.setOutlineColor(sf::Color::White);
-    yesBtn.setPosition({centerX - 90.f, centerY + 10.f});
+    yesBtn.setPosition({centerX - 90.f, btnY});
     window.draw(yesBtn);
 
     sf::Text yesText(font, "Yes", 14);
     yesText.setFillColor(sf::Color::White);
     sf::FloatRect ytBounds = yesText.getLocalBounds();
-    yesText.setPosition({centerX - 90.f + 35.f - ytBounds.size.x / 2.f, centerY + 14.f});
+    yesText.setPosition({centerX - 90.f + 35.f - ytBounds.size.x / 2.f, btnY + 4.f});
     window.draw(yesText);
 
-    // No button
     sf::RectangleShape noBtn({70.f, 30.f});
     noBtn.setFillColor(sf::Color(150, 50, 50));
     noBtn.setOutlineThickness(1.f);
     noBtn.setOutlineColor(sf::Color::White);
-    noBtn.setPosition({centerX + 20.f, centerY + 10.f});
+    noBtn.setPosition({centerX + 20.f, btnY});
     window.draw(noBtn);
 
     sf::Text noText(font, "No", 14);
     noText.setFillColor(sf::Color::White);
     sf::FloatRect ntBounds = noText.getLocalBounds();
-    noText.setPosition({centerX + 20.f + 35.f - ntBounds.size.x / 2.f, centerY + 14.f});
+    noText.setPosition({centerX + 20.f + 35.f - ntBounds.size.x / 2.f, btnY + 4.f});
     window.draw(noText);
 }
 

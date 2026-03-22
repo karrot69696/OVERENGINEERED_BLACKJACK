@@ -45,6 +45,7 @@ set(LOW_LEVEL_SOURCES
 set(LOW_LEVEL_HEADERS
     src/lowLevelEntities/Card.h
     src/lowLevelEntities/Deck.h
+    src/lowLevelEntities/GameConfig.h
     src/lowLevelEntities/GameState.h
     src/lowLevelEntities/Player.h
     src/lowLevelEntities/SkillDeck.h

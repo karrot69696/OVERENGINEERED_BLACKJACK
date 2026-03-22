@@ -1,6 +1,7 @@
 #ifndef GAMEEVENT_H
 #define GAMEEVENT_H
 #include "SkillDeck.h"
+#include "GameConfig.h"
 #include <variant>
 #include <vector>
 #include <string>
@@ -92,10 +93,12 @@ struct DeliveranceEffectEvent {
 
 struct RequestActionInputEvent {
     int playerId;
+    float duration = GameConfig::ACTION_PROMPT_DURATION;
 };
 
 struct RequestTargetInputEvent {
     int playerId;
+    float duration = GameConfig::TARGET_PROMPT_DURATION;
 };
 
 struct SkillErrorEvent {

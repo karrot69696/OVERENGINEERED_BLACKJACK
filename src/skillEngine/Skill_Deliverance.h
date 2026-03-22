@@ -64,6 +64,7 @@ class SkillDeliverance : public Skill{
         bool activatePassive(GameState& gameState) override { 
             //At the beginning of your host phase, gain 1 uses
             if  (gameState.getPhaseName() == PhaseName::HOST_HIT_PHASE){
+                if (!gameState.getPlayerInfo(userId).isHost) return false;
                     uses++;
                     return true;
             }

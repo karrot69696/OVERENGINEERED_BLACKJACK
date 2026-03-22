@@ -22,6 +22,8 @@ Output: `build/<preset>/bin/CrazyJack.exe`. Assets are copied to `build/<preset>
 
 **Don't build to verify after small changes.** Only build when explicitly asked or after a large batch of changes is complete.
 
+**When creating new files, always add them to CMakeLists.txt** in the appropriate source/header list (e.g., `LOW_LEVEL_HEADERS`, `GAME_ENGINE_SOURCES`, etc.).
+
 **SFML 3.0.2** is the only external dependency, path hardcoded in CMakeLists.txt. No vcpkg/conan. No test framework.
 
 ## Architecture

@@ -292,9 +292,11 @@ inline void writeGameEvent(ByteBuffer& buf, const GameEvent& event) {
         }
         else if constexpr (std::is_same_v<T, RequestActionInputEvent>) {
             buf.writeI32(payload.playerId);
+            buf.writeFloat(payload.duration);
         }
         else if constexpr (std::is_same_v<T, RequestTargetInputEvent>) {
             buf.writeI32(payload.playerId);
+            buf.writeFloat(payload.duration);
         }
         else if constexpr (std::is_same_v<T, ClearInputEvent>) {
             // no payload
@@ -403,11 +405,13 @@ inline GameEvent readGameEvent(ByteBuffer& buf) {
         case GameEventType::REQUEST_ACTION_INPUT: {
             RequestActionInputEvent e;
             e.playerId = buf.readI32();
+            e.duration = buf.readFloat();
             data = e;
         } break;
         case GameEventType::REQUEST_TARGET_INPUT: {
             RequestTargetInputEvent e;
             e.playerId = buf.readI32();
+            e.duration = buf.readFloat();
             data = e;
         } break;
         case GameEventType::CLEAR_INPUT: {

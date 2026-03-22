@@ -62,7 +62,7 @@ class Phase {
             bool requestSent = false;
             bool waitingForLocalPick = false;
             float promptTimer = 0.f;
-            static constexpr float PROMPT_TIMEOUT = 5.0f;
+            static constexpr float PROMPT_TIMEOUT = GameConfig::REACTIVE_PROMPT_DURATION_DEFAULT;
         };
         std::optional<ReactiveCheckState> reactiveCheck;
         void reactiveTickPending();

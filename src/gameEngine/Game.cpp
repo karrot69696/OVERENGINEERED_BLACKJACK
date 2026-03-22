@@ -54,6 +54,8 @@ void Game::SetupGame(int numHumans, int numBots){
         numBots = (numBots>numPlayers)? numPlayers: numBots;
     }
 
+    skillDeck.buildDeck(numPlayers);
+    skillDeck.shuffle();
     //create human players
     for (int i = 0; i < numHumans; i++){
         SkillName newSkill = skillDeck.drawSkill();
@@ -80,6 +82,9 @@ void Game::SetupGame(int numLocal, int numRemote, int numBots){
         return;
     }
     numPlayers = std::min(numPlayers, maxNumPlayer);
+
+    skillDeck.buildDeck(numPlayers);
+    skillDeck.shuffle();
 
     // Create local human players
     for (int i = 0; i < numLocal; i++){

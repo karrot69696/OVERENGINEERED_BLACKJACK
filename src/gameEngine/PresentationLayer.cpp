@@ -167,7 +167,7 @@ void PresentationLayer::processEvents() {
             // Only show UI for locally-controlled human players
             PlayerInfo info = gameState.getPlayerInfo(e.playerId);
             if (!info.isBot && !info.isRemote) {
-                uiManager.requestActionInput(e.playerId);
+                uiManager.requestActionInput(e.playerId, e.duration);
             }
         } break;
 
@@ -176,7 +176,7 @@ void PresentationLayer::processEvents() {
             std::cout << "[PresentationLayer] REQUEST_TARGET_INPUT: player=" << e.playerId << std::endl;
             PlayerInfo info = gameState.getPlayerInfo(e.playerId);
             if (!info.isBot && !info.isRemote) {
-                uiManager.requestTargetInput(e.playerId);
+                uiManager.requestTargetInput(e.playerId, e.duration);
             }
         } break;
 

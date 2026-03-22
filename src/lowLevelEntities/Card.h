@@ -6,6 +6,7 @@
 #include <SFML/Window.hpp>
 #include <SFML/Network.hpp>
 #include <SFML/Audio.hpp>
+#include "GameConfig.h"
 enum class Suit{
     Hearts,
     Diamonds,
