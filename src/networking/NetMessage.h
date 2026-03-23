@@ -22,6 +22,8 @@ enum class NetMsgType : uint8_t {
     SERVER_TARGET_REQUEST,  // server asks a specific client to pick a card (multi-actor skills)
     SERVER_REACTIVE_PROMPT, // server asks client: activate reactive skill? (yes/no)
     CLIENT_REACTIVE_RESPONSE, // client answers yes/no to reactive prompt
+    SERVER_CHRONO_PROMPT,   // server asks client: Snapshot or Rewind? (Chronosphere)
+    CLIENT_CHRONO_RESPONSE, // client answers Snapshot/Rewind/None to chrono prompt
 };
 
 enum class NetworkMode : uint8_t {

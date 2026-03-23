@@ -63,6 +63,7 @@ set(SKILL_ENGINE_HEADERS
     src/skillEngine/Skill_Deliverance.h
     src/skillEngine/Skill_NeuralGambit.h
     src/skillEngine/Skill_FatalDeal.h
+    src/skillEngine/Skill_ChronoSphere.h
 )
 
 set(GAME_ENGINE_SOURCES

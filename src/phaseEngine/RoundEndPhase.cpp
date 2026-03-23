@@ -33,6 +33,12 @@ void RoundEndPhase::onEnter() {
     skillManager.resetSkillUses(players);
     std::cout<<"[RoundEndPhase] Skill uses reset\n";
 
+    // Reset Chronosphere state for new round
+    gameState.snapShotTaken = false;
+    gameState.ranksSnapShot.clear();
+    gameState.pendingChronoChoice = ChronoChoice::NONE;
+    gameState.chronoTrackedHandValue = -1;
+
     // Snapshot card IDs per player BEFORE returning them
     playerCardIds.clear();
     for (auto& player : players){

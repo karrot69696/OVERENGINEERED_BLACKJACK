@@ -19,10 +19,6 @@ class SkillDeliverance : public Skill{
         skillType getType() const override {
             return skillType::ACTIVE;
         }
-
-        int getSkillId() const override {
-            return 1;
-        }
         SkillName getSkillName() const override {
             return SkillName::DELIVERANCE;
         }

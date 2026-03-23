@@ -5,6 +5,7 @@
 #include "Skill_Deliverance.h"
 #include "Skill_NeuralGambit.h"
 #include "Skill_FatalDeal.h"
+#include "Skill_ChronoSphere.h"
 #include <vector>
 #include <memory>
 #include <iostream>

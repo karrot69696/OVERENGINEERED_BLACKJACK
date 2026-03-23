@@ -153,6 +153,7 @@ void UIManager::clearInput() {
     showTargetingOverlay_NeuralGambit = false;
     showPickCardOverlay = false;
     showReactivePrompt = false;
+    showChronoPrompt = false;
     pickCardAllowedIds = {};
     // Unpin any NG cards before clearing IDs (prevent pin leaks)
     for (int cid : ngTargetCardIds) {
@@ -201,6 +202,14 @@ void UIManager::hideReactivePrompt() {
     showReactivePrompt = false;
 }
 
+void UIManager::requestChronoPrompt(bool hasSnapshot, float timerDuration) {
+    std::cout << "[UIManager] Chrono prompt (hasSnapshot=" << hasSnapshot << ", " << timerDuration << "s)" << std::endl;
+    showChronoPrompt = true;
+    chronoHasSnapshot = hasSnapshot;
+    chronoPromptDuration = timerDuration;
+    chronoPromptClock.restart();
+}
+
 // ============================================================================
 // Event Handling
 // ============================================================================
@@ -247,6 +256,28 @@ void UIManager::handleEvent(const std::optional<sf::Event>& event) {
                 showReactivePrompt = false;
                 std::cout << "[UIManager] Reactive prompt: NO" << std::endl;
                 if (onReactiveResponse) onReactiveResponse(false);
+                return;
+            }
+            return;  // block other clicks while prompt is visible
+        }
+
+        // Chronosphere choice prompt clicks ([Snapshot]/[Rewind])
+        if (showChronoPrompt) {
+            float centerX = window.getSize().x / 2.f;
+            float centerY = window.getSize().y / 2.f;
+            sf::FloatRect snapshotBounds({centerX - 90.f, centerY + 10.f}, {70.f, 30.f});
+            sf::FloatRect rewindBounds({centerX + 20.f, centerY + 10.f}, {70.f, 30.f});
+
+            if (snapshotBounds.contains(mousePos)) {
+                showChronoPrompt = false;
+                std::cout << "[UIManager] Chrono prompt: SNAPSHOT" << std::endl;
+                if (onChronoChoice) onChronoChoice(ChronoChoice::SNAPSHOT);
+                return;
+            }
+            if (chronoHasSnapshot && rewindBounds.contains(mousePos)) {
+                showChronoPrompt = false;
+                std::cout << "[UIManager] Chrono prompt: REWIND" << std::endl;
+                if (onChronoChoice) onChronoChoice(ChronoChoice::REWIND);
                 return;
             }
             return;  // block other clicks while prompt is visible
@@ -419,6 +450,7 @@ void UIManager::render() {
     if (showTargetingOverlay_NeuralGambit)    renderTargetingOverlay_NeuralGambit();
     if (showPickCardOverlay)                  renderPickCardOverlay();
     if (showReactivePrompt)                   renderReactivePrompt();
+    if (showChronoPrompt)                     renderChronoPrompt();
     if (showDebugTooltip)                     renderHoverTooltip();
     if (gameLogMode > 0)                      renderGameLog();
 }
@@ -1048,6 +1080,96 @@ void UIManager::renderReactivePrompt() {
     sf::FloatRect ntBounds = noText.getLocalBounds();
     noText.setPosition({centerX + 20.f + 35.f - ntBounds.size.x / 2.f, btnY + 4.f});
     window.draw(noText);
+}
+
+// ============================================================================
+// Chronosphere Choice Prompt
+// ============================================================================
+void UIManager::renderChronoPrompt() {
+    float elapsed = chronoPromptClock.getElapsedTime().asSeconds();
+
+    // Auto-decline on timeout
+    if (elapsed >= chronoPromptDuration) {
+        showChronoPrompt = false;
+        std::cout << "[UIManager] Chrono prompt timed out" << std::endl;
+        // Timeout = no choice (decline)
+        if (onChronoChoice) onChronoChoice(ChronoChoice::SNAPSHOT); // default to snapshot
+        return;
+    }
+
+    float centerX = window.getSize().x / 2.f;
+    float centerY = window.getSize().y / 2.f;
+    float boxW = window.getSize().x * 0.65f, boxH = window.getSize().y * 0.65f;
+    float boxTop = centerY - boxH / 2.f;
+
+    // Semi-transparent background box
+    sf::RectangleShape bg({boxW, boxH});
+    bg.setFillColor(sf::Color(20, 20, 40, 220));
+    bg.setOutlineThickness(2.f);
+    bg.setOutlineColor(sf::Color(100, 200, 255));
+    bg.setPosition({centerX - boxW / 2.f, boxTop});
+    window.draw(bg);
+
+    // Title text
+    sf::Text titleText(font, "CHRONOSPHERE", 14);
+    titleText.setFillColor(sf::Color(100, 200, 255));
+    sf::FloatRect ttBounds = titleText.getLocalBounds();
+    float titleY = boxTop + boxH * 0.25f;
+    titleText.setPosition({centerX - ttBounds.size.x / 2.f, titleY});
+    window.draw(titleText);
+
+    // Info text
+    std::string info = chronoHasSnapshot ? "Choose your action:" : "Snapshot your hand?";
+    sf::Text infoText(font, info, 10);
+    infoText.setFillColor(sf::Color(100, 200, 255));
+    sf::FloatRect itBounds = infoText.getLocalBounds();
+    float infoY = titleY + ttBounds.size.y + 10.f;
+    infoText.setPosition({centerX - itBounds.size.x / 2.f, infoY});
+    window.draw(infoText);
+
+    // Timer bar
+    float barW = boxW - 20.f;
+    float barH = 6.f;
+    float progress = 1.f - (elapsed / chronoPromptDuration);
+    float barY = infoY + itBounds.size.y + 12.f;
+    sf::RectangleShape barBg({barW, barH});
+    barBg.setFillColor(sf::Color(60, 60, 60));
+    barBg.setPosition({centerX - barW / 2.f, barY});
+    window.draw(barBg);
+
+    sf::RectangleShape barFill({barW * progress, barH});
+    barFill.setFillColor(progress > 0.3f ? sf::Color(100, 200, 255) : sf::Color(255, 80, 80));
+    barFill.setPosition({centerX - barW / 2.f, barY});
+    window.draw(barFill);
+
+    // Snapshot button (always available)
+    float btnY = centerY + 10.f;
+    sf::RectangleShape snapBtn({70.f, 30.f});
+    snapBtn.setFillColor(sf::Color(50, 120, 180));
+    snapBtn.setOutlineThickness(1.f);
+    snapBtn.setOutlineColor(sf::Color::White);
+    snapBtn.setPosition({centerX - 90.f, btnY});
+    window.draw(snapBtn);
+
+    sf::Text snapText(font, "Snapshot", 11);
+    snapText.setFillColor(sf::Color::White);
+    sf::FloatRect stBounds = snapText.getLocalBounds();
+    snapText.setPosition({centerX - 90.f + 35.f - stBounds.size.x / 2.f, btnY + 6.f});
+    window.draw(snapText);
+
+    // Rewind button (grayed out if no snapshot)
+    sf::RectangleShape rewBtn({70.f, 30.f});
+    rewBtn.setFillColor(chronoHasSnapshot ? sf::Color(180, 120, 50) : sf::Color(80, 80, 80));
+    rewBtn.setOutlineThickness(1.f);
+    rewBtn.setOutlineColor(chronoHasSnapshot ? sf::Color::White : sf::Color(120, 120, 120));
+    rewBtn.setPosition({centerX + 20.f, btnY});
+    window.draw(rewBtn);
+
+    sf::Text rewText(font, "Rewind", 11);
+    rewText.setFillColor(chronoHasSnapshot ? sf::Color::White : sf::Color(120, 120, 120));
+    sf::FloatRect rtBounds = rewText.getLocalBounds();
+    rewText.setPosition({centerX + 20.f + 35.f - rtBounds.size.x / 2.f, btnY + 6.f});
+    window.draw(rewText);
 }
 
 // ============================================================================

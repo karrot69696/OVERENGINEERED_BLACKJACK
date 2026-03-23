@@ -27,8 +27,22 @@ void PlayerHitPhase::onEnter() {
     //update player info in game state
     roundManager.updateGameState(PhaseName::PLAYER_HIT_PHASE, currentPlayer.getId());
 
-    //UI prompt for player action input (callbacks wired once in Game.cpp)
-    eventQueue.push({GameEventType::REQUEST_ACTION_INPUT, RequestActionInputEvent{currentPlayer.getId()}});
+    // Initialize Chronosphere hand-value tracking baseline (track the CHRONO OWNER's value)
+    gameState.chronoTrackedHandValue = -1;
+    for (auto& p : players) {
+        if (p.getSkillName() == SkillName::CHRONOSPHERE && p.getHandSize() > 0) {
+            gameState.chronoTrackedHandValue = p.calculateHandValue();
+            break;
+        }
+    }
+
+    // Fire ON_HIT_PHASE_START reactive check (Chronosphere snapshot prompt)
+    // If it fires, reactiveTickPending will push REQUEST_ACTION_INPUT when done
+    if (!startReactiveCheck(ReactiveTrigger::ON_HIT_PHASE_START,
+            -1, currentPlayer.getId(), currentPlayer.getId())) {
+        //UI prompt for player action input (callbacks wired once in Game.cpp)
+        eventQueue.push({GameEventType::REQUEST_ACTION_INPUT, RequestActionInputEvent{currentPlayer.getId()}});
+    }
 }
 
 ////////////////////////////////////////////////

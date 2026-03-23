@@ -51,6 +51,7 @@ private:
     sf::Texture neuralGambitTexture;
     std::unique_ptr<sf::Sprite> neuralGambitSprite1;
     std::unique_ptr<sf::Sprite> neuralGambitSprite2;
+    std::unique_ptr<sf::Sprite> chronosphereSprite;
     PlayerVisual* borrowedPlayerVisual;
 public:
     AnimationManager(sf::RenderWindow& window, GameState& gameState, VisualState& visualState) : 
@@ -74,6 +75,7 @@ public:
         renderHolyAnimation();
         renderFatalDealEffect();
         renderNeuralGambitEffect();
+        renderChronosphereEffect();
         renderBorrowedPlayerVisual();
     }
 
@@ -810,6 +812,29 @@ public:
     }
     void renderBorrowedPlayerVisual(){
         if (borrowedPlayerVisual) window.draw(borrowedPlayerVisual->playerSprite);
+    }
+    // Chronosphere effect — reuses holy spritesheet as placeholder
+    void playChronosphereEffect(sf::Vector2f position, bool isSnapshot,
+                                float scale = 2.f, float duration = 0.6f)
+    {
+        chronosphereSprite = std::make_unique<sf::Sprite>(holyTexture);
+        chronosphereSprite->setOrigin({32, 32});
+        chronosphereSprite->setPosition(position);
+        chronosphereSprite->setScale({scale, scale});
+
+        // Tint blue for snapshot, purple for rewind
+        if (isSnapshot)
+            chronosphereSprite->setColor(sf::Color(100, 200, 255));
+        else
+            chronosphereSprite->setColor(sf::Color(180, 100, 255));
+
+        auto onDone = [this](){ chronosphereSprite.reset(); };
+        playSpriteAnimation(chronosphereSprite.get(),
+            19, 0, 0, 64, 64, duration, 64, onDone);
+    }
+    void renderChronosphereEffect(){
+        if (chronosphereSprite)
+            window.draw(*chronosphereSprite);
     }
 };
 

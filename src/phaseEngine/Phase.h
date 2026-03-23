@@ -68,6 +68,18 @@ class Phase {
         void reactiveTickPending();
         bool startReactiveCheck(ReactiveTrigger trigger, int drawnCardId, int drawerId, int actingPlayerId);
 
+        // Chronosphere pending state (fusion skill: active + reactive)
+        struct ChronoPendingState {
+            int skillUserId;
+            int actingPlayerId;   // who gets REQUEST_ACTION_INPUT after chrono resolves
+            bool promptSent = false;
+            float promptTimer = 0.f;
+            static constexpr float PROMPT_TIMEOUT = GameConfig::REACTIVE_PROMPT_DURATION_DEFAULT;
+        };
+        std::optional<ChronoPendingState> chronoPending;
+        void chronoTickPending(Player& skillUser);
+        bool tryChronoReactiveCheck(int playerId);
+
     public:
         Phase(UIManager& uiManager,
             EventQueue& eventQueue,

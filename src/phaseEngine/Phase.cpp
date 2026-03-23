@@ -47,6 +47,12 @@ bool Phase::turnHandler(Player& player, Player& opponent){
         return true;
     }
 
+    // Chronosphere pending — drive choice prompt and keep turn alive
+    if (chronoPending.has_value()) {
+        chronoTickPending(player);
+        return true;
+    }
+
     if(player._isBot()){
        player.setPendingAction(player.botMode(gameState));
     }
@@ -109,11 +115,28 @@ bool Phase::turnHandler(Player& player, Player& opponent){
             }
             blackJackAndQuintetCheck(players);
 
+            // Check Chronosphere hand-value-change trigger before re-prompting
+            if (tryChronoReactiveCheck(player.getId())) {
+                break; // chronoTickPending will push REQUEST_ACTION_INPUT when done
+            }
+
             // Re-prompt for next action after HIT
             eventQueue.push({GameEventType::REQUEST_ACTION_INPUT, RequestActionInputEvent{player.getId()}});
         } break;
 
         case PlayerAction::SKILL_REQUEST: {
+            // Chronosphere: doesn't use pendingTarget, uses chronoPending instead
+            if (player.getSkillName() == SkillName::CHRONOSPHERE
+                    && gameState.pendingTarget.targetPlayerIds.empty()
+                    && gameState.pendingTarget.targetCards.empty()) {
+                chronoPending = ChronoPendingState{};
+                chronoPending->skillUserId = player.getId();
+                chronoPending->actingPlayerId = player.getId();
+                player.setPendingAction(PlayerAction::IDLE);
+                std::cout << "[turnHandler] Chronosphere active use initiated for P" << player.getId() << std::endl;
+                break;
+            }
+
             // For remote players, target may arrive in a different frame from the action
             if (player.isRemote && gameState.pendingTarget.targetPlayerIds.empty()
                     && gameState.pendingTarget.targetCards.empty()) {
@@ -226,8 +249,12 @@ void Phase::skillHandler(Player& player){
     }
 
     gameState.pendingTarget = {};
-    eventQueue.push({GameEventType::REQUEST_ACTION_INPUT, RequestActionInputEvent{player.getId()}});
     player.setPendingAction(PlayerAction::IDLE);
+
+    // Check Chronosphere hand-value-change trigger before re-prompting
+    if (!tryChronoReactiveCheck(player.getId())) {
+        eventQueue.push({GameEventType::REQUEST_ACTION_INPUT, RequestActionInputEvent{player.getId()}});
+    }
 }
 
 void Phase::skillProcessAftermath(SkillContext& context, SkillExecutionResult skillResult){
@@ -271,6 +298,26 @@ void Phase::skillProcessAftermath(SkillContext& context, SkillExecutionResult sk
                         context.targetCards[1]->getId()      // swapped card
                     }
                 });
+            }
+        break;
+        //CHRONOSPHERE
+        case SkillName::CHRONOSPHERE:
+            if (context.state.pendingChronoChoice == ChronoChoice::SNAPSHOT) {
+                context.eventQueue.push({GameEventType::CHRONOSPHERE_SNAPSHOT,
+                    ChronosphereSnapshotEvent{context.user.getId()}});
+            } else if (context.state.pendingChronoChoice == ChronoChoice::REWIND) {
+                context.eventQueue.push({GameEventType::CHRONOSPHERE_REWIND,
+                    ChronosphereRewindEvent{context.user.getId()}});
+                // Animate old cards returning to deck
+                for (int cardId : context.returnedCardIds) {
+                    context.eventQueue.push({GameEventType::CARD_RETURNED,
+                        CardReturnedEvent{cardId}});
+                }
+                // Animate new cards being drawn
+                for (int i = 0; i < (int)context.drawnCardIds.size(); i++) {
+                    context.eventQueue.push({GameEventType::CARD_DRAWN,
+                        CardDrawnEvent{context.user.getId(), i, context.drawnCardIds[i]}});
+                }
             }
         break;
     }
@@ -495,11 +542,16 @@ void Phase::ngTickPending(Player& skillUser) {
     if (ng.secondWasFaceDown && secondCard->isFaceUp()) secondCard->flip();
     roundManager.updateGameState(gameState.getPhaseName(), gameState.getCurrentPlayerId());
 
-    eventQueue.push({GameEventType::REQUEST_ACTION_INPUT,
-        RequestActionInputEvent{ng.skillUserId}});
     skillUser.setPendingAction(PlayerAction::IDLE);
+    int ngUserId = ng.skillUserId;
     ngPending = std::nullopt;
-    std::cout << "[ngTickPending] NeuralGambit complete for P" << ng.skillUserId << std::endl;
+    std::cout << "[ngTickPending] NeuralGambit complete for P" << ngUserId << std::endl;
+
+    // Check Chronosphere hand-value-change trigger before re-prompting
+    if (!tryChronoReactiveCheck(ngUserId)) {
+        eventQueue.push({GameEventType::REQUEST_ACTION_INPUT,
+            RequestActionInputEvent{ngUserId}});
+    }
 }
 
 // ============================================================================
@@ -519,10 +571,9 @@ bool Phase::startReactiveCheck(ReactiveTrigger trigger, int drawnCardId, int dra
     for (auto& skillEntry : qualified) {
         switch (skillEntry.second) {
             case SkillName::FATALDEAL: {
-                int actualRankofCardDrawn = static_cast<int>(gameState.getCardRankById(drawnCardId));
-                int halfAndRoundUp = (actualRankofCardDrawn + 1) / 2;
-                std::string peekInfo = "Half rank of card drawn + 1 = "+std::to_string(halfAndRoundUp) + ". You can math, right?";
-                std::cout<<"[startReactiveCheck] FATALDEAL PEEK: HALF AND ROUND UF="<< peekInfo <<std::endl;
+                int rankofCardDrawn = static_cast<int>(gameState.getCardRankById(drawnCardId));
+                std::string peekInfo = "Lethal revelation: " + std::to_string(rankofCardDrawn);
+                std::cout<<"[startReactiveCheck] FATALDEAL PEEK: "<< peekInfo <<std::endl;
                 state.extraInfo = peekInfo;
                 break;
             }
@@ -556,11 +607,15 @@ void Phase::reactiveTickPending() {
     // All skills processed — check blackjack/quintet, then re-prompt the acting player
     if (rc.currentIndex >= (int)rc.queue.size()) {
         blackJackAndQuintetCheck(players);
-        eventQueue.push({GameEventType::REQUEST_ACTION_INPUT,
-            RequestActionInputEvent{rc.actingPlayerId}});
+        int actingId = rc.actingPlayerId;
         reactiveCheck = std::nullopt;
         std::cout << "[reactiveTickPending] All reactive checks done, re-prompting P"
-                  << rc.actingPlayerId << std::endl;
+                  << actingId << std::endl;
+        // Check Chronosphere hand-value-change trigger before re-prompting
+        if (!tryChronoReactiveCheck(actingId)) {
+            eventQueue.push({GameEventType::REQUEST_ACTION_INPUT,
+                RequestActionInputEvent{actingId}});
+        }
         return;
     }
 
@@ -620,6 +675,33 @@ void Phase::reactiveTickPending() {
 
         if (response == ReactiveResponse::YES) {
             gameState.pendingReactiveResponse = ReactiveResponse::NONE;
+
+            // Chronosphere: skip PICKING_CARD, execute directly
+            if (entry.skillName == SkillName::CHRONOSPHERE) {
+                Player* skillOwner = nullptr;
+                for (auto& p : players) if (p.getId() == entry.skillOwnerId) { skillOwner = &p; break; }
+                if (skillOwner) {
+                    // Reactive ON_HIT_PHASE_START: snapshot if none, rewind if exists
+                    gameState.pendingChronoChoice = gameState.snapShotTaken
+                        ? ChronoChoice::REWIND : ChronoChoice::SNAPSHOT;
+                    SkillContext context{ *skillOwner, {}, {}, deck, gameState, eventQueue };
+                    SkillExecutionResult result = skillManager.processSkill(context);
+                    if (result.name == SkillName::UNDEFINED) {
+                        eventQueue.push({GameEventType::SKILL_ERROR,
+                            SkillErrorEvent{entry.skillOwnerId, result.errorMsg}});
+                    } else {
+                        skillProcessAftermath(context, result);
+                    }
+                    gameState.pendingChronoChoice = ChronoChoice::NONE;
+                    roundManager.updateGameState(gameState.getPhaseName(), rc.actingPlayerId);
+                }
+                rc.currentIndex++;
+                rc.step = ReactiveCheckState::PROMPTING;
+                rc.requestSent = false;
+                std::cout << "[reactiveTickPending] Chronosphere executed for P" << entry.skillOwnerId << std::endl;
+                break;
+            }
+
             rc.step = ReactiveCheckState::PICKING_CARD;
             rc.requestSent = false;
             std::cout << "[reactiveTickPending] P" << entry.skillOwnerId << " accepted reactive skill" << std::endl;
@@ -772,4 +854,123 @@ void Phase::blackJackAndQuintetCheck(std::vector<Player>& players){
         }
     }
     roundManager.updateGameState(gameState.getPhaseName(), gameState.getCurrentPlayerId());
+}
+
+// ============================================================================
+// Chronosphere: universal hand-value-change detector
+// ============================================================================
+bool Phase::tryChronoReactiveCheck(int playerId) {
+    // Scan ALL players for a Chronosphere owner whose hand value changed.
+    // playerId is the acting player (who will be re-prompted if chrono doesn't fire).
+    // The Chronosphere owner may be a different player (e.g. NeuralGambit boosted their card).
+    for (auto& p : players) {
+        if (p.getSkillName() != SkillName::CHRONOSPHERE) continue;
+        if (p.getHandSize() == 0) continue;
+        int currentValue = p.calculateHandValue();
+        if (currentValue != gameState.chronoTrackedHandValue && gameState.chronoTrackedHandValue != -1) {
+            int oldValue = gameState.chronoTrackedHandValue;
+            gameState.chronoTrackedHandValue = currentValue;
+            chronoPending = ChronoPendingState{};
+            chronoPending->skillUserId = p.getId();
+            chronoPending->actingPlayerId = playerId;
+            std::cout << "[tryChronoReactiveCheck] Hand value changed for P" << p.getId()
+                      << " (was " << oldValue
+                      << ", now " << currentValue << ") — starting chrono prompt" << std::endl;
+            return true;
+        }
+    }
+    return false;
+}
+
+// ============================================================================
+// Chronosphere pending state orchestration
+// ============================================================================
+void Phase::chronoTickPending(Player& skillUser) {
+    auto& cp = *chronoPending;
+    NetworkManager* net = roundManager.getNetworkManager();
+    int localPlayerId = net ? net->getLocalPlayerId() : 0;
+    PlayerInfo ownerInfo = gameState.getPlayerInfo(cp.skillUserId);
+
+    bool isBot = ownerInfo.isBot;
+    bool isRemote = !ownerInfo.isBot && net && net->isServer() && ownerInfo.playerId != localPlayerId;
+
+    // Step 1: Send prompt
+    if (!cp.promptSent) {
+        if (isBot) {
+            // Bot auto-picks: snapshot if none, rewind if exists
+            gameState.pendingChronoChoice = gameState.snapShotTaken
+                ? ChronoChoice::REWIND : ChronoChoice::SNAPSHOT;
+            std::cout << "[chronoTickPending] Bot P" << cp.skillUserId << " auto-chose "
+                      << (gameState.snapShotTaken ? "REWIND" : "SNAPSHOT") << std::endl;
+        } else if (isRemote) {
+            if (net) net->sendChronoPrompt(cp.skillUserId, gameState.snapShotTaken);
+            std::cout << "[chronoTickPending] Sent chrono prompt to remote P" << cp.skillUserId << std::endl;
+        } else {
+            // Local player: show chrono choice UI
+            uiManager.requestChronoPrompt(gameState.snapShotTaken, ChronoPendingState::PROMPT_TIMEOUT);
+            std::cout << "[chronoTickPending] Showing chrono prompt to local P" << cp.skillUserId << std::endl;
+        }
+        cp.promptSent = true;
+        cp.promptTimer = 0.f;
+        return;
+    }
+
+    // Step 2: Poll for response
+    cp.promptTimer += 1.f / 60.f;
+
+    ChronoChoice response = ChronoChoice::NONE;
+
+    if (isBot) {
+        response = gameState.pendingChronoChoice;
+    } else if (isRemote) {
+        if (net && net->hasChronoResponse(cp.skillUserId)) {
+            response = net->consumeChronoResponse(cp.skillUserId);
+        }
+    } else {
+        response = gameState.pendingChronoChoice;
+    }
+
+    // Timeout: decline
+    if (response == ChronoChoice::NONE && cp.promptTimer >= ChronoPendingState::PROMPT_TIMEOUT) {
+        std::cout << "[chronoTickPending] Prompt timed out for P" << cp.skillUserId << std::endl;
+        gameState.pendingChronoChoice = ChronoChoice::NONE;
+        int actingId = cp.actingPlayerId;
+        chronoPending = std::nullopt;
+        skillUser.setPendingAction(PlayerAction::IDLE);
+        eventQueue.push({GameEventType::REQUEST_ACTION_INPUT, RequestActionInputEvent{actingId}});
+        return;
+    }
+
+    if (response == ChronoChoice::NONE) return; // still waiting
+
+    // Step 3: Execute
+    gameState.pendingChronoChoice = response;
+
+    Player* chronoUser = nullptr;
+    for (auto& p : players) if (p.getId() == cp.skillUserId) { chronoUser = &p; break; }
+    if (!chronoUser) { chronoPending = std::nullopt; return; }
+
+    SkillContext context{ *chronoUser, {}, {}, deck, gameState, eventQueue };
+
+    SkillExecutionResult result = skillManager.processSkill(context);
+    if (result.name == SkillName::UNDEFINED) {
+        eventQueue.push({GameEventType::SKILL_ERROR,
+            SkillErrorEvent{cp.skillUserId, result.errorMsg}});
+    } else {
+        skillProcessAftermath(context, result);
+    }
+
+    // Update tracked hand value after chrono action
+    gameState.chronoTrackedHandValue = chronoUser->calculateHandValue();
+    gameState.pendingChronoChoice = ChronoChoice::NONE;
+    roundManager.updateGameState(gameState.getPhaseName(), gameState.getCurrentPlayerId());
+
+    int actingId = cp.actingPlayerId;
+    chronoPending = std::nullopt;
+    skillUser.setPendingAction(PlayerAction::IDLE);
+    // Push directly — don't re-check chrono to avoid infinite loop
+    // Re-prompt the acting player (may differ from chrono owner in HOST_HIT_PHASE)
+    eventQueue.push({GameEventType::REQUEST_ACTION_INPUT, RequestActionInputEvent{actingId}});
+    std::cout << "[chronoTickPending] Chronosphere complete for P" << cp.skillUserId
+              << ", re-prompting P" << actingId << std::endl;
 }

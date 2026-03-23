@@ -20,10 +20,6 @@ public:
         return skillType::REACTIVE;
     }
 
-    int getSkillId() const override {
-        return 2;
-    }
-
     SkillName getSkillName() const override {
         return SkillName::FATALDEAL;
     }

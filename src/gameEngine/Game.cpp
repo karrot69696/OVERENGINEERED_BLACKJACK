@@ -54,7 +54,8 @@ void Game::SetupGame(int numHumans, int numBots){
         numBots = (numBots>numPlayers)? numPlayers: numBots;
     }
 
-    skillDeck.buildDeck(numPlayers);
+    //skillDeck.buildDeck(numPlayers);
+    skillDeck.buildDeck();
     skillDeck.shuffle();
     //create human players
     for (int i = 0; i < numHumans; i++){
@@ -83,7 +84,8 @@ void Game::SetupGame(int numLocal, int numRemote, int numBots){
     }
     numPlayers = std::min(numPlayers, maxNumPlayer);
 
-    skillDeck.buildDeck(numPlayers);
+    //skillDeck.buildDeck(numPlayers);
+    skillDeck.buildDeck();
     skillDeck.shuffle();
 
     // Create local human players
@@ -157,6 +159,9 @@ void Game::RunGame(){
         uiManager.onReactiveResponse = [this](bool accepted) {
             networkManager.sendReactiveResponse(accepted);
         };
+        uiManager.onChronoChoice = [this](ChronoChoice choice) {
+            networkManager.sendChronoResponse(choice);
+        };
     } else {
         // HOST / LOCAL — logic layer validates before showing targeting UI
         uiManager.onActionChosen = [this, &roundManager](PlayerAction action) {
@@ -181,6 +186,8 @@ void Game::RunGame(){
                     return;
                 }
                 active->setPendingAction(action);
+                // Chronosphere: no targeting overlay — turnHandler starts chronoPending
+                if (active->getSkillName() == SkillName::CHRONOSPHERE) return;
                 uiManager.requestTargetInput(activeId);
             } else {
                 active->setPendingAction(action);
@@ -206,6 +213,9 @@ void Game::RunGame(){
         };
         uiManager.onReactiveResponse = [this](bool accepted) {
             gameState.pendingReactiveResponse = accepted ? ReactiveResponse::YES : ReactiveResponse::NO;
+        };
+        uiManager.onChronoChoice = [this](ChronoChoice choice) {
+            gameState.pendingChronoChoice = choice;
         };
     }
 
@@ -435,6 +445,13 @@ void Game::clientReceive() {
         uiManager.requestReactivePrompt(
             gameState.skillNameToString(prompt.skill), prompt.extraInfo
             ,prompt.timerDuration);
+    }
+
+    // Route Chronosphere choice prompts from server
+    if (networkManager.hasPendingChronoPrompt()) {
+        ChronoPromptData prompt = networkManager.consumePendingChronoPrompt();
+        uiManager.requestChronoPrompt(prompt.hasSnapshot,
+            GameConfig::REACTIVE_PROMPT_DURATION_DEFAULT);
     }
 }
 

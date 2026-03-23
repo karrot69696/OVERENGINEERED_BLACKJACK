@@ -63,6 +63,7 @@ private:
 
     // Server handlers
     void handleClientReactiveResponse(ENetPeer* peer, ByteBuffer& buf);
+    void handleClientChronoResponse(ENetPeer* peer, ByteBuffer& buf);
 
     // Client handlers
     void handleServerWelcome(ByteBuffer& buf);
@@ -72,6 +73,7 @@ private:
     void handleServerGameSetup(ByteBuffer& buf);
     void handleServerTargetRequest(ByteBuffer& buf);
     void handleServerReactivePrompt(ByteBuffer& buf);
+    void handleServerChronoPrompt(ByteBuffer& buf);
 
     // Find RemotePlayer by peer
     RemotePlayer* findRemoteByPeer(ENetPeer* peer);
@@ -172,6 +174,21 @@ public:
     // Client: send reactive response to server
     void sendReactiveResponse(bool accepted);
 
+    // Server: send Chronosphere choice prompt to a specific client
+    void sendChronoPrompt(int playerId, bool hasSnapshot);
+    // Server: check/consume chrono response from a remote player
+    bool hasChronoResponse(int playerId) const;
+    ChronoChoice consumeChronoResponse(int playerId);
+
+    // Client: send chrono choice response to server
+    void sendChronoResponse(ChronoChoice choice);
+    // Client: pending chrono prompt from server
+    bool hasPendingChronoPrompt() const { return hasPendingChronoPromptFlag; }
+    ChronoPromptData consumePendingChronoPrompt() {
+        hasPendingChronoPromptFlag = false;
+        return pendingChronoPromptData;
+    }
+
     // Callbacks for connection events
     std::function<void(int playerId)> onClientConnected;    // server: new client joined
     std::function<void(int playerId)> onClientDisconnected; // server: client left
@@ -192,6 +209,11 @@ private:
     std::unordered_map<int, bool> pendingReactiveResponses;  // server: playerId → accepted
     bool hasPendingReactivePromptFlag = false;               // client
     ReactivePromptData pendingReactivePromptData;            // client
+
+    // Chronosphere prompt state
+    std::unordered_map<int, ChronoChoice> pendingChronoResponses;  // server: playerId → choice
+    bool hasPendingChronoPromptFlag = false;                       // client
+    ChronoPromptData pendingChronoPromptData;                      // client
 };
 
 #endif

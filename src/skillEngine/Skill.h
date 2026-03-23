@@ -8,7 +8,8 @@
 #include <iostream>
 enum class skillType {
     ACTIVE,
-    REACTIVE
+    REACTIVE,
+    FUSION
 };
 
 enum class ReactiveTrigger { NONE, ON_CARD_DRAWN, ON_HIT_PHASE_START };
@@ -25,6 +26,10 @@ struct SkillContext {
     Deck& deck;
     GameState& state;        // read/write if needed
     EventQueue& eventQueue;
+
+    // Output: card IDs produced by execute() for skillProcessAftermath to emit events
+    std::vector<int> returnedCardIds;
+    std::vector<int> drawnCardIds;
 };
 
 class Skill{
@@ -36,7 +41,6 @@ class Skill{
         virtual bool execute(SkillContext& context) = 0;
         virtual std::string skillNameToString() const = 0;
         virtual skillType getType() const = 0;
-        virtual int getSkillId() const = 0;
         int getUserId(){
             return userId;
         }

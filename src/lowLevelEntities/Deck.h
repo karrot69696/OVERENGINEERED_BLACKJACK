@@ -29,7 +29,7 @@ class Deck {
         int getSize(){
             return (int)cards.size();
         }
-        std::vector<Card*> getCards() {return cards;}
+        std::vector<Card*>& getCards() {return cards;}
         void flipAllCardsFaceDown();
 };
 

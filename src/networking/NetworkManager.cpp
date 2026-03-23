@@ -156,6 +156,9 @@ void NetworkManager::handlePacket(ENetPeer* peer, ENetPacket* packet) {
             case NetMsgType::CLIENT_REACTIVE_RESPONSE:
                 handleClientReactiveResponse(peer, buf);
                 break;
+            case NetMsgType::CLIENT_CHRONO_RESPONSE:
+                handleClientChronoResponse(peer, buf);
+                break;
             default:
                 std::cerr << "[NetworkManager] Server got unexpected msg type: "
                           << static_cast<int>(header.type) << std::endl;
@@ -184,6 +187,9 @@ void NetworkManager::handlePacket(ENetPeer* peer, ENetPacket* packet) {
                 break;
             case NetMsgType::SERVER_REACTIVE_PROMPT:
                 handleServerReactivePrompt(buf);
+                break;
+            case NetMsgType::SERVER_CHRONO_PROMPT:
+                handleServerChronoPrompt(buf);
                 break;
             default:
                 std::cerr << "[NetworkManager] Client got unexpected msg type: "
@@ -399,6 +405,7 @@ void NetworkManager::clearAllRemoteInputs() {
     pendingActions.clear();
     pendingTargets.clear();
     pendingReactiveResponses.clear();
+    pendingChronoResponses.clear();
 }
 
 void NetworkManager::sendReactivePrompt(int playerId, SkillName skill,std::string extraInfo, float timerDuration) {
@@ -467,6 +474,62 @@ void NetworkManager::handleServerReactivePrompt(ByteBuffer& buf) {
     pendingReactivePromptData = NetSerializer::readReactivePrompt(buf);
     hasPendingReactivePromptFlag = true;
     std::cout << "[NetworkManager] Got reactive prompt from server" << std::endl;
+}
+
+// ============================================================================
+// Chronosphere prompt/response
+// ============================================================================
+
+void NetworkManager::sendChronoPrompt(int playerId, bool hasSnapshot) {
+    for (auto& client : remoteClients) {
+        if (client.playerId == playerId) {
+            ByteBuffer buf;
+            NetSerializer::writeChronoPrompt(buf, hasSnapshot);
+            sendPacket(client.peer, NetMsgType::SERVER_CHRONO_PROMPT, buf, 0, true);
+            std::cout << "[NetworkManager] Sent chrono prompt to P" << playerId
+                      << " (hasSnapshot=" << hasSnapshot << ")" << std::endl;
+            return;
+        }
+    }
+    std::cerr << "[NetworkManager] sendChronoPrompt: player " << playerId << " not found" << std::endl;
+}
+
+bool NetworkManager::hasChronoResponse(int playerId) const {
+    return pendingChronoResponses.find(playerId) != pendingChronoResponses.end();
+}
+
+ChronoChoice NetworkManager::consumeChronoResponse(int playerId) {
+    auto it = pendingChronoResponses.find(playerId);
+    if (it != pendingChronoResponses.end()) {
+        ChronoChoice choice = it->second;
+        pendingChronoResponses.erase(it);
+        return choice;
+    }
+    return ChronoChoice::NONE;
+}
+
+void NetworkManager::handleClientChronoResponse(ENetPeer* peer, ByteBuffer& buf) {
+    int playerId;
+    ChronoChoice choice;
+    NetSerializer::readChronoResponse(buf, playerId, choice);
+    pendingChronoResponses[playerId] = choice;
+    std::cout << "[NetworkManager] Received chrono response from P" << playerId
+              << ": " << static_cast<int>(choice) << std::endl;
+}
+
+void NetworkManager::sendChronoResponse(ChronoChoice choice) {
+    if (!serverPeer) return;
+    ByteBuffer buf;
+    NetSerializer::writeChronoResponse(buf, localPlayerId, choice);
+    sendPacket(serverPeer, NetMsgType::CLIENT_CHRONO_RESPONSE, buf, 0, true);
+    std::cout << "[NetworkManager] Sent chrono response: " << static_cast<int>(choice) << std::endl;
+}
+
+void NetworkManager::handleServerChronoPrompt(ByteBuffer& buf) {
+    pendingChronoPromptData = NetSerializer::readChronoPrompt(buf);
+    hasPendingChronoPromptFlag = true;
+    std::cout << "[NetworkManager] Got chrono prompt from server (hasSnapshot="
+              << pendingChronoPromptData.hasSnapshot << ")" << std::endl;
 }
 
 std::vector<GameEvent> NetworkManager::drainReceivedEvents() {

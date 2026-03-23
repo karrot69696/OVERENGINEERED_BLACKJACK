@@ -62,6 +62,12 @@ class UIManager {
 
         // Reactive skill prompt overlay (Yes/No with timer)
         bool showReactivePrompt = false;
+
+        // Chronosphere choice prompt overlay ([Snapshot]/[Rewind] with timer)
+        bool showChronoPrompt = false;
+        bool chronoHasSnapshot = false;
+        float chronoPromptDuration = GameConfig::REACTIVE_PROMPT_DURATION_DEFAULT;
+        sf::Clock chronoPromptClock;
         std::string reactivePromptSkillName;
         std::string reactivePromptExtraInfo;
         float reactivePromptDuration = GameConfig::REACTIVE_PROMPT_DURATION_DEFAULT;
@@ -108,6 +114,7 @@ class UIManager {
         std::function<void(PlayerAction)> onActionChosen;
         std::function<void(PlayerTargeting)> onTargetChosen;
         std::function<void(bool accepted)> onReactiveResponse;
+        std::function<void(ChronoChoice)> onChronoChoice;
         
         // Called by Phase::ngTickPending — target player must pick one of allowedCardIds
         void requestPickCard(const std::vector<int>& allowedCardIds);
@@ -117,6 +124,9 @@ class UIManager {
         // Reactive skill prompt (Yes/No with timer countdown)
         void requestReactivePrompt(const std::string& skillName, std::string& extraInfo, float timerDuration);
         void hideReactivePrompt();
+
+        // Chronosphere choice prompt ([Snapshot]/[Rewind] with timer)
+        void requestChronoPrompt(bool hasSnapshot, float timerDuration);
 
         // Sub-renderers
         void renderTable();
@@ -128,6 +138,7 @@ class UIManager {
         void renderTargetingOverlay_NeuralGambit();
         void renderPickCardOverlay();
         void renderReactivePrompt();
+        void renderChronoPrompt();
         void renderInputTimerBar();
         void renderHoverTooltip();
         void renderGameLog();

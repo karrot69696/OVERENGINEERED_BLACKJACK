@@ -18,6 +18,8 @@ bool PresentationLayer::isCutscene(GameEventType type) {
         case GameEventType::NEURALGAMBIT_REVEAL:
         case GameEventType::FATALDEAL_SWAP:
         case GameEventType::CARDS_REVEALED:
+        case GameEventType::CHRONOSPHERE_SNAPSHOT:
+        case GameEventType::CHRONOSPHERE_REWIND:
             uiManager.clearInput();
             return true;
         default:
@@ -275,6 +277,32 @@ void PresentationLayer::processEvents() {
                     visualState.getCardVisual(cardId).unpin();
                 });
             }
+        } break;
+
+        case GameEventType::CHRONOSPHERE_SNAPSHOT: {
+            auto& e = std::get<ChronosphereSnapshotEvent>(event.data);
+            std::cout << "[PresentationLayer] CHRONOSPHERE_SNAPSHOT: P" << e.playerId << std::endl;
+            sf::Vector2f playerPos = visualState.getPlayerSeatPos(
+                e.playerId, (int)gameState.getAllPlayerInfo().size());
+            animationManager.playChronosphereEffect({playerPos.x - 15.f, playerPos.y}, true);
+            animationManager.spawnFloatingText(
+                "SNAPSHOT TAKEN",
+                {playerPos.x, playerPos.y - 40.f},
+                sf::Color(100, 200, 255),
+                1.2f);
+        } break;
+
+        case GameEventType::CHRONOSPHERE_REWIND: {
+            auto& e = std::get<ChronosphereRewindEvent>(event.data);
+            std::cout << "[PresentationLayer] CHRONOSPHERE_REWIND: P" << e.playerId << std::endl;
+            sf::Vector2f playerPos = visualState.getPlayerSeatPos(
+                e.playerId, (int)gameState.getAllPlayerInfo().size());
+            animationManager.playChronosphereEffect({playerPos.x - 15.f, playerPos.y}, false);
+            animationManager.spawnFloatingText(
+                "HAND REWOUND",
+                {playerPos.x, playerPos.y - 40.f},
+                sf::Color(100, 200, 255),
+                1.2f);
         } break;
 
         } // switch

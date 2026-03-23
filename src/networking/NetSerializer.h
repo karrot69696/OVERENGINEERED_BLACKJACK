@@ -99,6 +99,10 @@ struct ReactivePromptData {
     float timerDuration;
 };
 
+struct ChronoPromptData {
+    bool hasSnapshot;
+};
+
 // ============================================================================
 // Card serialization (Suit, Rank, faceUp, id, ownerId, handIndex)
 // ============================================================================
@@ -175,6 +179,12 @@ inline void writeGameState(ByteBuffer& buf, GameState& state) {
     for (const PlayerInfo& info : allInfo) {
         writePlayerInfo(buf, info);
     }
+    // Chronosphere state
+    buf.writeBool(state.snapShotTaken);
+    buf.writeU16(static_cast<uint16_t>(state.ranksSnapShot.size()));
+    for (Rank r : state.ranksSnapShot) {
+        buf.writeU8(static_cast<uint8_t>(r));
+    }
 }
 
 inline void readGameState(ByteBuffer& buf, GameState& state) {
@@ -195,6 +205,13 @@ inline void readGameState(ByteBuffer& buf, GameState& state) {
     state.setAllPlayerInfo(allInfo);
     state.setPhaseName(phase, currentPlayerId);
     state.setDeckCards(deckCards);
+    // Chronosphere state
+    state.snapShotTaken = buf.readBool();
+    uint16_t snapCount = buf.readU16();
+    state.ranksSnapShot.clear();
+    for (uint16_t i = 0; i < snapCount; i++) {
+        state.ranksSnapShot.push_back(static_cast<Rank>(buf.readU8()));
+    }
 }
 
 // ============================================================================
@@ -331,6 +348,12 @@ inline void writeGameEvent(ByteBuffer& buf, const GameEvent& event) {
                 buf.writeI32(id);
             }
         }
+        else if constexpr (std::is_same_v<T, ChronosphereSnapshotEvent>) {
+            buf.writeI32(payload.playerId);
+        }
+        else if constexpr (std::is_same_v<T, ChronosphereRewindEvent>) {
+            buf.writeI32(payload.playerId);
+        }
     }, event.data);
 }
 
@@ -462,6 +485,16 @@ inline GameEvent readGameEvent(ByteBuffer& buf) {
             }
             data = e;
         } break;
+        case GameEventType::CHRONOSPHERE_SNAPSHOT: {
+            ChronosphereSnapshotEvent e;
+            e.playerId = buf.readI32();
+            data = e;
+        } break;
+        case GameEventType::CHRONOSPHERE_REWIND: {
+            ChronosphereRewindEvent e;
+            e.playerId = buf.readI32();
+            data = e;
+        } break;
     }
 
     return GameEvent{type, data};
@@ -529,6 +562,29 @@ inline void writeReactiveResponse(ByteBuffer& buf, int playerId, bool accepted) 
 inline void readReactiveResponse(ByteBuffer& buf, int& playerId, bool& accepted) {
     playerId = buf.readI32();
     accepted = buf.readBool();
+}
+
+// ============================================================================
+// ChronoPrompt serialization (server → client: Snapshot or Rewind?)
+// ============================================================================
+inline void writeChronoPrompt(ByteBuffer& buf, bool hasSnapshot) {
+    buf.writeBool(hasSnapshot);
+}
+
+inline ChronoPromptData readChronoPrompt(ByteBuffer& buf) {
+    ChronoPromptData data;
+    data.hasSnapshot = buf.readBool();
+    return data;
+}
+
+inline void writeChronoResponse(ByteBuffer& buf, int playerId, ChronoChoice choice) {
+    buf.writeI32(playerId);
+    buf.writeU8(static_cast<uint8_t>(choice));
+}
+
+inline void readChronoResponse(ByteBuffer& buf, int& playerId, ChronoChoice& choice) {
+    playerId = buf.readI32();
+    choice = static_cast<ChronoChoice>(buf.readU8());
 }
 
 } // namespace NetSerializer

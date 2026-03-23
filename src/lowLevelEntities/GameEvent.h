@@ -33,6 +33,9 @@ enum class GameEventType {
     REACTIVE_SKILL_PROMPT,       // tell presentation to show yes/no prompt
     FATALDEAL_SWAP,              // skill visual: card swap animation
     CARDS_REVEALED,              // flip cards face-up with animation
+
+    CHRONOSPHERE_SNAPSHOT,       // skill visual: snapshot taken
+    CHRONOSPHERE_REWIND,         // skill visual: hand rewound to snapshot
 };
 
 // Payloads carry IDs only, never screen positions
@@ -135,6 +138,14 @@ struct CardsRevealedEvent {
     std::vector<int> cardIds;
 };
 
+struct ChronosphereSnapshotEvent {
+    int playerId;
+};
+
+struct ChronosphereRewindEvent {
+    int playerId;
+};
+
 using GameEventData = std::variant<
     CardDrawnEvent,
     CardReturnedEvent,
@@ -155,7 +166,9 @@ using GameEventData = std::variant<
     NeuralGambitRevealEvent,
     ReactiveSkillPromptEvent,
     FatalDealSwapEvent,
-    CardsRevealedEvent
+    CardsRevealedEvent,
+    ChronosphereSnapshotEvent,
+    ChronosphereRewindEvent
 >;
 
 struct GameEvent {

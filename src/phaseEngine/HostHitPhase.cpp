@@ -17,12 +17,18 @@ void HostHitPhase::onEnter() {
     eventQueue.push({GameEventType::PHASE_ANNOUNCED, 
         PhaseAnnouncedEvent{turnText, AnimConfig::PHASE_TEXT_DURATION}});
 
-    //UI prompt for host action input (callbacks wired once in Game.cpp)
-    eventQueue.push({GameEventType::REQUEST_ACTION_INPUT, RequestActionInputEvent{hostPlayer.getId()}});
-
     //update player info in game state
     roundManager.updateGameState(PhaseName::HOST_HIT_PHASE,currentPlayer.getId());
 
+    // Initialize Chronosphere hand-value tracking baseline (track the CHRONO OWNER's value)
+    gameState.chronoTrackedHandValue = -1;
+    for (auto& p : players) {
+        if (p.getSkillName() == SkillName::CHRONOSPHERE && p.getHandSize() > 0) {
+            gameState.chronoTrackedHandValue = p.calculateHandValue();
+            break;
+        }
+    }
+    eventQueue.push({GameEventType::REQUEST_ACTION_INPUT, RequestActionInputEvent{hostPlayer.getId()}});
     //check and execute skill passives
     processPassiveSkills(hostPlayer.getId());
     roundManager.updateGameState(PhaseName::HOST_HIT_PHASE,currentPlayer.getId());

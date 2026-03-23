@@ -37,6 +37,7 @@ enum class PlayerAction{
     IDLE
 };
 enum class ReactiveResponse { NONE, YES, NO };
+enum class ChronoChoice { NONE, SNAPSHOT, REWIND };
 struct PlayerTargeting{
     std::vector<int> targetPlayerIds;
     std::vector<Card> targetCards;
@@ -52,6 +53,10 @@ public:
     PlayerAction pendingPlayerAction = PlayerAction::IDLE;
     PlayerTargeting pendingTarget;
     ReactiveResponse pendingReactiveResponse = ReactiveResponse::NONE;
+    bool snapShotTaken = false;
+    std::vector<Rank> ranksSnapShot;
+    ChronoChoice pendingChronoChoice = ChronoChoice::NONE;
+    int chronoTrackedHandValue = -1;
     void setAllPlayerInfo(std::vector<PlayerInfo> playersInfo);
     void setPhaseName(PhaseName newPhaseName, int newCurrentPlayerId);
     void setDeckCards(const std::vector<Card>& cards) { deckCards = cards; }
@@ -134,7 +139,7 @@ public:
             case SkillName::DELIVERANCE:   return "DELIVERANCE";
             case SkillName::NEURALGAMBIT:  return "NEURAL GAMBIT";
             case SkillName::FATALDEAL:     return "FATAL DEAL";
-            case SkillName::CLONE:         return "CLONE";
+            case SkillName::CHRONOSPHERE:  return "CHRONOSPHERE";
             case SkillName::BOOGIEWOOGIE:  return "BOOGIE WOOGIE";
             case SkillName::LOOKMAXXING:   return "LOOKMAXXING";
             case SkillName::SIGMA:         return "SIGMA";

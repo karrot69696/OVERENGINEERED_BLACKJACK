@@ -250,8 +250,8 @@ std::string Player::skillNameToString(){
     switch (skillName){
         case SkillName::DELIVERANCE:   return "DELIVERANCE";
         case SkillName::NEURALGAMBIT:  return "NEURAL GAMBIT";
-        case SkillName::FATALDEAL:    return "FATALDEAL";
-        case SkillName::CLONE:         return "CLONE";
+        case SkillName::FATALDEAL:     return "FATALDEAL";
+        case SkillName::CHRONOSPHERE:  return "CLONE";
         case SkillName::BOOGIEWOOGIE:  return "BOOGIE WOOGIE";
         case SkillName::LOOKMAXXING:   return "LOOKMAXXING";
         case SkillName::SIGMA:         return "SIGMA";
