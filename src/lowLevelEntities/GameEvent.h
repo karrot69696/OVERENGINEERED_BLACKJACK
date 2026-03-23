@@ -23,7 +23,7 @@ enum class GameEventType {
     SHOCK_EFFECT,
     EXPLOSION_EFFECT,
     DELIVERANCE_EFFECT,
-
+    FATALDEAL_EFFECT,
     REQUEST_ACTION_INPUT,
     REQUEST_TARGET_INPUT,
     CLEAR_INPUT,
@@ -91,6 +91,9 @@ struct DeliveranceEffectEvent {
     int playerId;
 };
 
+struct FatalDealEffectEvent {
+    int playerId;
+};
 struct RequestActionInputEvent {
     int playerId;
     float duration = GameConfig::ACTION_PROMPT_DURATION;
@@ -144,6 +147,7 @@ using GameEventData = std::variant<
     ShockEffectEvent,
     ExplosionEffectEvent,
     DeliveranceEffectEvent,
+    FatalDealEffectEvent,
     RequestActionInputEvent,
     RequestTargetInputEvent,
     ClearInputEvent,

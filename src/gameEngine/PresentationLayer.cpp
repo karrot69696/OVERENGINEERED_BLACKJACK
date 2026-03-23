@@ -107,7 +107,7 @@ void PresentationLayer::processEvents() {
                       << " text=\"" << e.text << "\"" << std::endl;
             sf::Vector2f seat = visualState.getPlayerSeatPos(
                 e.playerId, (int)gameState.getAllPlayerInfo().size());
-            sf::Vector2f textPos = {seat.x - 90.f, seat.y - 40.f};
+            sf::Vector2f textPos = {seat.x, seat.y - 40.f};
             sf::Color textColor(245, 224, 32);
             animationManager.spawnFloatingText(e.text, textPos, textColor, AnimConfig::POINT_CHANGE_DURATION);
         } break;
@@ -158,7 +158,14 @@ void PresentationLayer::processEvents() {
             auto& e = std::get<DeliveranceEffectEvent>(event.data);
             std::cout << "[PresentationLayer] DELIVERANCE_EFFECT: playerId=" << e.playerId << std::endl;
             sf::Vector2f playerPos = visualState.getPlayerSeatPos(e.playerId, (int)gameState.getAllPlayerInfo().size());
-            animationManager.playDeliveranceEffect(playerPos);
+            animationManager.playDeliveranceEffect({playerPos.x-15.f,playerPos.y});
+        } break;
+
+        case GameEventType::FATALDEAL_EFFECT:{
+            auto& e = std::get<FatalDealEffectEvent>(event.data);
+            std::cout << "[PresentationLayer] FATALDEAL_EFFECT: playerId=" << e.playerId << std::endl;
+            sf::Vector2f playerPos = visualState.getPlayerSeatPos(e.playerId, (int)gameState.getAllPlayerInfo().size());
+            animationManager.playFatalDealInitialEffect({playerPos.x-15.f,playerPos.y});
         } break;
 
         case GameEventType::REQUEST_ACTION_INPUT: {

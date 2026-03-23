@@ -19,10 +19,12 @@ namespace GameConfig {
     constexpr int REACTIVE_PROMPT_DURATION_DEFAULT = 12;
     constexpr int ACTION_PROMPT_DURATION = 30;
     constexpr int TARGET_PROMPT_DURATION = 20;
+    constexpr float PLAYER_ICON_SCALE = 0.18f;
     // Bot behavior constants
     constexpr double BURST_RISK_WEIGHT = 0.5;
     constexpr double OPPONENT_PRESSURE_WEIGHT = 0.70;
     constexpr double LOSING_PRESSURE_WEIGHT = 0.15;
+    
 }
 
 #endif

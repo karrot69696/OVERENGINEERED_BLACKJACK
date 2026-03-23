@@ -290,6 +290,9 @@ inline void writeGameEvent(ByteBuffer& buf, const GameEvent& event) {
         else if constexpr (std::is_same_v<T, DeliveranceEffectEvent>) {
             buf.writeI32(payload.playerId);
         }
+        else if constexpr (std::is_same_v<T, FatalDealEffectEvent>) {
+            buf.writeI32(payload.playerId);
+        }
         else if constexpr (std::is_same_v<T, RequestActionInputEvent>) {
             buf.writeI32(payload.playerId);
             buf.writeFloat(payload.duration);
@@ -399,6 +402,11 @@ inline GameEvent readGameEvent(ByteBuffer& buf) {
         } break;
         case GameEventType::DELIVERANCE_EFFECT: {
             DeliveranceEffectEvent e;
+            e.playerId = buf.readI32();
+            data = e;
+        } break;
+        case GameEventType::FATALDEAL_EFFECT:{
+            FatalDealEffectEvent e;
             e.playerId = buf.readI32();
             data = e;
         } break;

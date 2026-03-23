@@ -28,7 +28,7 @@ namespace UILayout {
 
     const sf::Vector2f CARD_SIZE   = {42.f, 63.f};
     const sf::Vector2f BUTTON_SIZE = {120.f, 40.f};
-    const float CARD_SPACING       = 49.f;
+    const float CARD_SPACING       = 39.f;
     const float DECK_X_RATIO       = 0.07f;  // deck X as fraction of window width
 }
 // ============================================================================
@@ -116,11 +116,11 @@ class VisualState {
 
             if (playerId == 0) {
                 // Host sits at top
-                return { w / 2.f - 100.f, 60.f };
+                return { w / 2.f - 100.f, 90.f };
             }
 
-            float spacing = w / (float)(totalPlayers);
-            return { spacing * playerId - 30.f, h - 130.f };
+            float spacing = w / (float)(totalPlayers) + 10.f;
+            return { spacing * playerId - 30.f, h - 110.f };
         }
 };
 

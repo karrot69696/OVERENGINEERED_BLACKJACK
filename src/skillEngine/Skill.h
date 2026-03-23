@@ -11,7 +11,7 @@ enum class skillType {
     REACTIVE
 };
 
-enum class ReactiveTrigger { NONE, ON_CARD_DRAWN };
+enum class ReactiveTrigger { NONE, ON_CARD_DRAWN, ON_HIT_PHASE_START };
 
 struct ReactiveContext {
     ReactiveTrigger trigger;

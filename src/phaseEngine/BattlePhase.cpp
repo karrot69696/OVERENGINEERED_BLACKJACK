@@ -63,7 +63,7 @@ std::optional<PhaseName> BattlePhase::onUpdate(){
         winner.gainPoint(GameConfig::POINTS_GAIN_WON);
         loser.gainLoss();
         eventQueue.push({GameEventType::POINT_CHANGED, PointChangedEvent{
-            winner.getId(), "+"+ std::to_string(GameConfig::POINTS_GAIN_WON)+ "POINT"
+            winner.getId(), "+"+ std::to_string(GameConfig::POINTS_GAIN_WON)
         }});
         eventQueue.push({GameEventType::SHOCK_EFFECT, ShockEffectEvent{winner.getId(), loser.getId(), 1.2f}});
         eventQueue.push({GameEventType::EXPLOSION_EFFECT, ExplosionEffectEvent{loser.getId(), 3.0f, 1.2f}});

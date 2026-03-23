@@ -570,6 +570,9 @@ void Phase::reactiveTickPending() {
     switch (rc.step) {
     case ReactiveCheckState::PROMPTING: {
         if (!rc.requestSent) {
+            // Everyone sees the effect animation (broadcast via event queue)
+            if (entry.skillName == SkillName::FATALDEAL) eventQueue.push({GameEventType::FATALDEAL_EFFECT, FatalDealEffectEvent{entry.skillOwnerId}});
+
             if (ownerInfo.isBot) {
                 // Bots always accept reactive skills
                 gameState.pendingReactiveResponse = ReactiveResponse::YES;
@@ -581,9 +584,9 @@ void Phase::reactiveTickPending() {
                 std::cout << "[reactiveTickPending] Sent reactive prompt to remote P"
                           << entry.skillOwnerId << std::endl;
             } else {
-                // Local player: push event for PresentationLayer to show prompt
-                eventQueue.push({GameEventType::REACTIVE_SKILL_PROMPT,
-                    ReactiveSkillPromptEvent{entry.skillOwnerId, entry.skillName, rc.extraInfo, ReactiveCheckState::PROMPT_TIMEOUT}});
+                // Local player: call UI directly (no event broadcast)
+                uiManager.requestReactivePrompt(
+                    gameState.skillNameToString(entry.skillName), rc.extraInfo, ReactiveCheckState::PROMPT_TIMEOUT);
                 std::cout << "[reactiveTickPending] Prompting local P" << entry.skillOwnerId
                           << " for " << gameState.skillNameToString(entry.skillName) << " with extra info: "<< rc.extraInfo << std::endl;
             }

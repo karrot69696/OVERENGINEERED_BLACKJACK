@@ -64,7 +64,7 @@ std::optional<PhaseName> BlackJackCheckPhase::onUpdate(){
             }();
             currentPlayer.lastBlackjackHand = currentIds;
             eventQueue.push({GameEventType::POINT_CHANGED, PointChangedEvent{
-                currentPlayer.getId(), "BLACKJACK! +3"}});
+                currentPlayer.getId(), "BLACKJACK! +" + std::to_string(GameConfig::POINTS_GAIN_BLACKJACK)}});
         }
     }
 

@@ -464,7 +464,7 @@ public:
     }
 
     void spawnFloatingText(const std::string& text, sf::Vector2f position, sf::Color color, float duration = 1.0f){
-        auto ft = std::make_shared<sf::Text>(visualState.getFont(), text, 20.f);
+        auto ft = std::make_shared<sf::Text>(visualState.getFont(), text, 15.f);
         ft->setFillColor(color);
         ft->setPosition(position);
         floatingTexts.push_back(ft);
@@ -477,7 +477,7 @@ public:
         auto func = [this, ptr, startPos, color](float t)
         {
             float floatDistance = 30.f;   // stronger upward motion
-            float peakScale = 1.5f;
+            float peakScale = 2.0f;
 
             // --- POSITION (fast start, slows down) ---
             float y = startPos.y - floatDistance * easeOutCubic(t);
@@ -490,7 +490,7 @@ public:
             {
                 // explode outward
                 float local = scaleT / 0.7f;
-                s = 1.f + (peakScale - 1.f) * easeOutCubic(local);
+                s = 1.f + (peakScale - 1.f) * easeInCubic(local);
             }
             else
             {
@@ -513,7 +513,7 @@ public:
             c.a = static_cast<uint8_t>(255.f * alpha);
 
             // --- OPTIONAL: tiny horizontal shake (adds impact) ---
-            float shake = (1.f - t) * 4.f * std::sin(t * 40.f);
+            float shake = (1.f - t) * 3.f * std::sin(t * 40.f);
             float x = startPos.x + shake;
 
             ptr->setScale({s, s});
@@ -647,6 +647,16 @@ public:
         onDone);
         
     }
+
+    void playFatalDealInitialEffect(sf::Vector2f position, float scale = 2.f, float duration = 0.6f){
+       if(!fatalDealSprite1) fatalDealSprite1 = std::make_unique<sf::Sprite>(fatalDealTexture);
+        fatalDealSprite1->setOrigin({32,32}); 
+        fatalDealSprite1->setPosition(position); 
+        fatalDealSprite1->setScale({scale,scale}); 
+        auto onDone = [this](){ fatalDealSprite1.reset(); };
+        playSpriteAnimation(fatalDealSprite1.get(),19, 0,0,64,64, duration, 64, onDone);
+    }
+
     void renderExplosionAnimation(){
         if (explosionSprite)
             window.draw(*explosionSprite);
@@ -656,7 +666,7 @@ public:
             window.draw(*holySprite);
     }
     void playFatalDealEffect(sf::Vector2f pos1, sf::Vector2f pos2, float scale = 2.f, float duration = 1.0f){
-        fatalDealSprite1 = std::make_unique<sf::Sprite>(fatalDealTexture);
+        if(!fatalDealSprite1) fatalDealSprite1 = std::make_unique<sf::Sprite>(fatalDealTexture);
         fatalDealSprite1->setOrigin({32,32});
         fatalDealSprite1->setPosition(pos1);
         fatalDealSprite1->setScale({scale,scale});

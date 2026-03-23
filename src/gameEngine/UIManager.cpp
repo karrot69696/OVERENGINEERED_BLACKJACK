@@ -530,9 +530,9 @@ void UIManager::renderPlayerVisuals(){
 
         // Draw player icon — skip position/scale/draw if borrowed (AnimationManager controls it)
         if (!isBorrowed) {
-            sf::Vector2f iconScale = {0.18f, 0.18f};
+            sf::Vector2f iconScale = {GameConfig::PLAYER_ICON_SCALE, GameConfig::PLAYER_ICON_SCALE};
             playerVisual.playerSprite.setPosition({
-                playerVisual.seatPostion.x - 66.f,
+                playerVisual.seatPostion.x - 56.f,
                 playerVisual.seatPostion.y - 26.f
             });
             playerVisual.playerSprite.setScale(iconScale);
@@ -541,10 +541,10 @@ void UIManager::renderPlayerVisuals(){
 
         // Host label above player icon
         if (playerVisual.isHost) {
-            sf::Text hostLabel(font, "HOST", 18);
+            sf::Text hostLabel(font, "HOST", 16);
             hostLabel.setFillColor(sf::Color(255, 200, 50));
             hostLabel.setStyle(sf::Text::Bold);
-            hostLabel.setPosition({ playerVisual.seatPostion.x - 86.f, playerVisual.seatPostion.y - 50.f });
+            hostLabel.setPosition({ playerVisual.seatPostion.x - 56.f, playerVisual.seatPostion.y - 50.f });
             window.draw(hostLabel);
         }
 

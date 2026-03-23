@@ -8,7 +8,7 @@
 #include <iostream>
 
 #include "../lowLevelEntities/VisualState.h"
-
+#include "../lowLevelEntities/GameConfig.h"
 #include <SFML/Graphics.hpp>
 #include <SFML/System.hpp>
 #include <SFML/Window.hpp>
