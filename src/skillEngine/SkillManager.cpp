@@ -19,6 +19,10 @@ void SkillManager::createSkills(std::vector<Player>& players) {
                 skills.push_back(std::make_unique<SkillChronoSphere>(player.getId()));
                 std::cout << "[createSkills] Created [Chronosphere] for player " << player.getId() << std::endl;
                 break;
+            case SkillName::DESTINYDEFLECT:
+                skills.push_back(std::make_unique<SkillDestinyDeflect>(player.getId()));
+                std::cout << "[createSkills] Created [DestinyDeflect] for player " << player.getId() << std::endl;
+                break;
             default:
                 std::cout << "[createSkills] Skill: " << player.skillNameToString() << " does not exist" << std::endl;
         }

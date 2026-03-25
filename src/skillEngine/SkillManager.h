@@ -6,6 +6,7 @@
 #include "Skill_NeuralGambit.h"
 #include "Skill_FatalDeal.h"
 #include "Skill_ChronoSphere.h"
+#include "Skill_DestinyDeflect.h"
 #include <vector>
 #include <memory>
 #include <iostream>
@@ -24,6 +25,7 @@ class SkillManager {
     public:
         SkillManager() {};
         void createSkills(std::vector<Player>& players);
+        void recreateSkills(std::vector<Player>& players) { skills.clear(); createSkills(players); }
         SkillExecutionResult processSkill(SkillContext& context);
         std::string preValidateSkill(int playerId, const GameState& state);
         int getSkillUses(SkillName name);

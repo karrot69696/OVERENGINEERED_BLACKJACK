@@ -20,8 +20,6 @@ cmake --build --preset windows-msvc-debug
 
 Output: `build/<preset>/bin/CrazyJack.exe`. Assets are copied to `build/<preset>/assets/` automatically.
 
-**Don't build to verify after small changes.** Only build when explicitly asked or after a large batch of changes is complete.
-
 **When creating new files, always add them to CMakeLists.txt** in the appropriate source/header list (e.g., `LOW_LEVEL_HEADERS`, `GAME_ENGINE_SOURCES`, etc.).
 
 **SFML 3.0.2** is the only external dependency, path hardcoded in CMakeLists.txt. No vcpkg/conan. No test framework.
@@ -157,6 +155,7 @@ Events stay in the queue for the local PresentationLayer — **no drain/re-push*
 4. Client receives signal → exits waiting screen → enters game loop
 
 #### Key debugging patterns
+- **Hard crash (instant close, no error message)**: suspect uninitialized pointers and memory issues FIRST. Check raw pointers for `= nullptr` initialization, out-of-bounds vector access, and dangling references. Memory layout changes (e.g. adding/removing class members) can expose latent uninitialized pointer bugs elsewhere.
 - **Event duplication**: check if events are being broadcast more than once per logic tick
 - **Desync**: compare `[Server]` and `[Client]` console logs for phase/turn/card count
 - **Animation stalls**: PresentationLayer blocks on cutscene events — if an event is pushed but animation never starts, the queue stalls

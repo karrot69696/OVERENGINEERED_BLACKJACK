@@ -424,6 +424,10 @@ void Game::clientReceive() {
                 auto& data = std::get<RequestTargetInputEvent>(e.data);
                 if (data.playerId != myId) continue;
             }
+            if (e.type == GameEventType::DECK_PEEK) {
+                auto& data = std::get<DeckPeekEvent>(e.data);
+                if (data.playerId != myId) continue;
+            }
             eventQueue.push(std::move(e));
         }
     }
@@ -434,6 +438,8 @@ void Game::clientReceive() {
         if (req.isBoostPick) {
             if (req.allowedCardIds.size() >= 2)
                 uiManager.requestBoostPickInput(req.allowedCardIds[0], req.allowedCardIds[1]);
+        } else if (req.isPlayerPick) {
+            uiManager.requestPlayerPick(req.allowedCardIds);
         } else {
             uiManager.requestPickCard(req.allowedCardIds);
         }

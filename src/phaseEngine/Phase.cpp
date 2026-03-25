@@ -300,6 +300,16 @@ void Phase::skillProcessAftermath(SkillContext& context, SkillExecutionResult sk
                 });
             }
         break;
+        //DESTINY DEFLECT
+        case SkillName::DESTINYDEFLECT:
+            if (!context.targetPlayers.empty() && context.targetPlayers.size() >= 2 && !context.targetCards.empty()) {
+                context.eventQueue.push({GameEventType::CARD_REDIRECTED, CardRedirectedEvent{
+                    context.targetCards[0]->getId(),
+                    context.targetPlayers[0]->getId(),  // drawer (from)
+                    context.targetPlayers[1]->getId()    // redirect target (to)
+                }});
+            }
+        break;
         //CHRONOSPHERE
         case SkillName::CHRONOSPHERE:
             if (context.state.pendingChronoChoice == ChronoChoice::SNAPSHOT) {
@@ -313,15 +323,25 @@ void Phase::skillProcessAftermath(SkillContext& context, SkillExecutionResult sk
                     context.eventQueue.push({GameEventType::CARD_RETURNED,
                         CardReturnedEvent{cardId}});
                 }
-                // Animate new cards being drawn
-                for (int i = 0; i < (int)context.drawnCardIds.size(); i++) {
-                    context.eventQueue.push({GameEventType::CARD_DRAWN,
-                        CardDrawnEvent{context.user.getId(), i, context.drawnCardIds[i]}});
+                // Animate all redrawn cards at once (no reactive trigger)
+                {
+                    CardRedrawnEvent redrawn;
+                    redrawn.playerId = context.user.getId();
+                    for (int i = 0; i < (int)context.drawnCardIds.size(); i++) {
+                        redrawn.cardIds.push_back(context.drawnCardIds[i]);
+                        redrawn.handIndices.push_back(i);
+                    }
+                    context.eventQueue.push({GameEventType::CARD_REDRAWN, redrawn});
                 }
             }
         break;
     }
     blackJackAndQuintetCheck(players);
+    int actingId;
+    if (gameState.getPhaseName()==PhaseName::HOST_HIT_PHASE) actingId = gameState.getHostPlayerId();
+    else actingId = gameState.getCurrentPlayerId();
+    eventQueue.push({GameEventType::REQUEST_ACTION_INPUT,
+                RequestActionInputEvent{actingId}});
 }
 
 // ============================================================================
@@ -568,22 +588,32 @@ bool Phase::startReactiveCheck(ReactiveTrigger trigger, int drawnCardId, int dra
     state.drawnCardId = drawnCardId;
     state.drawerId = drawerId;
     state.actingPlayerId = actingPlayerId;
-    for (auto& skillEntry : qualified) {
-        switch (skillEntry.second) {
+    std::string extraInfo="";
+    for (auto& [ownerId, skillName] : qualified) {
+        switch (skillName) {
             case SkillName::FATALDEAL: {
                 int rankofCardDrawn = static_cast<int>(gameState.getCardRankById(drawnCardId));
-                std::string peekInfo = "Lethal revelation: " + std::to_string(rankofCardDrawn);
+                std::string peekInfo = "Lethal revelation: " + std::to_string(rankofCardDrawn) + " , ready to strike the deal?";
                 std::cout<<"[startReactiveCheck] FATALDEAL PEEK: "<< peekInfo <<std::endl;
-                state.extraInfo = peekInfo;
+                extraInfo = peekInfo;
+                break;
+            }
+            case SkillName::DESTINYDEFLECT: {
+                std::string peekInfo = "Make this their problem instead?";
+                std::cout<<"[startReactiveCheck] DESTINYDEFLECT info: "<< peekInfo <<std::endl;
+                extraInfo = peekInfo;
+                break;
+            }
+            case SkillName::CHRONOSPHERE:{
+                std::string peekInfo = "Wanna snapshot this moment?";
+                std::cout<<"[startReactiveCheck] CHRONOSPHERE info: "<< peekInfo <<std::endl;
+                extraInfo = peekInfo;
                 break;
             }
             default:
                 break;
         }
-    }
-    
-    for (auto& [ownerId, skillName] : qualified) {
-        state.queue.push_back({ownerId, skillName});
+        state.queue.push_back({ownerId, skillName, extraInfo});
     }
     state.currentIndex = 0;
     state.step = ReactiveCheckState::PROMPTING;
@@ -597,12 +627,6 @@ bool Phase::startReactiveCheck(ReactiveTrigger trigger, int drawnCardId, int dra
 
 void Phase::reactiveTickPending() {
     auto& rc = *reactiveCheck;
-    NetworkManager* net = roundManager.getNetworkManager();
-    int localPlayerId = net ? net->getLocalPlayerId() : 0;
-
-    auto isRemotePlayer = [&](const PlayerInfo& info) -> bool {
-        return !info.isBot && net && net->isServer() && info.playerId != localPlayerId;
-    };
 
     // All skills processed — check blackjack/quintet, then re-prompt the acting player
     if (rc.currentIndex >= (int)rc.queue.size()) {
@@ -620,40 +644,63 @@ void Phase::reactiveTickPending() {
     }
 
     auto& entry = rc.queue[rc.currentIndex];
+
+    // Dispatch to per-skill isolated workflow
+    switch (entry.skillName) {
+        case SkillName::FATALDEAL:       tickReactive_FatalDeal(rc, entry); break;
+        case SkillName::DESTINYDEFLECT:  tickReactive_DestinyDeflect(rc, entry); break;
+        case SkillName::CHRONOSPHERE:    tickReactive_Chronosphere(rc, entry); break;
+        default:
+            std::cerr << "[reactiveTickPending] Unknown reactive skill, skipping" << std::endl;
+            rc.currentIndex++;
+            rc.step = ReactiveCheckState::PROMPTING;
+            rc.requestSent = false;
+            break;
+    }
+}
+
+// ============================================================================
+// Fatal Deal reactive workflow
+// ============================================================================
+void Phase::tickReactive_FatalDeal(ReactiveCheckState& rc, ReactiveCheckState::QueueEntry& entry) {
+    NetworkManager* net = roundManager.getNetworkManager();
+    int localPlayerId = net ? net->getLocalPlayerId() : 0;
     PlayerInfo ownerInfo = gameState.getPlayerInfo(entry.skillOwnerId);
-    std::string extraInfo = rc.extraInfo;
+
+    auto isRemotePlayer = [&](const PlayerInfo& info) -> bool {
+        return !info.isBot && net && net->isServer() && info.playerId != localPlayerId;
+    };
+
+    auto advance = [&]() {
+        rc.currentIndex++;
+        rc.step = ReactiveCheckState::PROMPTING;
+        rc.requestSent = false;
+    };
+
     switch (rc.step) {
     case ReactiveCheckState::PROMPTING: {
-        if (!rc.requestSent) {
-            // Everyone sees the effect animation (broadcast via event queue)
-            if (entry.skillName == SkillName::FATALDEAL) eventQueue.push({GameEventType::FATALDEAL_EFFECT, FatalDealEffectEvent{entry.skillOwnerId}});
+        if (rc.requestSent) break;
 
-            if (ownerInfo.isBot) {
-                // Bots always accept reactive skills
-                gameState.pendingReactiveResponse = ReactiveResponse::YES;
-                std::cout << "[reactiveTickPending] Bot P" << entry.skillOwnerId
-                          << " auto-accepts " << gameState.skillNameToString(entry.skillName) << std::endl;
-            } else if (isRemotePlayer(ownerInfo)) {
-                // Send prompt to remote client
-                if (net) net->sendReactivePrompt(entry.skillOwnerId, entry.skillName,rc.extraInfo,ReactiveCheckState::PROMPT_TIMEOUT);
-                std::cout << "[reactiveTickPending] Sent reactive prompt to remote P"
-                          << entry.skillOwnerId << std::endl;
-            } else {
-                // Local player: call UI directly (no event broadcast)
-                uiManager.requestReactivePrompt(
-                    gameState.skillNameToString(entry.skillName), rc.extraInfo, ReactiveCheckState::PROMPT_TIMEOUT);
-                std::cout << "[reactiveTickPending] Prompting local P" << entry.skillOwnerId
-                          << " for " << gameState.skillNameToString(entry.skillName) << " with extra info: "<< rc.extraInfo << std::endl;
-            }
-            rc.requestSent = true;
-            rc.promptTimer = 0.f;
-            rc.step = ReactiveCheckState::WAITING_RESPONSE;
+        eventQueue.push({GameEventType::FATALDEAL_EFFECT, FatalDealEffectEvent{entry.skillOwnerId}});
+
+        if (ownerInfo.isBot) {
+            gameState.pendingReactiveResponse = ReactiveResponse::YES;
+            std::cout << "[tickReactive_FatalDeal] Bot P" << entry.skillOwnerId << " auto-accepts" << std::endl;
+        } else if (isRemotePlayer(ownerInfo)) {
+            if (net) net->sendReactivePrompt(entry.skillOwnerId, entry.skillName, entry.extraInfo, ReactiveCheckState::PROMPT_TIMEOUT);
+            std::cout << "[tickReactive_FatalDeal] Sent prompt to remote P" << entry.skillOwnerId << std::endl;
+        } else {
+            uiManager.requestReactivePrompt(
+                gameState.skillNameToString(entry.skillName), entry.extraInfo, ReactiveCheckState::PROMPT_TIMEOUT);
+            std::cout << "[tickReactive_FatalDeal] Prompting local P" << entry.skillOwnerId << std::endl;
         }
+        rc.requestSent = true;
+        rc.promptTimer = 0.f;
+        rc.step = ReactiveCheckState::WAITING_RESPONSE;
     } break;
 
     case ReactiveCheckState::WAITING_RESPONSE: {
-        rc.promptTimer += 1.f / 60.f;  // ~1 frame at 60fps
-
+        rc.promptTimer += 1.f / 60.f;
         ReactiveResponse response = ReactiveResponse::NONE;
 
         if (ownerInfo.isBot) {
@@ -667,58 +714,25 @@ void Phase::reactiveTickPending() {
             response = gameState.pendingReactiveResponse;
         }
 
-        // Timeout check
         if (response == ReactiveResponse::NONE && rc.promptTimer >= ReactiveCheckState::PROMPT_TIMEOUT) {
             response = ReactiveResponse::NO;
-            std::cout << "[reactiveTickPending] Prompt timed out for P" << entry.skillOwnerId << std::endl;
+            std::cout << "[tickReactive_FatalDeal] Prompt timed out for P" << entry.skillOwnerId << std::endl;
         }
 
         if (response == ReactiveResponse::YES) {
             gameState.pendingReactiveResponse = ReactiveResponse::NONE;
-
-            // Chronosphere: skip PICKING_CARD, execute directly
-            if (entry.skillName == SkillName::CHRONOSPHERE) {
-                Player* skillOwner = nullptr;
-                for (auto& p : players) if (p.getId() == entry.skillOwnerId) { skillOwner = &p; break; }
-                if (skillOwner) {
-                    // Reactive ON_HIT_PHASE_START: snapshot if none, rewind if exists
-                    gameState.pendingChronoChoice = gameState.snapShotTaken
-                        ? ChronoChoice::REWIND : ChronoChoice::SNAPSHOT;
-                    SkillContext context{ *skillOwner, {}, {}, deck, gameState, eventQueue };
-                    SkillExecutionResult result = skillManager.processSkill(context);
-                    if (result.name == SkillName::UNDEFINED) {
-                        eventQueue.push({GameEventType::SKILL_ERROR,
-                            SkillErrorEvent{entry.skillOwnerId, result.errorMsg}});
-                    } else {
-                        skillProcessAftermath(context, result);
-                    }
-                    gameState.pendingChronoChoice = ChronoChoice::NONE;
-                    roundManager.updateGameState(gameState.getPhaseName(), rc.actingPlayerId);
-                }
-                rc.currentIndex++;
-                rc.step = ReactiveCheckState::PROMPTING;
-                rc.requestSent = false;
-                std::cout << "[reactiveTickPending] Chronosphere executed for P" << entry.skillOwnerId << std::endl;
-                break;
-            }
-
             rc.step = ReactiveCheckState::PICKING_CARD;
             rc.requestSent = false;
-            std::cout << "[reactiveTickPending] P" << entry.skillOwnerId << " accepted reactive skill" << std::endl;
+            std::cout << "[tickReactive_FatalDeal] P" << entry.skillOwnerId << " accepted" << std::endl;
         } else if (response == ReactiveResponse::NO) {
             gameState.pendingReactiveResponse = ReactiveResponse::NONE;
-            // Advance to next skill in queue
-            rc.currentIndex++;
-            rc.step = ReactiveCheckState::PROMPTING;
-            rc.requestSent = false;
-            std::cout << "[reactiveTickPending] P" << entry.skillOwnerId << " declined reactive skill" << std::endl;
+            advance();
+            std::cout << "[tickReactive_FatalDeal] P" << entry.skillOwnerId << " declined" << std::endl;
         }
-        // else: still waiting
     } break;
 
     case ReactiveCheckState::PICKING_CARD: {
         if (!rc.requestSent) {
-            // Get the skill owner's hand card IDs
             std::vector<int> handCardIds;
             for (auto& p : players) {
                 if (p.getId() == entry.skillOwnerId) {
@@ -729,29 +743,25 @@ void Phase::reactiveTickPending() {
             }
 
             if (ownerInfo.isBot) {
-                // Bot auto-picks a random card from hand
                 if (!handCardIds.empty()) {
                     int pickedId = handCardIds[rand() % handCardIds.size()];
                     Card tempCard(Suit::Hearts, Rank::Ace, false);
                     tempCard.setId(pickedId);
                     gameState.pendingTarget = PlayerTargeting{{}, {tempCard}};
-                    std::cout << "[reactiveTickPending] Bot P" << entry.skillOwnerId
+                    std::cout << "[tickReactive_FatalDeal] Bot P" << entry.skillOwnerId
                               << " auto-picked card " << pickedId << std::endl;
                 }
             } else if (isRemotePlayer(ownerInfo)) {
                 if (net) net->sendTargetRequest(entry.skillOwnerId,
                     TargetRequestData{-1, handCardIds, false});
-                std::cout << "[reactiveTickPending] Sent card pick request to remote P"
-                          << entry.skillOwnerId << std::endl;
+                std::cout << "[tickReactive_FatalDeal] Sent card pick to remote P" << entry.skillOwnerId << std::endl;
             } else {
                 uiManager.requestPickCard(handCardIds);
                 rc.waitingForLocalPick = true;
-                std::cout << "[reactiveTickPending] Requesting card pick from local P"
-                          << entry.skillOwnerId << std::endl;
+                std::cout << "[tickReactive_FatalDeal] Requesting card pick from local P" << entry.skillOwnerId << std::endl;
             }
             rc.requestSent = true;
         } else {
-            // Poll for the card pick
             int pickedCardId = -1;
 
             if (isRemotePlayer(ownerInfo) && net && net->hasRemoteTarget(entry.skillOwnerId)) {
@@ -764,35 +774,27 @@ void Phase::reactiveTickPending() {
             }
 
             if (pickedCardId != -1) {
-                std::cout << "[reactiveTickPending] P" << entry.skillOwnerId
+                std::cout << "[tickReactive_FatalDeal] P" << entry.skillOwnerId
                           << " picked card " << pickedCardId << std::endl;
-                rc.step = ReactiveCheckState::EXECUTING;
 
-                // Find the actual card pointers and execute
                 Card* drawnCard = nullptr;
                 Card* pickedCard = nullptr;
-                Player* drawer = nullptr;
+                Player* currentHolder = nullptr;  // whoever currently holds the drawn card (may differ from original drawer)
                 Player* skillOwner = nullptr;
                 for (auto& p : players) {
-                    if (p.getId() == rc.drawerId) drawer = &p;
                     if (p.getId() == entry.skillOwnerId) skillOwner = &p;
                     for (int i = 0; i < p.getHandSize(); i++) {
                         Card* c = p.getCardInHand(i);
-                        if (c->getId() == rc.drawnCardId) drawnCard = c;
+                        if (c->getId() == rc.drawnCardId) { drawnCard = c; currentHolder = &p; }
                         if (c->getId() == pickedCardId) pickedCard = c;
                     }
                 }
 
-                if (drawnCard && pickedCard && drawer && skillOwner) {
+                if (drawnCard && pickedCard && currentHolder && skillOwner) {
                     SkillContext context{
-                        *skillOwner,
-                        {drawer},
-                        {drawnCard, pickedCard},
-                        deck,
-                        gameState,
-                        eventQueue
+                        *skillOwner, {currentHolder}, {drawnCard, pickedCard},
+                        deck, gameState, eventQueue
                     };
-
                     SkillExecutionResult result = skillManager.processSkill(context);
                     if (result.name == SkillName::UNDEFINED) {
                         eventQueue.push({GameEventType::SKILL_ERROR,
@@ -800,27 +802,293 @@ void Phase::reactiveTickPending() {
                     } else {
                         skillProcessAftermath(context, result);
                     }
-
-                    roundManager.updateGameState(gameState.getPhaseName(),
-                        rc.actingPlayerId);
+                    roundManager.updateGameState(gameState.getPhaseName(), rc.actingPlayerId);
                 } else {
-                    std::cerr << "[reactiveTickPending] ERROR: could not resolve cards/players" << std::endl;
+                    std::cerr << "[tickReactive_FatalDeal] ERROR: could not resolve cards/players" << std::endl;
                 }
-
-                // Advance to next skill in queue
-                rc.currentIndex++;
-                rc.step = ReactiveCheckState::PROMPTING;
-                rc.requestSent = false;
+                advance();
             }
         }
     } break;
 
-    default:
-        break;
+    default: break;
+    }
+}
+
+// ============================================================================
+// Destiny Deflect reactive workflow
+// ============================================================================
+void Phase::tickReactive_DestinyDeflect(ReactiveCheckState& rc, ReactiveCheckState::QueueEntry& entry) {
+    NetworkManager* net = roundManager.getNetworkManager();
+    int localPlayerId = net ? net->getLocalPlayerId() : 0;
+    PlayerInfo ownerInfo = gameState.getPlayerInfo(entry.skillOwnerId);
+
+    auto isRemotePlayer = [&](const PlayerInfo& info) -> bool {
+        return !info.isBot && net && net->isServer() && info.playerId != localPlayerId;
+    };
+
+    auto advance = [&]() {
+        rc.currentIndex++;
+        rc.step = ReactiveCheckState::PROMPTING;
+        rc.requestSent = false;
+    };
+
+    switch (rc.step) {
+    case ReactiveCheckState::PROMPTING: {
+        if (rc.requestSent) break;
+
+        eventQueue.push({GameEventType::DESTINYDEFLECT_EFFECT, DestinyDeflectEffectEvent{entry.skillOwnerId}});
+
+        if (ownerInfo.isBot) {
+            gameState.pendingReactiveResponse = ReactiveResponse::YES;
+            std::cout << "[tickReactive_DestinyDeflect] Bot P" << entry.skillOwnerId << " auto-accepts" << std::endl;
+        } else if (isRemotePlayer(ownerInfo)) {
+            if (net) net->sendReactivePrompt(entry.skillOwnerId, entry.skillName, entry.extraInfo, ReactiveCheckState::PROMPT_TIMEOUT);
+            std::cout << "[tickReactive_DestinyDeflect] Sent prompt to remote P" << entry.skillOwnerId << std::endl;
+        } else {
+            uiManager.requestReactivePrompt(
+                gameState.skillNameToString(entry.skillName), entry.extraInfo, ReactiveCheckState::PROMPT_TIMEOUT);
+            std::cout << "[tickReactive_DestinyDeflect] Prompting local P" << entry.skillOwnerId << std::endl;
+        }
+        rc.requestSent = true;
+        rc.promptTimer = 0.f;
+        rc.step = ReactiveCheckState::WAITING_RESPONSE;
+    } break;
+
+    case ReactiveCheckState::WAITING_RESPONSE: {
+        rc.promptTimer += 1.f / 60.f;
+        ReactiveResponse response = ReactiveResponse::NONE;
+
+        if (ownerInfo.isBot) {
+            response = gameState.pendingReactiveResponse;
+        } else if (isRemotePlayer(ownerInfo)) {
+            if (net && net->hasReactiveResponse(entry.skillOwnerId)) {
+                bool accepted = net->consumeReactiveResponse(entry.skillOwnerId);
+                response = accepted ? ReactiveResponse::YES : ReactiveResponse::NO;
+            }
+        } else {
+            response = gameState.pendingReactiveResponse;
+        }
+
+        if (response == ReactiveResponse::NONE && rc.promptTimer >= ReactiveCheckState::PROMPT_TIMEOUT) {
+            response = ReactiveResponse::NO;
+            std::cout << "[tickReactive_DestinyDeflect] Prompt timed out for P" << entry.skillOwnerId << std::endl;
+        }
+
+        if (response == ReactiveResponse::YES) {
+            gameState.pendingReactiveResponse = ReactiveResponse::NONE;
+            rc.step = ReactiveCheckState::PICKING_PLAYER;
+            rc.requestSent = false;
+            std::cout << "[tickReactive_DestinyDeflect] P" << entry.skillOwnerId << " accepted, picking player" << std::endl;
+        } else if (response == ReactiveResponse::NO) {
+            gameState.pendingReactiveResponse = ReactiveResponse::NONE;
+            advance();
+            std::cout << "[tickReactive_DestinyDeflect] P" << entry.skillOwnerId << " declined" << std::endl;
+        }
+    } break;
+
+    case ReactiveCheckState::PICKING_PLAYER: {
+        if (!rc.requestSent) {
+            std::vector<int> allowedPlayerIds;
+            for (auto& p : players) {
+                if (p.getId() != entry.skillOwnerId)
+                    allowedPlayerIds.push_back(p.getId());
+            }
+
+            if (ownerInfo.isBot) {
+                // Deterministic: pick player with highest hand value (push toward bust)
+                int bestId = -1, bestValue = -1;
+                for (auto& p : players) {
+                    if (p.getId() == entry.skillOwnerId) continue;
+                    int val = p.calculateHandValue();
+                    if (val > bestValue || (val == bestValue && (bestId == -1 || p.getId() < bestId))) {
+                        bestValue = val;
+                        bestId = p.getId();
+                    }
+                }
+                if (bestId != -1) {
+                    gameState.pendingTarget = PlayerTargeting{{bestId}, {}};
+                    std::cout << "[tickReactive_DestinyDeflect] Bot P" << entry.skillOwnerId
+                              << " picked target P" << bestId << " (hand value " << bestValue << ")" << std::endl;
+                }
+            } else if (isRemotePlayer(ownerInfo)) {
+                if (net) net->sendTargetRequest(entry.skillOwnerId,
+                    TargetRequestData{-1, allowedPlayerIds, false, true});
+                std::cout << "[tickReactive_DestinyDeflect] Sent player pick to remote P" << entry.skillOwnerId << std::endl;
+            } else {
+                uiManager.requestPlayerPick(allowedPlayerIds);
+                rc.waitingForLocalPick = true;
+                std::cout << "[tickReactive_DestinyDeflect] Requesting player pick from local P" << entry.skillOwnerId << std::endl;
+            }
+            rc.requestSent = true;
+        } else {
+            int pickedPlayerId = -1;
+
+            if (isRemotePlayer(ownerInfo) && net && net->hasRemoteTarget(entry.skillOwnerId)) {
+                auto t = net->consumeRemoteTarget(entry.skillOwnerId);
+                if (!t.targetPlayerIds.empty()) pickedPlayerId = t.targetPlayerIds[0];
+            } else if (!gameState.pendingTarget.targetPlayerIds.empty()) {
+                pickedPlayerId = gameState.pendingTarget.targetPlayerIds[0];
+                gameState.pendingTarget = {};
+                rc.waitingForLocalPick = false;
+            }
+
+            if (pickedPlayerId != -1) {
+                std::cout << "[tickReactive_DestinyDeflect] P" << entry.skillOwnerId
+                          << " picked redirect target P" << pickedPlayerId << std::endl;
+
+                Card* drawnCard = nullptr;
+                Player* currentHolder = nullptr;  // whoever currently holds the drawn card (may differ from original drawer after FD swap)
+                Player* redirectTarget = nullptr;
+                Player* skillOwner = nullptr;
+                for (auto& p : players) {
+                    if (p.getId() == pickedPlayerId) redirectTarget = &p;
+                    if (p.getId() == entry.skillOwnerId) skillOwner = &p;
+                    for (int i = 0; i < p.getHandSize(); i++) {
+                        if (p.getCardInHand(i)->getId() == rc.drawnCardId) { drawnCard = p.getCardInHand(i); currentHolder = &p; }
+                    }
+                }
+
+                if (drawnCard && currentHolder && redirectTarget && skillOwner) {
+                    SkillContext context{
+                        *skillOwner, {currentHolder, redirectTarget}, {drawnCard},
+                        deck, gameState, eventQueue
+                    };
+                    SkillExecutionResult result = skillManager.processSkill(context);
+                    if (result.name == SkillName::UNDEFINED) {
+                        eventQueue.push({GameEventType::SKILL_ERROR,
+                            SkillErrorEvent{entry.skillOwnerId, result.errorMsg}});
+                    } else {
+                        skillProcessAftermath(context, result);
+                    }
+                    roundManager.updateGameState(gameState.getPhaseName(), rc.actingPlayerId);
+                } else {
+                    std::cerr << "[tickReactive_DestinyDeflect] ERROR: could not resolve card/players" << std::endl;
+                }
+                advance();
+            }
+        }
+    } break;
+
+    default: break;
+    }
+}
+
+// ============================================================================
+// Chronosphere reactive workflow
+// ============================================================================
+void Phase::tickReactive_Chronosphere(ReactiveCheckState& rc, ReactiveCheckState::QueueEntry& entry) {
+    NetworkManager* net = roundManager.getNetworkManager();
+    int localPlayerId = net ? net->getLocalPlayerId() : 0;
+    PlayerInfo ownerInfo = gameState.getPlayerInfo(entry.skillOwnerId);
+
+    auto isRemotePlayer = [&](const PlayerInfo& info) -> bool {
+        return !info.isBot && net && net->isServer() && info.playerId != localPlayerId;
+    };
+
+    auto advance = [&]() {
+        rc.currentIndex++;
+        rc.step = ReactiveCheckState::PROMPTING;
+        rc.requestSent = false;
+    };
+
+    switch (rc.step) {
+    case ReactiveCheckState::PROMPTING: {
+        if (rc.requestSent) break;
+
+        if (ownerInfo.isBot) {
+            gameState.pendingReactiveResponse = ReactiveResponse::YES;
+            std::cout << "[tickReactive_Chronosphere] Bot P" << entry.skillOwnerId << " auto-accepts" << std::endl;
+        } else if (isRemotePlayer(ownerInfo)) {
+            if (net) net->sendReactivePrompt(entry.skillOwnerId, entry.skillName, entry.extraInfo, ReactiveCheckState::PROMPT_TIMEOUT);
+            std::cout << "[tickReactive_Chronosphere] Sent prompt to remote P" << entry.skillOwnerId << std::endl;
+        } else {
+            uiManager.requestReactivePrompt(
+                gameState.skillNameToString(entry.skillName), entry.extraInfo, ReactiveCheckState::PROMPT_TIMEOUT);
+            std::cout << "[tickReactive_Chronosphere] Prompting local P" << entry.skillOwnerId << std::endl;
+        }
+        rc.requestSent = true;
+        rc.promptTimer = 0.f;
+        rc.step = ReactiveCheckState::WAITING_RESPONSE;
+    } break;
+
+    case ReactiveCheckState::WAITING_RESPONSE: {
+        rc.promptTimer += 1.f / 60.f;
+        ReactiveResponse response = ReactiveResponse::NONE;
+
+        if (ownerInfo.isBot) {
+            response = gameState.pendingReactiveResponse;
+        } else if (isRemotePlayer(ownerInfo)) {
+            if (net && net->hasReactiveResponse(entry.skillOwnerId)) {
+                bool accepted = net->consumeReactiveResponse(entry.skillOwnerId);
+                response = accepted ? ReactiveResponse::YES : ReactiveResponse::NO;
+            }
+        } else {
+            response = gameState.pendingReactiveResponse;
+        }
+
+        if (response == ReactiveResponse::NONE && rc.promptTimer >= ReactiveCheckState::PROMPT_TIMEOUT) {
+            response = ReactiveResponse::NO;
+            std::cout << "[tickReactive_Chronosphere] Prompt timed out for P" << entry.skillOwnerId << std::endl;
+        }
+
+        if (response == ReactiveResponse::YES) {
+            gameState.pendingReactiveResponse = ReactiveResponse::NONE;
+            // Reactive ON_HIT_PHASE_START: snapshot only — execute directly
+            Player* skillOwner = nullptr;
+            for (auto& p : players) if (p.getId() == entry.skillOwnerId) { skillOwner = &p; break; }
+            if (skillOwner) {
+                gameState.pendingChronoChoice = ChronoChoice::SNAPSHOT;
+                SkillContext context{ *skillOwner, {}, {}, deck, gameState, eventQueue };
+                SkillExecutionResult result = skillManager.processSkill(context);
+                if (result.name == SkillName::UNDEFINED) {
+                    eventQueue.push({GameEventType::SKILL_ERROR,
+                        SkillErrorEvent{entry.skillOwnerId, result.errorMsg}});
+                } else {
+                    skillProcessAftermath(context, result);
+                }
+                gameState.pendingChronoChoice = ChronoChoice::NONE;
+                roundManager.updateGameState(gameState.getPhaseName(), rc.actingPlayerId);
+            }
+            std::cout << "[tickReactive_Chronosphere] Executed for P" << entry.skillOwnerId << std::endl;
+            advance();
+        } else if (response == ReactiveResponse::NO) {
+            gameState.pendingReactiveResponse = ReactiveResponse::NONE;
+            advance();
+            std::cout << "[tickReactive_Chronosphere] P" << entry.skillOwnerId << " declined" << std::endl;
+        }
+    } break;
+
+    default: break;
     }
 }
 
 void Phase::blackJackAndQuintetCheck(std::vector<Player>& players){
+    static const std::vector<std::string> blackjackPhrases = {
+        "BLACKJACK! THEY KNEW WHAT THEY WERE DOING",
+        "BLACKJACK! CALCULATED? NAH, JUST LUCKY",
+        "BLACKJACK! THE CARDS WERE SCARED TO SAY NO",
+        "BLACKJACK! SOMEONE CALL THE POLICE",
+        "BLACKJACK! ACTUAL WITCHCRAFT",
+        "BLACKJACK! THAT'S NOT FAIR AND WE ALL KNOW IT",
+        "BLACKJACK! ZERO HESITATION ZERO REGRETS",
+        "BLACKJACK! THE PROPHECY IS FULFILLED",
+        "BLACKJACK! DISGUSTING. ABSOLUTELY DISGUSTING.",
+        "BLACKJACK! THEY CAN'T KEEP GETTING AWAY WITH THIS",
+    };
+    static const std::vector<std::string> quintetPhrases = {
+        "QUINTET! FIVE CARDS AND STILL BREATHING???",
+        "QUINTET! THIS SHOULDN'T BE MATHEMATICALLY POSSIBLE",
+        "QUINTET! THEY BROUGHT THE WHOLE SQUAD",
+        "QUINTET! HOARDING CARDS LIKE POKEMON",
+        "QUINTET! THE GREEDIEST HAND IN HISTORY",
+        "QUINTET! LIVING LIFE ON THE EDGE AND WINNING",
+        "QUINTET! ABSOLUTE MANIAC WITH FIVE CARDS",
+        "QUINTET! THE DECK RAN OUT OF IDEAS",
+        "QUINTET! COLLECT THEM ALL APPARENTLY",
+        "QUINTET! FIVE DEEP NO FEAR ALL GAS",
+    };
+
     for (auto& player : players) {
         int handValue = player.calculateHandValue();
         auto currentIds = [&]() {
@@ -832,15 +1100,14 @@ void Phase::blackJackAndQuintetCheck(std::vector<Player>& players){
         }();
         if (player.getHandSize() == 5 && handValue <= GameConfig::BLACKJACK_VALUE && currentIds != player.lastQuintetHand) {
             player.lastQuintetHand = currentIds;
-            // Collect all card IDs for reveal — cards stay logically face-down
             std::vector<int> revealIds;
             for (int i = 0; i < player.getHandSize(); i++)
                 revealIds.push_back(player.getCardInHand(i)->getId());
             eventQueue.push({GameEventType::CARDS_REVEALED, CardsRevealedEvent{revealIds}});
             player.gainPoint(GameConfig::POINTS_GAIN_QUINTET);
+            const std::string& phrase = quintetPhrases[std::rand() % quintetPhrases.size()];
             eventQueue.push({GameEventType::POINT_CHANGED, PointChangedEvent{
-            player.getId(), "QUINTET! +"+ std::to_string(GameConfig::POINTS_GAIN_QUINTET)}});
-
+                player.getId(), phrase + " +" + std::to_string(GameConfig::POINTS_GAIN_QUINTET)}});
         }
         else if (player.getHandSize() == 2 && handValue == GameConfig::BLACKJACK_VALUE && currentIds != player.lastBlackjackHand) {
             player.lastBlackjackHand = currentIds;
@@ -849,8 +1116,9 @@ void Phase::blackJackAndQuintetCheck(std::vector<Player>& players){
                 revealIds.push_back(player.getCardInHand(i)->getId());
             eventQueue.push({GameEventType::CARDS_REVEALED, CardsRevealedEvent{revealIds}});
             player.gainPoint(GameConfig::POINTS_GAIN_BLACKJACK);
+            const std::string& phrase = blackjackPhrases[std::rand() % blackjackPhrases.size()];
             eventQueue.push({GameEventType::POINT_CHANGED, PointChangedEvent{
-            player.getId(), "BLACKJACK! +" + std::to_string(GameConfig::POINTS_GAIN_BLACKJACK)}});
+                player.getId(), phrase + " +" + std::to_string(GameConfig::POINTS_GAIN_BLACKJACK)}});
         }
     }
     roundManager.updateGameState(gameState.getPhaseName(), gameState.getCurrentPlayerId());

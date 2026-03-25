@@ -73,13 +73,16 @@ std::optional<PhaseName> BattlePhase::onUpdate(){
     bool hostBust = hostHandValue > GameConfig::BLACKJACK_VALUE;
     bool oppBust  = opponentHandValue > GameConfig::BLACKJACK_VALUE;
 
-    if (hostBust) {
+    if(hostBust) eventQueue.push({GameEventType::POINT_CHANGED, PointChangedEvent{host.getId(), GameConfig::BUST_TEXT}});
+    if(oppBust) eventQueue.push({GameEventType::POINT_CHANGED, PointChangedEvent{opponent.getId(), GameConfig::BUST_TEXT}});
+
+    if (hostBust && !oppBust) {
         resolveWin(opponent, host, "Host BUSTS");
-    } else if (oppBust) {
+    } else if (oppBust && !hostBust) {
         resolveWin(host, opponent, "Player " + std::to_string(opponent.getId()) + " BUSTS!");
-    } else if (hostHandValue > opponentHandValue) {
+    } else if (hostHandValue > opponentHandValue && !hostBust && !oppBust) {
         resolveWin(host, opponent, "Host WINS");
-    } else if (hostHandValue < opponentHandValue) {
+    } else if (hostHandValue < opponentHandValue && !hostBust && !oppBust) {
         resolveWin(opponent, host, "Player " + std::to_string(opponent.getId()) + " WINS");
     } else {
         std::cout << "[BattlePhase] TIE " << opponent.getId() << std::endl;

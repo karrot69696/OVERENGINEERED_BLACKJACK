@@ -17,10 +17,11 @@ bool PresentationLayer::isCutscene(GameEventType type) {
         case GameEventType::HAND_REPOSITIONED:
         case GameEventType::NEURALGAMBIT_REVEAL:
         case GameEventType::FATALDEAL_SWAP:
-        case GameEventType::CARDS_REVEALED:
         case GameEventType::CHRONOSPHERE_SNAPSHOT:
         case GameEventType::CHRONOSPHERE_REWIND:
-            uiManager.clearInput();
+        case GameEventType::CARD_REDRAWN:
+        case GameEventType::CARD_REDIRECTED:
+        case GameEventType::CARDS_REVEALED:
             return true;
         default:
             return false;
@@ -28,6 +29,7 @@ bool PresentationLayer::isCutscene(GameEventType type) {
 }
 
 void PresentationLayer::processEvents() {
+    float S = UILayout::S();
     while (!eventQueue.empty()) {
         // A cutscene event was processed last time — wait for its animation to finish
         if (cutsceneBlocking && animationManager.playing()) break;
@@ -67,7 +69,12 @@ void PresentationLayer::processEvents() {
             int playerId = e.playerId;
 
             animationManager.playDeliveranceEffect(cv.cardSprite.getPosition());
-
+            sf::Vector2f playerPos = visualState.getPlayerSeatPos(e.playerId, gameState.getAllPlayerInfo().size());
+            animationManager.spawnFloatingText(
+                    "Grace restored",
+                {playerPos.x, playerPos.y - 30.f * S},
+                sf::Color(132, 255, 56),
+                1.2f);
             animationManager.addSpinAnimation(cardId, [this, cardId, playerId](){
                 std::cout << "[PresentationLayer] DELIVERANCE spin done, cardId=" << cardId
                           << " -> return to deck" << std::endl;
@@ -75,6 +82,7 @@ void PresentationLayer::processEvents() {
                 card.ownerId = -1;
                 card.cardIndex = -1;
                 card.location = CardLocation::DECK;
+
                 animationManager.addReturnToDeckAnimation(cardId, [this, playerId](){
                     std::cout << "[PresentationLayer] DELIVERANCE return done -> repositionHand player="
                               << playerId << std::endl;
@@ -109,8 +117,13 @@ void PresentationLayer::processEvents() {
                       << " text=\"" << e.text << "\"" << std::endl;
             sf::Vector2f seat = visualState.getPlayerSeatPos(
                 e.playerId, (int)gameState.getAllPlayerInfo().size());
-            sf::Vector2f textPos = {seat.x, seat.y - 40.f};
-            sf::Color textColor(245, 224, 32);
+            sf::Vector2f textPos = {seat.x, seat.y - 40.f * S};
+            sf::Color textColor;
+            if (e.text == GameConfig::BUST_TEXT) textColor = sf::Color(255, 89, 0);
+            else {
+                textColor = sf::Color(245, 224, 32);
+            }
+
             animationManager.spawnFloatingText(e.text, textPos, textColor, AnimConfig::POINT_CHANGE_DURATION);
         } break;
 
@@ -127,7 +140,7 @@ void PresentationLayer::processEvents() {
             sf::Vector2f seat = visualState.getPlayerSeatPos(
                 e.playerId, (int)gameState.getAllPlayerInfo().size()
             );
-            sf::Vector2f textPos = {seat.x, seat.y - 40.f};
+            sf::Vector2f textPos = {seat.x, seat.y - 40.f * S};
             sf::Color textColor(255, 69, 69);
             animationManager.spawnFloatingText(e.reason, textPos, textColor, 0.7f);
         } break;
@@ -150,7 +163,7 @@ void PresentationLayer::processEvents() {
                     uiManager.getBorrowedPlayerVisualIds().clear();
                     
             };
-            sf::Vector2f pos = {seat.x - 50.f, seat.y - 10.f};
+            sf::Vector2f pos = {seat.x - 50.f * S, seat.y - 10.f * S};
 
             animationManager.shakeBorrowedPlayerVisual(targetPlayerPv, e.duration,onDone);
             animationManager.playExplosionAnimation(pos, e.scale, e.duration);
@@ -160,14 +173,14 @@ void PresentationLayer::processEvents() {
             auto& e = std::get<DeliveranceEffectEvent>(event.data);
             std::cout << "[PresentationLayer] DELIVERANCE_EFFECT: playerId=" << e.playerId << std::endl;
             sf::Vector2f playerPos = visualState.getPlayerSeatPos(e.playerId, (int)gameState.getAllPlayerInfo().size());
-            animationManager.playDeliveranceEffect({playerPos.x-15.f,playerPos.y});
+            animationManager.playDeliveranceEffect({playerPos.x - 15.f * S, playerPos.y});
         } break;
 
         case GameEventType::FATALDEAL_EFFECT:{
             auto& e = std::get<FatalDealEffectEvent>(event.data);
             std::cout << "[PresentationLayer] FATALDEAL_EFFECT: playerId=" << e.playerId << std::endl;
             sf::Vector2f playerPos = visualState.getPlayerSeatPos(e.playerId, (int)gameState.getAllPlayerInfo().size());
-            animationManager.playFatalDealInitialEffect({playerPos.x-15.f,playerPos.y});
+            animationManager.playFatalDealInitialEffect({playerPos.x - 15.f * S, playerPos.y});
         } break;
 
         case GameEventType::REQUEST_ACTION_INPUT: {
@@ -195,6 +208,12 @@ void PresentationLayer::processEvents() {
                       << e.cardId1 << " & " << e.cardId2
                       << " -> boost card " << e.boostCardId
                       << " +" << e.boostAmount << std::endl;
+            sf::Vector2f cardPos = visualState.getCardVisual(e.boostCardId).cardSprite.getPosition();
+            animationManager.spawnFloatingText(
+                    "All according to plan",
+                {cardPos.x, cardPos.y - 30.f * S},
+                sf::Color(48, 190, 255),
+                1.2f);          
             // Flip the two revealed cards with animation, then play the NG effect
             animationManager.playCardFlip(e.cardId1);
             animationManager.playCardFlip(e.cardId2);
@@ -262,6 +281,12 @@ void PresentationLayer::processEvents() {
             int swappedId = e.swappedCardId;
             int drawnId   = e.drawnCardId;
 
+            sf::Vector2f playerPos = visualState.getPlayerSeatPos(e.fatalDealUserId, gameState.getAllPlayerInfo().size());
+            animationManager.spawnFloatingText(
+                "Your fate is signed",
+                {playerPos.x, playerPos.y - 30.f * S},
+                sf::Color(0, 0, 0),
+                1.2f);
             animationManager.addTeleportSwapAnimation(swappedId, drawnPos, swappedCv.cardIndex, nullptr);
             animationManager.addTeleportSwapAnimation(drawnId,   swappedPos, drawnCv.cardIndex, nullptr);
         } break;
@@ -284,11 +309,11 @@ void PresentationLayer::processEvents() {
             std::cout << "[PresentationLayer] CHRONOSPHERE_SNAPSHOT: P" << e.playerId << std::endl;
             sf::Vector2f playerPos = visualState.getPlayerSeatPos(
                 e.playerId, (int)gameState.getAllPlayerInfo().size());
-            animationManager.playChronosphereEffect({playerPos.x - 15.f, playerPos.y}, true);
+            animationManager.playChronosphereEffect({playerPos.x - 20.f * S, playerPos.y}, true);
             animationManager.spawnFloatingText(
-                "SNAPSHOT TAKEN",
-                {playerPos.x, playerPos.y - 40.f},
-                sf::Color(100, 200, 255),
+                "TIMELINE SEALED",
+                {playerPos.x, playerPos.y - 30.f * S},
+                sf::Color(241, 48, 255),
                 1.2f);
         } break;
 
@@ -297,12 +322,95 @@ void PresentationLayer::processEvents() {
             std::cout << "[PresentationLayer] CHRONOSPHERE_REWIND: P" << e.playerId << std::endl;
             sf::Vector2f playerPos = visualState.getPlayerSeatPos(
                 e.playerId, (int)gameState.getAllPlayerInfo().size());
-            animationManager.playChronosphereEffect({playerPos.x - 15.f, playerPos.y}, false);
+            animationManager.playChronosphereEffect({playerPos.x - 20.f * S, playerPos.y}, false);
             animationManager.spawnFloatingText(
-                "HAND REWOUND",
-                {playerPos.x, playerPos.y - 40.f},
-                sf::Color(100, 200, 255),
+                "TEMPORAL ROLLBACK",
+                {playerPos.x, playerPos.y - 30.f * S},
+                sf::Color(241, 48, 255),
                 1.2f);
+        } break;
+
+        case GameEventType::DESTINYDEFLECT_EFFECT: {
+            auto& e = std::get<ChronosphereSnapshotEvent>(event.data);
+            std::cout << "[PresentationLayer] CHRONOSPHERE_SNAPSHOT: P" << e.playerId << std::endl;
+            sf::Vector2f playerPos = visualState.getPlayerSeatPos(
+                e.playerId, (int)gameState.getAllPlayerInfo().size());
+            animationManager.playDestinyDeflectEffect({playerPos.x - 20.f * S, playerPos.y});
+            animationManager.spawnFloatingText(
+                "Fate calls upon you",
+                {playerPos.x, playerPos.y - 30.f * S},
+                sf::Color(241, 48, 255),
+                1.2f);
+        } break;        
+
+        case GameEventType::CARD_REDIRECTED: {
+            auto& e = std::get<CardRedirectedEvent>(event.data);
+            std::cout << "[PresentationLayer] CARD_REDIRECTED: card " << e.cardId
+                      << " from P" << e.fromPlayerId << " to P" << e.toPlayerId << std::endl;
+            int numPlayers = (int)gameState.getAllPlayerInfo().size();
+
+            // Update card visual ownership
+            CardVisual& cv = visualState.getCardVisual(e.cardId);
+            cv.ownerId = e.toPlayerId;
+            // Find new hand index from game state
+            auto allInfo = gameState.getAllPlayerInfo();
+            for (auto& info : allInfo) {
+                if (info.playerId == e.toPlayerId) {
+                    for (int i = 0; i < (int)info.cardsInHand.size(); i++) {
+                        if (info.cardsInHand[i].getId() == e.cardId) {
+                            cv.cardIndex = i;
+                            break;
+                        }
+                    }
+                    break;
+                }
+            }
+            cv.location = CardLocation::HAND;
+
+            // Play effect at source player
+            sf::Vector2f fromPos = visualState.getPlayerSeatPos(e.fromPlayerId, numPlayers);
+            animationManager.playDestinyDeflectEffect({fromPos.x - 20.f * S, fromPos.y});
+            animationManager.spawnFloatingText(
+                "Fate diverted",
+                {fromPos.x, fromPos.y - 30.f * S},
+                sf::Color(208, 214, 217),
+                1.2f);
+
+            // Animate card sliding to new owner + reposition source hand on finish
+            // (folded into one animation to avoid a second cutscene event that clears UI)
+            animationManager.addRedirectAnimation(e.cardId, e.toPlayerId, cv.cardIndex, e.fromPlayerId);
+        } break;
+
+        case GameEventType::CARD_REDRAWN: {
+            auto& e = std::get<CardRedrawnEvent>(event.data);
+            std::cout << "[PresentationLayer] CARD_REDRAWN: P" << e.playerId
+                      << " redrawn " << e.cardIds.size() << " cards" << std::endl;
+            // Fire all draw animations simultaneously
+            for (int i = 0; i < (int)e.cardIds.size(); i++) {
+                CardVisual& card = visualState.getCardVisual(e.cardIds[i]);
+                card.location = CardLocation::HAND;
+                card.ownerId = e.playerId;
+                card.cardIndex = e.handIndices[i];
+                animationManager.addDrawAnimation(e.playerId, e.handIndices[i], e.cardIds[i]);
+            }
+        } break;
+
+        case GameEventType::DECK_PEEK: {
+            auto& e = std::get<DeckPeekEvent>(event.data);
+            std::cout << "[PresentationLayer] DECK_PEEK: P" << e.playerId
+                      << " peeking at " << e.cardIds.size() << " cards" << std::endl;
+            // Only show to the local player who owns the skill
+            PlayerInfo info = gameState.getPlayerInfo(e.playerId);
+            if (!info.isBot && !info.isRemote) {
+                std::vector<PeekCardInfo> peekCards;
+                for (int i = 0; i < (int)e.cardIds.size(); i++) {
+                    peekCards.push_back({
+                        static_cast<Rank>(e.ranks[i]),
+                        static_cast<Suit>(e.suits[i])
+                    });
+                }
+                uiManager.showDeckPeekOverlay(peekCards, 10.f);
+            }
         } break;
 
         } // switch

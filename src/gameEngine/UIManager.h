@@ -30,6 +30,14 @@ struct Button {
     bool isClicked(sf::Vector2f mousePos);
 };
 // ============================================================================
+// PeekCardInfo — used by UIManager for Destiny Deflect deck peek overlay
+// ============================================================================
+struct PeekCardInfo {
+    Rank rank;
+    Suit suit;
+};
+
+// ============================================================================
 // UIManager
 // ============================================================================
 class UIManager {
@@ -63,6 +71,16 @@ class UIManager {
         // Reactive skill prompt overlay (Yes/No with timer)
         bool showReactivePrompt = false;
 
+        // Player pick overlay (for Destiny Deflect reactive redirect)
+        bool showPlayerPickOverlay = false;
+        std::vector<int> playerPickAllowedIds;
+
+        // Deck peek overlay (non-blocking, for Destiny Deflect passive)
+        bool showDeckPeek = false;
+        std::vector<PeekCardInfo> deckPeekCards;
+        sf::Clock deckPeekClock;
+        float deckPeekDuration = 10.f;
+
         // Chronosphere choice prompt overlay ([Snapshot]/[Rewind] with timer)
         bool showChronoPrompt = false;
         bool chronoHasSnapshot = false;
@@ -76,6 +94,7 @@ class UIManager {
         sf::Texture cardTexture;
         sf::Texture tableTexture;
         sf::Texture playerIcon;
+        sf::Texture playerIcon2;
         sf::Texture cardRankPatch;
         std::unique_ptr<sf::Sprite> cardRankPatchSprite;
         std::vector<PlayerVisual> playerVisuals;
@@ -85,6 +104,10 @@ class UIManager {
         sf::Clock shakeClock;
         int cheatOn = 0;
         bool showDebugTooltip = false;
+        bool showHoverTooltip = true;       // player-facing tooltip (always on)
+        int skillDescPlayerId = -1;         // which player's skill desc is toggled (-1 = none)
+        sf::Clock doubleClickClock;
+        int lastClickedPlayerId = -1;
         int gameLogMode = 0;  // 0=off, 1=recent (fading), 2=full history
         std::vector<int> borrowedPlayerVisualIds;
 
@@ -128,6 +151,13 @@ class UIManager {
         // Chronosphere choice prompt ([Snapshot]/[Rewind] with timer)
         void requestChronoPrompt(bool hasSnapshot, float timerDuration);
 
+        // Destiny Deflect: player pick for reactive redirect
+        void requestPlayerPick(const std::vector<int>& allowedPlayerIds);
+
+        // Destiny Deflect: deck peek overlay (non-blocking)
+        void showDeckPeekOverlay(const std::vector<PeekCardInfo>& cards, float duration);
+        void dismissDeckPeek();
+
         // Sub-renderers
         void renderTable();
         void renderCards();
@@ -139,8 +169,12 @@ class UIManager {
         void renderPickCardOverlay();
         void renderReactivePrompt();
         void renderChronoPrompt();
+        void renderPlayerPickOverlay();
+        void renderDeckPeekOverlay();
         void renderInputTimerBar();
         void renderHoverTooltip();
+        void renderPlayerTooltip();
+        void ensurePlayerVisuals(int count);
         void renderGameLog();
 };
 

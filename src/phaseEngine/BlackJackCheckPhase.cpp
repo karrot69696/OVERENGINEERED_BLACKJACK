@@ -1,9 +1,22 @@
 #include "BlackJackCheckPhase.h"
 #include "../gameEngine/Game.h"
 
+static const std::vector<std::string> bjCheckPhrases = {
+    "BLACKJACK! DIDN'T EVEN SHUFFLE PROPERLY",
+    "BLACKJACK! SKILL ISSUE FOR EVERYONE ELSE",
+    "BLACKJACK! THE TUTORIAL BOSS",
+    "BLACKJACK! BORN WITH A SILVER HAND",
+    "BLACKJACK! GG GO NEXT",
+    "BLACKJACK! THEY INSTALLED HACKS BEFORE ROUND 1",
+    "BLACKJACK! IMAGINE NEEDING MORE THAN 2 CARDS",
+    "BLACKJACK! ACTUAL MAIN CHARACTER",
+    "BLACKJACK! THE AUDACITY",
+    "BLACKJACK! DEAL WITH IT. LITERALLY.",
+};
+
 void BlackJackCheckPhase::onEnter() {
     std::cout << "\n=== ENTERING BLACKJACK CHECK PHASE ===\n" << std::endl;
-    
+
     std::cout << "ROUND: " << roundManager.getRound() << std::endl;
     Player& currentPlayer = getCurrentPlayer();
 
@@ -35,8 +48,9 @@ std::optional<PhaseName> BlackJackCheckPhase::onUpdate(){
 
             std::cout << "[BlackJackCheckPhase] Host player has Black Jack! Host player wins the round!" << std::endl;
             currentPlayer.gainPoint(GameConfig::POINTS_GAIN_BLACKJACK);
+            const std::string& phrase = bjCheckPhrases[std::rand() % bjCheckPhrases.size()];
             eventQueue.push({GameEventType::POINT_CHANGED, PointChangedEvent{
-                currentPlayer.getId(), "BLACKJACK! +" + std::to_string((int)players.size()+2)}});
+                currentPlayer.getId(), phrase + " +" + std::to_string((int)players.size()+2)}});
             roundManager.updateGameState(PhaseName::ROUND_END, currentPlayer.getId());
             return PhaseName::ROUND_END;
         }
@@ -63,8 +77,9 @@ std::optional<PhaseName> BlackJackCheckPhase::onUpdate(){
                 return ids;
             }();
             currentPlayer.lastBlackjackHand = currentIds;
+            const std::string& phrase2 = bjCheckPhrases[std::rand() % bjCheckPhrases.size()];
             eventQueue.push({GameEventType::POINT_CHANGED, PointChangedEvent{
-                currentPlayer.getId(), "BLACKJACK! +" + std::to_string(GameConfig::POINTS_GAIN_BLACKJACK)}});
+                currentPlayer.getId(), phrase2 + " +" + std::to_string(GameConfig::POINTS_GAIN_BLACKJACK)}});
         }
     }
 
@@ -74,6 +89,29 @@ std::optional<PhaseName> BlackJackCheckPhase::onUpdate(){
     //if all players have been checked move to next phase
     if ( allPlayersProcessed() ){
         std::cout << "[BlackJackCheckPhase] All players checked for blackjack. Moving to PLAYER_HIT_PHASE." << std::endl;
+
+        // Destiny Deflect passive: peek top 3 deck cards for the owner
+        for (auto& player : players) {
+            if (player.getSkillName() == SkillName::DESTINYDEFLECT) {
+                auto& deckCards = deck.getCards();
+                int peekCount = std::min(3, (int)deckCards.size());
+                if (peekCount > 0) {
+                    DeckPeekEvent peekEvent;
+                    peekEvent.playerId = player.getId();
+                    for (int i = 0; i < peekCount; i++) {
+                        Card* c = deckCards[(int)deckCards.size() - 1 - i]; // top of deck
+                        peekEvent.cardIds.push_back(c->getId());
+                        peekEvent.ranks.push_back(static_cast<uint8_t>(c->getRank()));
+                        peekEvent.suits.push_back(static_cast<uint8_t>(c->getSuit()));
+                    }
+                    eventQueue.push({GameEventType::DECK_PEEK, peekEvent});
+                    std::cout << "[BlackJackCheckPhase] Destiny Deflect passive: P" << player.getId()
+                              << " peeks at top " << peekCount << " deck cards" << std::endl;
+                }
+                break; // only one Destiny Deflect owner
+            }
+        }
+
         roundManager.updateGameState(PhaseName::PLAYER_HIT_PHASE, 0);
         return PhaseName::PLAYER_HIT_PHASE;
     }

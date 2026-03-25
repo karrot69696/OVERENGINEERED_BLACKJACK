@@ -51,18 +51,23 @@ private:
     sf::Texture neuralGambitTexture;
     std::unique_ptr<sf::Sprite> neuralGambitSprite1;
     std::unique_ptr<sf::Sprite> neuralGambitSprite2;
+    sf::Texture chronosphereTexture;
     std::unique_ptr<sf::Sprite> chronosphereSprite;
-    PlayerVisual* borrowedPlayerVisual;
+    sf::Texture destinyDeflectTexture;
+    std::unique_ptr<sf::Sprite> destinyDeflectSprite;
+    PlayerVisual* borrowedPlayerVisual = nullptr;
 public:
     AnimationManager(sf::RenderWindow& window, GameState& gameState, VisualState& visualState) : 
     window(window), gameState(gameState), visualState(visualState) {
-        std::filesystem::path shockTextPath = "../assets/images/cartoon-shock-animation-frames.png";
+        std::filesystem::path shockTextPath = "assets/images/cartoon-shock-animation-frames.png";
         shockTexture.loadFromFile(shockTextPath);
-        std::filesystem::path explosionPath = "../assets/images/Explosion02_spritesheet.png";
+        std::filesystem::path explosionPath = "assets/images/Explosion02_spritesheet.png";
         explosionTexture.loadFromFile(explosionPath);
-        holyTexture.loadFromFile("../assets/images/holySpellEffect.png");
-        fatalDealTexture.loadFromFile("../assets/images/fatalDealEffect.png");
-        neuralGambitTexture.loadFromFile("../assets/images/neuralGambitEffect.png");
+        holyTexture.loadFromFile("assets/images/holySpellEffect.png");
+        fatalDealTexture.loadFromFile("assets/images/fatalDealEffect.png");
+        neuralGambitTexture.loadFromFile("assets/images/neuralGambitEffect.png");
+        chronosphereTexture.loadFromFile("assets/images/chronoSphereEffect.png");
+        destinyDeflectTexture.loadFromFile("assets/images/destinyDeflectEffect.png");
     }
     void add(Animation anim){
         animations.push_back(anim);
@@ -76,6 +81,7 @@ public:
         renderFatalDealEffect();
         renderNeuralGambitEffect();
         renderChronosphereEffect();
+        renderDestinyDeflectEffect();
         renderBorrowedPlayerVisual();
     }
 
@@ -125,27 +131,34 @@ public:
     void addDrawAnimation(int playerId, int handIndex, int cardId){
 
         CardVisual& card = visualState.getCardVisual(cardId);
-        sf::Vector2f startPosition = card.cardSprite.getPosition();
+        auto pos = card.cardSprite.getPosition();
+        auto localBounds  = card.cardSprite.getLocalBounds();
+        card.cardSprite.setOrigin({localBounds.size.x / 2.f, localBounds.size.y / 2.f});
+        card.cardSprite.setPosition(pos);
+        sf::Vector2f startPosition = pos;
         // Visual state (location, ownerId, cardIndex) is set by PresentationLayer before this call
 
         sf::Vector2f seatPos = visualState.getPlayerSeatPos(playerId, gameState.getAllPlayerInfo().size());
         sf::Vector2f endPosition = {
-            seatPos.x + handIndex * UILayout::CARD_SPACING,
-            seatPos.y
+            seatPos.x + UILayout::HAND_OFFSET_X() + handIndex * UILayout::CARD_SPACING(),
+            seatPos.y + UILayout::HAND_OFFSET_Y()
         };
 
         // Set center origin so rotation spins around the card center (frisbee)
         // setOrigin needs local coords; worldOffset needs world (scaled) coords
-        auto localBounds  = card.cardSprite.getLocalBounds();
-        auto globalBounds = card.cardSprite.getGlobalBounds();
-        sf::Vector2f localCenter = {localBounds.size.x / 2.f, localBounds.size.y / 2.f};
-        sf::Vector2f worldOffset = {globalBounds.size.x / 2.f, globalBounds.size.y / 2.f};
+        
+        //auto globalBounds = card.cardSprite.getGlobalBounds();
+       
+        //sf::Vector2f worldOffset = {globalBounds.size.x / 2.f, globalBounds.size.y / 2.f};
 
-        card.cardSprite.setOrigin(localCenter);
+       
 
         // Convert top-left positions to center-based
-        sf::Vector2f centerStart = startPosition + worldOffset;
-        sf::Vector2f centerEnd = endPosition + worldOffset;
+        //  sf::Vector2f centerStart = startPosition + worldOffset;
+        //  sf::Vector2f centerEnd = endPosition + worldOffset;
+         sf::Vector2f centerStart = startPosition ;
+         sf::Vector2f centerEnd = endPosition ;
+
 
         auto func = [&card, centerStart, centerEnd](float t){
             // Mostly straight, slight slowdown at end
@@ -165,16 +178,13 @@ public:
 
         CardVisual& card = visualState.getCardVisual(cardId);
 
-        // Current hand position (already center-based from draw animation)
+        // Current position (center-origin based)
         sf::Vector2f startPosition = card.cardSprite.getPosition();
 
-        // Deck position (top-left based), convert to center
-        auto bounds = card.cardSprite.getGlobalBounds();
-        sf::Vector2f worldOffset = {bounds.size.x / 2.f, bounds.size.y / 2.f};
-
-        float deckX = static_cast<float>(window.getSize().x) * UILayout::DECK_X_RATIO;
+        // Deck position — same as where deck cards sit in rebuildFromState
+        float deckX = static_cast<float>(window.getSize().x) * UILayout::DECK_X_RATIO();
         float deckY = static_cast<float>(window.getSize().y) / 2.f;
-        sf::Vector2f centerEnd = {deckX + worldOffset.x, deckY + worldOffset.y};
+        sf::Vector2f centerEnd = {deckX, deckY};
 
         // Visual state (ownerId, cardIndex, location) is set by PresentationLayer before this call
 
@@ -201,6 +211,7 @@ public:
         // Ensure center origin
         auto localBounds = card.cardSprite.getLocalBounds();
         card.cardSprite.setOrigin({localBounds.size.x / 2.f, localBounds.size.y / 2.f});
+        card.cardSprite.setPosition(origPos);
 
         // Phase 1: shake in place, then shrink to nothing
         auto phase1 = [&card, origPos, origScale](float t) {
@@ -254,6 +265,7 @@ public:
 
         auto bounds = card.cardSprite.getLocalBounds();
         card.cardSprite.setOrigin({bounds.size.x / 2.f, bounds.size.y / 2.f});
+        card.cardSprite.setPosition(startPosition);
 
         auto func = [this,&card, startPosition](float t){
             float ease = easeOutCubic(t);
@@ -284,13 +296,13 @@ public:
             CardVisual& cv = *handCards[i];
             cv.cardIndex = i;
 
-            auto globalBounds = cv.cardSprite.getGlobalBounds();
-            sf::Vector2f worldOffset = {globalBounds.size.x / 2.f, globalBounds.size.y / 2.f};
-
-            sf::Vector2f startPos = cv.cardSprite.getPosition();
+            auto startPos = cv.cardSprite.getPosition();
+            auto localBounds = cv.cardSprite.getLocalBounds();
+            cv.cardSprite.setOrigin({localBounds.size.x / 2.f, localBounds.size.y / 2.f});
+            cv.cardSprite.setPosition(startPos);        
             sf::Vector2f endPos = {
-                seatPos.x + i * UILayout::CARD_SPACING + worldOffset.x,
-                seatPos.y + worldOffset.y
+                seatPos.x + UILayout::HAND_OFFSET_X() + i * UILayout::CARD_SPACING(),
+                seatPos.y + UILayout::HAND_OFFSET_Y()
             };
 
             // Skip if already at target position (within tolerance)
@@ -334,14 +346,10 @@ public:
         sf::Vector2f origScale = card.cardSprite.getScale();
 
         // Ensure center origin for symmetric scaling
+        auto flipPos = card.cardSprite.getPosition();
         auto localBounds = card.cardSprite.getLocalBounds();
-        sf::Vector2f currentOrigin = card.cardSprite.getOrigin();
-        if (currentOrigin.x < 1.f && currentOrigin.y < 1.f) {
-            auto globalBounds = card.cardSprite.getGlobalBounds();
-            sf::Vector2f worldOffset = {globalBounds.size.x / 2.f, globalBounds.size.y / 2.f};
-            card.cardSprite.setOrigin({localBounds.size.x / 2.f, localBounds.size.y / 2.f});
-            card.cardSprite.setPosition(card.cardSprite.getPosition() + worldOffset);
-        }
+        card.cardSprite.setOrigin({localBounds.size.x / 2.f, localBounds.size.y / 2.f});
+        card.cardSprite.setPosition(flipPos);
 
         auto flipped = std::make_shared<bool>(false);
 
@@ -405,7 +413,8 @@ public:
 
     void spawnPhaseText(std::string text, float duration){
 
-        phaseText = std::make_unique<sf::Text>(visualState.getFont(), text, 32.f);
+        float S = GameSettings::instance().S;
+        phaseText = std::make_unique<sf::Text>(visualState.getFont(), text, (unsigned int)(32.f * S));
 
         sf::Text* textPtr = phaseText.get();
         auto bounds = textPtr->getLocalBounds();
@@ -465,38 +474,66 @@ public:
         this->add(phaseTransitionAnimation);
     }
 
-    void spawnFloatingText(const std::string& text, sf::Vector2f position, sf::Color color, float duration = 1.0f){
-        auto ft = std::make_shared<sf::Text>(visualState.getFont(), text, 15.f);
-        ft->setFillColor(color);
+    void spawnFloatingText(const std::string& text, sf::Vector2f position, sf::Color color, float duration = 1.2f){
+        float S = GameSettings::instance().S;
+        // Scale font size and color intensity by text length
+        int len = (int)text.size();
+        float fontSize = 12.f * S;
+        sf::Color colorOverride = color;
+        bool isNewHost = text.rfind("New host - ", 0) == 0;
+        if (isNewHost){
+            fontSize = 10.f * S;
+            colorOverride = sf::Color(255, 215, 0); // gold for new host dealer text
+        }
+        auto ft = std::make_shared<sf::Text>(visualState.getFont(), text, fontSize);
+        ft->setFillColor(colorOverride);
         ft->setPosition(position);
+        ft->setOutlineThickness(0.1f);
+        ft->setOutlineColor(sf::Color::Black);
         floatingTexts.push_back(ft);
         auto bounds = ft->getLocalBounds();
         ft->setOrigin({bounds.position.x + bounds.size.x / 2.f,
                         bounds.position.y + bounds.size.y / 2.f});
-        auto ptr = ft; // shared_ptr keeps it alive
-        sf::Vector2f startPos = position;
 
-        auto func = [this, ptr, startPos, color](float t)
+        // Clamp start position so text stays on screen
+        float winW = static_cast<float>(window.getSize().x);
+        float winH = static_cast<float>(window.getSize().y);
+        float halfW = bounds.size.x / 2.f;
+        float halfH = bounds.size.y / 2.f;
+
+        sf::Vector2f startPos = position;
+        // Left/right clamp
+        if (startPos.x - halfW < 0.f) startPos.x = halfW;
+        if (startPos.x + halfW > winW) startPos.x = winW - halfW;
+
+        float floatDistance = 25.f * S;
+        float totalMove = floatDistance * 2.f;
+
+        // push startPos down so upward animation never goes off-screen
+        startPos.y = std::max(startPos.y, totalMove + halfH);
+
+        ft->setPosition(startPos);
+
+        auto ptr = ft; // shared_ptr keeps it alive
+        auto func = [this, ptr, startPos, colorOverride, floatDistance](float t)
         {
-            float floatDistance = 30.f;   // stronger upward motion
             float peakScale = 2.0f;
 
             // --- POSITION (fast start, slows down) ---
-            float y = startPos.y - floatDistance * easeOutCubic(t);
+            float yOffset = floatDistance * easeOutCubic(t);
+            float y = startPos.y - yOffset;
 
             // --- SCALE (quick pop + overshoot + settle) ---
-            float scaleT = std::min(t * 3.0f, 1.0f); // VERY fast scale phase
+            float scaleT = std::min(t * 3.0f, 1.0f);
             float s;
 
             if (scaleT < 0.7f)
             {
-                // explode outward
                 float local = scaleT / 0.7f;
                 s = 1.f + (peakScale - 1.f) * easeInCubic(local);
             }
             else
             {
-                // snap back slightly (overshoot feel)
                 float local = (scaleT - 0.7f) / 0.7f;
                 s = peakScale - 0.15f * easeInCubic(local);
             }
@@ -508,13 +545,13 @@ public:
             if (t > fadeStart)
             {
                 float fadeT = (t - fadeStart) / (1.f - fadeStart);
-                alpha = 1.f - easeInCubic(fadeT); // fast disappear
+                alpha = 1.f - easeInCubic(fadeT);
             }
 
-            sf::Color c = color;
+            sf::Color c = colorOverride;
             c.a = static_cast<uint8_t>(255.f * alpha);
 
-            // --- OPTIONAL: tiny horizontal shake (adds impact) ---
+            // --- tiny horizontal shake (adds impact) ---
             float shake = (1.f - t) * 3.f * std::sin(t * 40.f);
             float x = startPos.x + shake;
 
@@ -566,9 +603,9 @@ public:
     }
 
     void playShockAnimation(int winnerId, int loserId, float duration = 1.0f){
-
+        float S = GameSettings::instance().S;
         int totalPlayers = (int)gameState.getAllPlayerInfo().size();
-        sf::Vector2f offSet = {-30.f, 0.f};
+        sf::Vector2f offSet = {-30.f * S, 0.f};
         sf::Vector2f winnerPos = visualState.getPlayerSeatPos(winnerId, totalPlayers) + offSet;
         sf::Vector2f loserPos  = visualState.getPlayerSeatPos(loserId, totalPlayers) + offSet;
         sf::Vector2f midpoint  = (winnerPos + loserPos) / 2.f;
@@ -611,12 +648,13 @@ public:
             window.draw(*shockSprite);
     }
 
-    void playExplosionAnimation(sf::Vector2f position, float scale = 2.f, float duration = 0.6f){
+    void playExplosionAnimation(sf::Vector2f position, float scale = 2.f, float duration = 0.8f){
+        float S = GameSettings::instance().S;
         explosionSprite = std::make_unique<sf::Sprite>(explosionTexture);
 
         explosionSprite->setOrigin({51 / 2.f, 65 / 2.f});
         explosionSprite->setPosition(position);
-        explosionSprite->setScale({scale, scale});
+        explosionSprite->setScale({scale * S, scale * S});
         //a lambda function that plays once when animation is finished
         //called by AnimationManager::update()-> if (time > duration) -> run onFinish() -> erase(animation)
         auto onDone = [this](){ explosionSprite.reset(); };
@@ -631,12 +669,12 @@ public:
         onDone); 
     }
 
-    void playDeliveranceEffect(sf::Vector2f position, float scale = 2.f, float duration = 0.6f){
-
+    void playDeliveranceEffect(sf::Vector2f position, float scale = 2.f, float duration = 0.8f){
+        float S = GameSettings::instance().S;
         holySprite = std::make_unique<sf::Sprite>(holyTexture);
-        holySprite->setOrigin({32,32}); 
-        holySprite->setPosition(position); 
-        holySprite->setScale({scale,scale}); 
+        holySprite->setOrigin({32,32});
+        holySprite->setPosition(position);
+        holySprite->setScale({scale * S, scale * S}); 
         auto onDone = [this](){ holySprite.reset(); };
         playSpriteAnimation(holySprite.get(), 
         19, //frameCount
@@ -651,12 +689,13 @@ public:
     }
 
     void playFatalDealInitialEffect(sf::Vector2f position, float scale = 2.f, float duration = 0.6f){
+        float S = GameSettings::instance().S;
        if(!fatalDealSprite1) fatalDealSprite1 = std::make_unique<sf::Sprite>(fatalDealTexture);
-        fatalDealSprite1->setOrigin({32,32}); 
-        fatalDealSprite1->setPosition(position); 
-        fatalDealSprite1->setScale({scale,scale}); 
+        fatalDealSprite1->setOrigin({32,32});
+        fatalDealSprite1->setPosition(position);
+        fatalDealSprite1->setScale({scale * S, scale * S}); 
         auto onDone = [this](){ fatalDealSprite1.reset(); };
-        playSpriteAnimation(fatalDealSprite1.get(),19, 0,0,64,64, duration, 64, onDone);
+        playSpriteAnimation(fatalDealSprite1.get(),19,0,512,64,64, duration, 64, onDone);
     }
 
     void renderExplosionAnimation(){
@@ -668,10 +707,11 @@ public:
             window.draw(*holySprite);
     }
     void playFatalDealEffect(sf::Vector2f pos1, sf::Vector2f pos2, float scale = 2.f, float duration = 1.0f){
+        float S = GameSettings::instance().S;
         if(!fatalDealSprite1) fatalDealSprite1 = std::make_unique<sf::Sprite>(fatalDealTexture);
         fatalDealSprite1->setOrigin({32,32});
         fatalDealSprite1->setPosition(pos1);
-        fatalDealSprite1->setScale({scale,scale});
+        fatalDealSprite1->setScale({scale * S, scale * S});
         auto onDone1 = [this](){ fatalDealSprite1.reset(); };
         playSpriteAnimation(fatalDealSprite1.get(),
             19, 0, 512, 64, 64, duration, 64, onDone1);
@@ -679,28 +719,32 @@ public:
         fatalDealSprite2 = std::make_unique<sf::Sprite>(fatalDealTexture);
         fatalDealSprite2->setOrigin({32,32});
         fatalDealSprite2->setPosition(pos2);
-        fatalDealSprite2->setScale({scale,scale});
+        fatalDealSprite2->setScale({scale * S, scale * S});
         auto onDone2 = [this](){ fatalDealSprite2.reset(); };
         playSpriteAnimation(fatalDealSprite2.get(),
             19, 0, 512, 64, 64, duration, 64, onDone2);
     }
     void playNeuralGambitEffect(int cardId1, int cardId2, int boostCardId, int boostAmount,
-        float scale = 2.f, float duration = 1.0f, std::function<void()> onFinish = nullptr)
+        float scale = 2.f, float duration = 0.8f, std::function<void()> onFinish = nullptr)
     {
+        float S = GameSettings::instance().S;
         CardVisual& cardCv1 = visualState.getCardVisual(cardId1);
         CardVisual& cardCv2 = visualState.getCardVisual(cardId2);
         CardVisual& boostCv = visualState.getCardVisual(boostCardId);
 
-        auto bounds = cardCv1.cardSprite.getLocalBounds();
-        cardCv1.cardSprite.setOrigin({bounds.size.x / 2.f, bounds.size.y / 2.f});
-        bounds = cardCv2.cardSprite.getLocalBounds();
-        cardCv2.cardSprite.setOrigin({bounds.size.x / 2.f, bounds.size.y / 2.f});
-        bounds = boostCv.cardSprite.getLocalBounds();
-        boostCv.cardSprite.setOrigin({bounds.size.x / 2.f, bounds.size.y / 2.f});
-
         sf::Vector2f pos1 = cardCv1.cardSprite.getPosition();
         sf::Vector2f pos2 = cardCv2.cardSprite.getPosition();
         sf::Vector2f posBoosted = boostCv.cardSprite.getPosition();
+
+        auto bounds = cardCv1.cardSprite.getLocalBounds();
+        cardCv1.cardSprite.setOrigin({bounds.size.x / 2.f, bounds.size.y / 2.f});
+        cardCv1.cardSprite.setPosition(pos1);
+        bounds = cardCv2.cardSprite.getLocalBounds();
+        cardCv2.cardSprite.setOrigin({bounds.size.x / 2.f, bounds.size.y / 2.f});
+        cardCv2.cardSprite.setPosition(pos2);
+        bounds = boostCv.cardSprite.getLocalBounds();
+        boostCv.cardSprite.setOrigin({bounds.size.x / 2.f, bounds.size.y / 2.f});
+        boostCv.cardSprite.setPosition(posBoosted);
         sf::Vector2f origScale = boostCv.cardSprite.getScale();
 
         // Phase 2: shake boosted card, then pop-scale it
@@ -743,7 +787,7 @@ public:
         neuralGambitSprite1 = std::make_unique<sf::Sprite>(neuralGambitTexture);
         neuralGambitSprite1->setOrigin({32,32});
         neuralGambitSprite1->setPosition(pos1);
-        neuralGambitSprite1->setScale({scale,scale});
+        neuralGambitSprite1->setScale({scale * S, scale * S});
         auto onDone1 = [this, cardId1, boostCardId, phase2, phase2Finish](){
             neuralGambitSprite1.reset();
             if (cardId1 == boostCardId){
@@ -756,7 +800,7 @@ public:
         neuralGambitSprite2 = std::make_unique<sf::Sprite>(neuralGambitTexture);
         neuralGambitSprite2->setOrigin({32,32});
         neuralGambitSprite2->setPosition(pos2);
-        neuralGambitSprite2->setScale({scale,scale});
+        neuralGambitSprite2->setScale({scale * S, scale * S});
         auto onDone2 = [this, cardId2, boostCardId, phase2, phase2Finish](){
             neuralGambitSprite2.reset();
             if (cardId2 == boostCardId){
@@ -815,26 +859,77 @@ public:
     }
     // Chronosphere effect — reuses holy spritesheet as placeholder
     void playChronosphereEffect(sf::Vector2f position, bool isSnapshot,
-                                float scale = 2.f, float duration = 0.6f)
+                                float scale = 2.f, float duration = 0.8f)
     {
-        chronosphereSprite = std::make_unique<sf::Sprite>(holyTexture);
+        float S = GameSettings::instance().S;
+        chronosphereSprite = std::make_unique<sf::Sprite>(chronosphereTexture);
         chronosphereSprite->setOrigin({32, 32});
         chronosphereSprite->setPosition(position);
-        chronosphereSprite->setScale({scale, scale});
-
-        // Tint blue for snapshot, purple for rewind
-        if (isSnapshot)
-            chronosphereSprite->setColor(sf::Color(100, 200, 255));
-        else
-            chronosphereSprite->setColor(sf::Color(180, 100, 255));
+        chronosphereSprite->setScale({scale * S, scale * S});
 
         auto onDone = [this](){ chronosphereSprite.reset(); };
         playSpriteAnimation(chronosphereSprite.get(),
-            19, 0, 0, 64, 64, duration, 64, onDone);
+            19, 0, 64, 64, 64, duration, 64, onDone);
     }
     void renderChronosphereEffect(){
         if (chronosphereSprite)
             window.draw(*chronosphereSprite);
+    }
+
+    // Destiny Deflect effect — reuses holy spritesheet with cyan tint
+    void playDestinyDeflectEffect(sf::Vector2f position, float scale = 2.f, float duration = 0.8f) {
+        float S = GameSettings::instance().S;
+        destinyDeflectSprite = std::make_unique<sf::Sprite>(destinyDeflectTexture);
+        destinyDeflectSprite->setOrigin({32, 32});
+        destinyDeflectSprite->setPosition(position);
+        destinyDeflectSprite->setScale({scale * S, scale * S});
+        auto onDone = [this](){ destinyDeflectSprite.reset(); };
+        playSpriteAnimation(destinyDeflectSprite.get(),
+            19, 0, 320, 64, 64, duration, 64, onDone);
+    }
+
+    void renderDestinyDeflectEffect() {
+        if (destinyDeflectSprite)
+            window.draw(*destinyDeflectSprite);
+    }
+
+    // Redirect animation: slide card from current position to target player's hand
+    void addRedirectAnimation(int cardId, int toPlayerId, int handIndex, int fromPlayerId) {
+        CardVisual& card = visualState.getCardVisual(cardId);
+        sf::Vector2f startPos = card.cardSprite.getPosition();
+
+        int numPlayers = (int)gameState.getAllPlayerInfo().size();
+        sf::Vector2f seatPos = visualState.getPlayerSeatPos(toPlayerId, numPlayers);
+        sf::Vector2f endPos = {
+            seatPos.x + UILayout::HAND_OFFSET_X() + handIndex * UILayout::CARD_SPACING(),
+            seatPos.y + UILayout::HAND_OFFSET_Y()
+        };
+
+        auto localBounds = card.cardSprite.getLocalBounds();
+        card.cardSprite.setOrigin({localBounds.size.x / 2.f, localBounds.size.y / 2.f});
+        card.cardSprite.setPosition(startPos);
+
+        float origScaleX = card.cardSprite.getScale().x;
+        float origScaleY = card.cardSprite.getScale().y;
+
+        Animation anim;
+        anim.time = 0;
+        anim.duration = AnimConfig::CARD_DRAW_DURATION;
+        anim.update = [this, cardId, startPos, endPos](float t) {
+            float easedT = t * t * (3.f - 2.f * t); // smoothstep
+            CardVisual& cv = visualState.getCardVisual(cardId);
+            float cx = startPos.x + (endPos.x - startPos.x) * easedT;
+            float cy = startPos.y + (endPos.y - startPos.y) * easedT;
+            cv.cardSprite.setPosition({cx, cy});
+        };
+        anim.onFinish = [this, cardId, origScaleX, origScaleY, fromPlayerId]() {
+            CardVisual& cv = visualState.getCardVisual(cardId);
+            cv.cardSprite.setScale({origScaleX, origScaleY});
+            // Reposition source player's remaining hand inline — avoids a
+            // separate HAND_REPOSITIONED cutscene that would clearInput()
+            repositionHand(fromPlayerId);
+        };
+        add(anim);
     }
 };
 

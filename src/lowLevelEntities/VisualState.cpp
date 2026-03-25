@@ -30,8 +30,8 @@ static int cardSpriteRow(Suit suit) {
 VisualState::VisualState(sf::RenderWindow& window, GameState& gameState)
     : window(window), gameState(gameState) {
 
-    std::filesystem::path fontPath =            "../assets/fonts/PixeloidSans.ttf";
-    std::filesystem::path cardTexturePath =     "../assets/images/CuteCards.png";
+    std::filesystem::path fontPath =            "assets/fonts/PixeloidSans.ttf";
+    std::filesystem::path cardTexturePath =     "assets/images/CuteCards.png";
 
     if (!font.openFromFile(fontPath)) {
         std::cerr << "[UIManager] Failed to load font from assets/fonts/PixeloidSans.ttf" << std::endl;
@@ -48,8 +48,8 @@ void VisualState::buildCardVisuals(Deck& deck, std::vector<Player>& players){
     sf::Vector2u texSize = cardTexture.getSize();
     int cellW = (int)texSize.x / 15;
     int cellH = (int)texSize.y / 4;
-    float scaleX = UILayout::CARD_SIZE.x / cellW;
-    float scaleY = UILayout::CARD_SIZE.y / cellH;
+    float scaleX = UILayout::CARD_SIZE().x / cellW;
+    float scaleY = UILayout::CARD_SIZE().y / cellH;
 
     //card coordinates on screen
 
@@ -59,7 +59,7 @@ void VisualState::buildCardVisuals(Deck& deck, std::vector<Player>& players){
 
     int totalCards = deck.getCards().size();
 
-    float startX = 50.f;  // left side
+    float startX = 50.f * GameSettings::instance().S;  // left side
     auto winSize = window.getSize();
     float windowH = static_cast<float>(winSize.y);
     float y = windowH / 2.f;  // middle vertically
@@ -107,11 +107,11 @@ void VisualState::rebuildFromState(Deck& deck, std::vector<Player>& players) {
     sf::Vector2u texSize = cardTexture.getSize();
     int cellW = (int)texSize.x / 15;
     int cellH = (int)texSize.y / 4;
-    float scaleX = UILayout::CARD_SIZE.x / cellW;
-    float scaleY = UILayout::CARD_SIZE.y / cellH;
+    float scaleX = UILayout::CARD_SIZE().x / cellW;
+    float scaleY = UILayout::CARD_SIZE().y / cellH;
 
     auto winSize = window.getSize();
-    float startX = static_cast<float>(winSize.x) * UILayout::DECK_X_RATIO;
+    float startX = static_cast<float>(winSize.x) * UILayout::DECK_X_RATIO();
     float windowH = static_cast<float>(winSize.y);
     float deckY = windowH / 2.f;
 
@@ -134,7 +134,8 @@ void VisualState::rebuildFromState(Deck& deck, std::vector<Player>& players) {
         sprite.setTextureRect(sf::IntRect({col * cellW, row * cellH}, {cellW, cellH}));
         sprite.setScale({scaleX, scaleY});
         sprite.setPosition(pos);
-
+        auto localBounds = sprite.getLocalBounds();
+        sprite.setOrigin({localBounds.size.x / 2.f, localBounds.size.y / 2.f});
         CardVisual cv(sprite);
         cv.cardId = card->getId();
         cv.cardIndex = card->getHandIndex();
@@ -159,8 +160,8 @@ void VisualState::rebuildFromState(Deck& deck, std::vector<Player>& players) {
         sf::Vector2f seatPos = getPlayerSeatPos(player.getId(), totalPlayers);
         for (int c = 0; c < player.getHandSize(); c++) {
             Card* card = player.getCardInHand(c);
-            float cardX = seatPos.x + c * UILayout::CARD_SPACING;
-            float cardY = seatPos.y;
+            float cardX = seatPos.x + UILayout::HAND_OFFSET_X() + c * UILayout::CARD_SPACING();
+            float cardY = seatPos.y + UILayout::HAND_OFFSET_Y();
             makeVisual(card, CardLocation::HAND, {cardX, cardY});
         }
     }

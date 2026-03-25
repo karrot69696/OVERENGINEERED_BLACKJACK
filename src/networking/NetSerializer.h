@@ -89,8 +89,9 @@ public:
 // ============================================================================
 struct TargetRequestData {
     int requesterId = -1;             // who triggered the skill
-    std::vector<int> allowedCardIds;  // card IDs the recipient may pick from
+    std::vector<int> allowedCardIds;  // card IDs the recipient may pick from (also player IDs for player pick)
     bool isBoostPick = false;         // false = pick your card, true = pick which card to boost
+    bool isPlayerPick = false;        // true = pick a player (Destiny Deflect redirect target)
 };
 
 struct ReactivePromptData {
@@ -354,6 +355,31 @@ inline void writeGameEvent(ByteBuffer& buf, const GameEvent& event) {
         else if constexpr (std::is_same_v<T, ChronosphereRewindEvent>) {
             buf.writeI32(payload.playerId);
         }
+        else if constexpr (std::is_same_v<T, CardRedirectedEvent>) {
+            buf.writeI32(payload.cardId);
+            buf.writeI32(payload.fromPlayerId);
+            buf.writeI32(payload.toPlayerId);
+        }
+        else if constexpr (std::is_same_v<T, DestinyDeflectEffectEvent>) {
+            buf.writeI32(payload.playerId);
+        }
+        else if constexpr (std::is_same_v<T, DeckPeekEvent>) {
+            buf.writeI32(payload.playerId);
+            buf.writeU16(static_cast<uint16_t>(payload.cardIds.size()));
+            for (int i = 0; i < (int)payload.cardIds.size(); i++) {
+                buf.writeI32(payload.cardIds[i]);
+                buf.writeU8(payload.ranks[i]);
+                buf.writeU8(payload.suits[i]);
+            }
+        }
+        else if constexpr (std::is_same_v<T, CardRedrawnEvent>) {
+            buf.writeI32(payload.playerId);
+            buf.writeU16(static_cast<uint16_t>(payload.cardIds.size()));
+            for (int i = 0; i < (int)payload.cardIds.size(); i++) {
+                buf.writeI32(payload.cardIds[i]);
+                buf.writeI32(payload.handIndices[i]);
+            }
+        }
     }, event.data);
 }
 
@@ -495,6 +521,39 @@ inline GameEvent readGameEvent(ByteBuffer& buf) {
             e.playerId = buf.readI32();
             data = e;
         } break;
+        case GameEventType::CARD_REDIRECTED: {
+            CardRedirectedEvent e;
+            e.cardId = buf.readI32();
+            e.fromPlayerId = buf.readI32();
+            e.toPlayerId = buf.readI32();
+            data = e;
+        } break;
+        case GameEventType::DESTINYDEFLECT_EFFECT: {
+            DestinyDeflectEffectEvent e;
+            e.playerId = buf.readI32();
+            data = e;
+        } break;
+        case GameEventType::DECK_PEEK: {
+            DeckPeekEvent e;
+            e.playerId = buf.readI32();
+            uint16_t count = buf.readU16();
+            for (uint16_t i = 0; i < count; i++) {
+                e.cardIds.push_back(buf.readI32());
+                e.ranks.push_back(buf.readU8());
+                e.suits.push_back(buf.readU8());
+            }
+            data = e;
+        } break;
+        case GameEventType::CARD_REDRAWN: {
+            CardRedrawnEvent e;
+            e.playerId = buf.readI32();
+            uint16_t count = buf.readU16();
+            for (uint16_t i = 0; i < count; i++) {
+                e.cardIds.push_back(buf.readI32());
+                e.handIndices.push_back(buf.readI32());
+            }
+            data = e;
+        } break;
     }
 
     return GameEvent{type, data};
@@ -524,6 +583,7 @@ inline std::vector<GameEvent> readEventBatch(ByteBuffer& buf) {
 inline void writeTargetRequest(ByteBuffer& buf, const TargetRequestData& req) {
     buf.writeI32(req.requesterId);
     buf.writeBool(req.isBoostPick);
+    buf.writeBool(req.isPlayerPick);
     buf.writeU16(static_cast<uint16_t>(req.allowedCardIds.size()));
     for (int id : req.allowedCardIds) buf.writeI32(id);
 }
@@ -532,6 +592,7 @@ inline TargetRequestData readTargetRequest(ByteBuffer& buf) {
     TargetRequestData req;
     req.requesterId = buf.readI32();
     req.isBoostPick = buf.readBool();
+    req.isPlayerPick = buf.readBool();
     uint16_t n = buf.readU16();
     for (uint16_t i = 0; i < n; i++) req.allowedCardIds.push_back(buf.readI32());
     return req;

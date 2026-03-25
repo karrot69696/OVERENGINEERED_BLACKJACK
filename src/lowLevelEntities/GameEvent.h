@@ -36,6 +36,11 @@ enum class GameEventType {
 
     CHRONOSPHERE_SNAPSHOT,       // skill visual: snapshot taken
     CHRONOSPHERE_REWIND,         // skill visual: hand rewound to snapshot
+
+    DESTINYDEFLECT_EFFECT,
+    CARD_REDIRECTED,             // skill visual: card redirect animation
+    DECK_PEEK,                   // passive: show top N deck cards (non-blocking)
+    CARD_REDRAWN,                // chrono rewind: batch card draw (no reactive trigger, all animate at once)
 };
 
 // Payloads carry IDs only, never screen positions
@@ -146,6 +151,28 @@ struct ChronosphereRewindEvent {
     int playerId;
 };
 
+struct CardRedirectedEvent {
+    int cardId;
+    int fromPlayerId;
+    int toPlayerId;
+};
+struct DestinyDeflectEffectEvent{
+    int playerId;
+};
+
+struct DeckPeekEvent {
+    int playerId;
+    std::vector<int> cardIds;
+    std::vector<uint8_t> ranks;
+    std::vector<uint8_t> suits;
+};
+
+struct CardRedrawnEvent {
+    int playerId;
+    std::vector<int> cardIds;       // all cards dealt in the rewind
+    std::vector<int> handIndices;   // corresponding hand index for each card
+};
+
 using GameEventData = std::variant<
     CardDrawnEvent,
     CardReturnedEvent,
@@ -168,7 +195,11 @@ using GameEventData = std::variant<
     FatalDealSwapEvent,
     CardsRevealedEvent,
     ChronosphereSnapshotEvent,
-    ChronosphereRewindEvent
+    ChronosphereRewindEvent,
+    CardRedirectedEvent,
+    DeckPeekEvent,
+    DestinyDeflectEffectEvent,
+    CardRedrawnEvent
 >;
 
 struct GameEvent {

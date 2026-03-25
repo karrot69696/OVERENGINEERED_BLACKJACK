@@ -9,6 +9,7 @@ enum class SkillName {
     NEURALGAMBIT,
     FATALDEAL,
     CHRONOSPHERE,
+    DESTINYDEFLECT,
     BOOGIEWOOGIE,
     LOOKMAXXING,
     SIGMA,
@@ -31,6 +32,8 @@ class SkillDeck {
             skills.push_back(SkillName::NEURALGAMBIT);
             skills.push_back(SkillName::FATALDEAL);
             skills.push_back(SkillName::CHRONOSPHERE);
+            skills.push_back(SkillName::DELIVERANCE);
+            skills.push_back(SkillName::DESTINYDEFLECT);
         }
         void shuffle(){
             std::random_device rd;

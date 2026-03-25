@@ -1,0 +1,8 @@
+# Player seat layout config — edit values, alt-tab back, instant update
+# Lines starting with # are ignored. Format: key=value
+
+topY=90
+botY_offset=110
+midY_offset=30
+offsetX=50
+seatRightX_offset=200

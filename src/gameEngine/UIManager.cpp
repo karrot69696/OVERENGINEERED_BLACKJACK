@@ -1,24 +1,26 @@
 #include "UIManager.h"
 #include "Log.h"
 #include <map>
+#include <sstream>
 // ============================================================================
 // Button
 // ============================================================================
 Button::Button(sf::Font& font, const std::string& text, sf::Vector2f pos, sf::Vector2f size)
-    : label(font, text, 16)
+    : label(font, text, (unsigned int)(16 * UILayout::S()))
 {
+    float S = UILayout::S();
     shape.setPosition(pos);
     shape.setSize(size);
     shape.setFillColor(UILayout::BUTTON_NORMAL);
-    shape.setOutlineThickness(1.f);
+    shape.setOutlineThickness(1.f * S);
     shape.setOutlineColor(sf::Color::White);
 
-    label = sf::Text(font, text, 16);
+    label = sf::Text(font, text, (unsigned int)(16 * S));
     // Center label in button
     sf::FloatRect bounds = label.getLocalBounds();
     label.setPosition({
         pos.x + size.x / 2.f - bounds.size.x / 2.f,
-        pos.y + size.y / 2.f - bounds.size.y / 2.f - 4.f
+        pos.y + size.y / 2.f - bounds.size.y / 2.f - 4.f * S
     });
 }
 
@@ -50,14 +52,15 @@ UIManager::UIManager(sf::RenderWindow& window, GameState& gameState,VisualState&
     : window(window), gameState(gameState),visualState(visualState), cardVisuals(cardVisuals) {
 
     font = visualState.getFont();
-    
-    // Build action buttons (hidden by default)
-    float btnY = window.getSize().y - 60.f;
-    float btnStartX = window.getSize().x / 2.f - 190.f;
+    float S = UILayout::S();
 
-    actionButtons.emplace_back(font, "Hit",   sf::Vector2f{btnStartX,         btnY}, UILayout::BUTTON_SIZE);
-    actionButtons.emplace_back(font, "Stand", sf::Vector2f{btnStartX + 130.f, btnY}, UILayout::BUTTON_SIZE);
-    actionButtons.emplace_back(font, "Skill", sf::Vector2f{btnStartX + 260.f, btnY}, UILayout::BUTTON_SIZE);
+    // Build action buttons (hidden by default)
+    float btnY = window.getSize().y - 60.f * S;
+    float btnStartX = window.getSize().x / 2.f - 190.f * S;
+
+    actionButtons.emplace_back(font, "Hit",   sf::Vector2f{btnStartX,              btnY}, UILayout::BUTTON_SIZE());
+    actionButtons.emplace_back(font, "Stand", sf::Vector2f{btnStartX + 130.f * S,  btnY}, UILayout::BUTTON_SIZE());
+    actionButtons.emplace_back(font, "Skill", sf::Vector2f{btnStartX + 260.f * S,  btnY}, UILayout::BUTTON_SIZE());
 
     actionButtons[0].onClick = [this]() {
         showActionMenu = false;
@@ -72,38 +75,48 @@ UIManager::UIManager(sf::RenderWindow& window, GameState& gameState,VisualState&
         if (onActionChosen) onActionChosen(PlayerAction::SKILL_REQUEST);
     };
 
-    std::filesystem::path tableTexturePath = "../assets/images/crazyJackBG.png";
+    std::filesystem::path tableTexturePath = "assets/images/crazyJackBG.png";
     if (!tableTexture.loadFromFile(tableTexturePath)) {
         std::cerr << "[UIManager] Failed to load tableTexture from assets/images/crazyJackBG.png" << std::endl;
     }
-    if (!cardRankPatch.loadFromFile("../assets/images/cardBoosted.png")) {
+    if (!cardRankPatch.loadFromFile("assets/images/cardBoosted.png")) {
         std::cerr << "[UIManager] Failed to load cardRankPatch from assets/images/cardBoosted.png" << std::endl;
     }
     cardRankPatchSprite = std::make_unique<sf::Sprite>(cardRankPatch);
     clearInput();
 
-    std::filesystem::path playerIconPath = "../assets/images/playerIcon.png";
+    std::filesystem::path playerIconPath = "assets/images/playerIcon.png";
     if (!playerIcon.loadFromFile(playerIconPath)) {
         std::cerr << "[UIManager] Failed to load playerIcon from assets/images/playerIcon.png" << std::endl;
     }
+    playerIcon2.loadFromFile("assets/images/playerIcon2.png");
+    // Player icon sprite definitions are stored — playerVisuals built dynamically
+    // in ensurePlayerVisuals() based on actual player count from GameState.
+}
 
-    // Player 0: start x=288 y=160, crop 96x96
+void UIManager::ensurePlayerVisuals(int count) {
+    if ((int)playerVisuals.size() == count) return;
+    playerVisuals.clear();
+
+    // 4 unique character crops — cycle for >4 players
+    struct IconDef { sf::Texture* tex; sf::IntRect rect; };
     sf::Vector2i cropSize = { 195, 195 };
-    sf::Sprite p0(playerIcon);
-    p0.setTextureRect(sf::IntRect({772, 194},cropSize));
-    PlayerVisual player0(p0);
-    playerVisuals.push_back(player0);
-    // Player 1: start x=64 y=224, crop 96x96
-    sf::Sprite p1(playerIcon);
-    p1.setTextureRect(sf::IntRect({62, 212}, cropSize));
-    PlayerVisual player1(p1);
-    playerVisuals.push_back(player1);
+    IconDef icons[] = {
+        { &playerIcon,  sf::IntRect({772, 194}, cropSize) },
+        { &playerIcon,  sf::IntRect({62, 212},  cropSize) },
+        { &playerIcon,  sf::IntRect({512, 224}, cropSize) },
+        { &playerIcon2, sf::IntRect({817, 255}, {167, 167}) },
+    };
+    int numIcons = 4;
 
-    // Player 2: start x=512 y=224, crop 96x96
-    sf::Sprite p2(playerIcon);
-    p2.setTextureRect(sf::IntRect({536, 240}, cropSize));
-    PlayerVisual player2(p2);
-    playerVisuals.push_back(player2);
+    for (int i = 0; i < count; i++) {
+        auto& def = icons[i % numIcons];
+        sf::Sprite sprite(*def.tex);
+        sprite.setTextureRect(def.rect);
+        PlayerVisual pv(sprite);
+        pv.playerId = i;
+        playerVisuals.push_back(pv);
+    }
 }
 
 // ============================================================================
@@ -152,9 +165,11 @@ void UIManager::clearInput() {
     showTargetingOverlay_Deliverance = false;
     showTargetingOverlay_NeuralGambit = false;
     showPickCardOverlay = false;
-    showReactivePrompt = false;
     showChronoPrompt = false;
+    showPlayerPickOverlay = false;
+    playerPickAllowedIds = {};
     pickCardAllowedIds = {};
+    // Note: showDeckPeek is NOT cleared — it's non-blocking and persists through phase transitions
     // Unpin any NG cards before clearing IDs (prevent pin leaks)
     for (int cid : ngTargetCardIds) {
         visualState.getCardVisual(cid).unpin();
@@ -216,16 +231,20 @@ void UIManager::requestChronoPrompt(bool hasSnapshot, float timerDuration) {
 void UIManager::handleEvent(const std::optional<sf::Event>& event) {
     if (!event.has_value()) return;
 
-    // F3 toggles debug hover tooltip, F4 cycles game log (off → recent → full)
+    // F3 toggles player tooltip, F4 cycles game log, F6 toggles debug tooltip
     if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>()) {
         if (keyPressed->scancode == sf::Keyboard::Scancode::F3) {
-            showDebugTooltip = !showDebugTooltip;
-            std::cout << "[UIManager] Debug tooltip: " << (showDebugTooltip ? "ON" : "OFF") << std::endl;
+            showHoverTooltip = !showHoverTooltip;
+            std::cout << "[UIManager] Player tooltip: " << (showHoverTooltip ? "ON" : "OFF") << std::endl;
         }
         if (keyPressed->scancode == sf::Keyboard::Scancode::F4) {
             gameLogMode = (gameLogMode + 1) % 3;
             const char* modes[] = {"OFF", "RECENT", "FULL"};
             std::cout << "[UIManager] Game log: " << modes[gameLogMode] << std::endl;
+        }
+        if (keyPressed->scancode == sf::Keyboard::Scancode::F6) {
+            showDebugTooltip = !showDebugTooltip;
+            std::cout << "[UIManager] Debug tooltip: " << (showDebugTooltip ? "ON" : "OFF") << std::endl;
         }
     }
 
@@ -234,17 +253,75 @@ void UIManager::handleEvent(const std::optional<sf::Event>& event) {
         mousePos = window.mapPixelToCoords({mouseMoved->position.x, mouseMoved->position.y});
     }
 
+    // Double-click on player sprite toggles skill description
+    if (const auto* mouseBtn = event->getIf<sf::Event::MouseButtonPressed>()) {
+        if (mouseBtn->button == sf::Mouse::Button::Left) {
+            sf::Vector2f clickPos = window.mapPixelToCoords({mouseBtn->position.x, mouseBtn->position.y});
+            for (auto& pv : playerVisuals) {
+                if (pv.playerSprite.getGlobalBounds().contains(clickPos)) {
+                    if (lastClickedPlayerId == pv.playerId && doubleClickClock.getElapsedTime().asMilliseconds() < 400) {
+                        skillDescPlayerId = (skillDescPlayerId == pv.playerId) ? -1 : pv.playerId;
+                        lastClickedPlayerId = -1; // reset so triple-click doesn't re-toggle
+                    } else {
+                        lastClickedPlayerId = pv.playerId;
+                        doubleClickClock.restart();
+                    }
+                    break;
+                }
+            }
+        }
+    }
+
     if (const auto* mouseBtn = event->getIf<sf::Event::MouseButtonPressed>()) {
         if (mouseBtn->button != sf::Mouse::Button::Left) return;
         sf::Vector2f mousePos = window.mapPixelToCoords({mouseBtn->position.x, mouseBtn->position.y});
         std::cout << "[UIManager] Mouse click at (" << mousePos.x << ", " << mousePos.y << ")\n";
 
+        // Player pick overlay clicks (Destiny Deflect redirect target)
+        if (showPlayerPickOverlay) {
+            for (auto& playerVisual : playerVisuals) {
+                if (playerVisual.isClicked(mousePos)) {
+                    auto it = std::find(playerPickAllowedIds.begin(), playerPickAllowedIds.end(), playerVisual.playerId);
+                    if (it != playerPickAllowedIds.end()) {
+                        PlayerTargeting target;
+                        target.targetPlayerIds.push_back(playerVisual.playerId);
+                        pendingTargeting = target;
+                        showPlayerPickOverlay = false;
+                        playerPickAllowedIds = {};
+                        std::cout << "[UIManager] Player pick: selected P" << playerVisual.playerId << std::endl;
+                        confirmTargeting();
+                        return;
+                    }
+                }
+            }
+            return; // block other clicks while player pick is showing
+        }
+
+        // Deck peek OK button click (non-blocking — check but don't block)
+        if (showDeckPeek) {
+            float S = UILayout::S();
+            float panelW = 200.f * S, panelH = 190.f * S;
+            float panelX = window.getSize().x - panelW - 10.f * S;
+            float panelY = 10.f * S;
+            float okW = 80.f * S, okH = 25.f * S;
+            float okX = panelX + panelW / 2.f - okW / 2.f;
+            float okY = panelY + panelH - 30.f * S + 4.f * S + 2.f * S;
+            sf::FloatRect okBounds({okX, okY}, {okW, okH});
+            if (okBounds.contains(mousePos)) {
+                dismissDeckPeek();
+                std::cout << "[UIManager] Deck peek dismissed via OK" << std::endl;
+                return;
+            }
+            // Don't return here — deck peek is non-blocking, other clicks pass through
+        }
+
         // Reactive prompt clicks (Yes/No)
         if (showReactivePrompt) {
+            float S = UILayout::S();
             float centerX = window.getSize().x / 2.f;
             float centerY = window.getSize().y / 2.f;
-            sf::FloatRect yesBounds({centerX - 90.f, centerY + 10.f}, {70.f, 30.f});
-            sf::FloatRect noBounds({centerX + 20.f, centerY + 10.f}, {70.f, 30.f});
+            sf::FloatRect yesBounds({centerX - 90.f * S, centerY + 10.f * S}, {70.f * S, 30.f * S});
+            sf::FloatRect noBounds({centerX + 20.f * S, centerY + 10.f * S}, {70.f * S, 30.f * S});
 
             if (yesBounds.contains(mousePos)) {
                 showReactivePrompt = false;
@@ -263,10 +340,11 @@ void UIManager::handleEvent(const std::optional<sf::Event>& event) {
 
         // Chronosphere choice prompt clicks ([Snapshot]/[Rewind])
         if (showChronoPrompt) {
+            float S = UILayout::S();
             float centerX = window.getSize().x / 2.f;
             float centerY = window.getSize().y / 2.f;
-            sf::FloatRect snapshotBounds({centerX - 90.f, centerY + 10.f}, {70.f, 30.f});
-            sf::FloatRect rewindBounds({centerX + 20.f, centerY + 10.f}, {70.f, 30.f});
+            sf::FloatRect snapshotBounds({centerX - 90.f * S, centerY + 10.f * S}, {70.f * S, 30.f * S});
+            sf::FloatRect rewindBounds({centerX + 20.f * S, centerY + 10.f * S}, {70.f * S, 30.f * S});
 
             if (snapshotBounds.contains(mousePos)) {
                 showChronoPrompt = false;
@@ -419,11 +497,12 @@ void UIManager::handleEvent(const std::optional<sf::Event>& event) {
             }
 
             // Confirm button — bottom right
+            float S = UILayout::S();
             sf::Vector2f confirmPos = {
-                window.getSize().x - 150.f,
-                window.getSize().y - 60.f
+                window.getSize().x - 150.f * S,
+                window.getSize().y - 60.f * S
             };
-            sf::FloatRect confirmBounds(confirmPos, UILayout::BUTTON_SIZE);
+            sf::FloatRect confirmBounds(confirmPos, UILayout::BUTTON_SIZE());
             if (confirmBounds.contains(mousePos)) {
                 confirmTargeting();
             }
@@ -440,7 +519,6 @@ void UIManager::confirmTargeting() {
 // Render
 // ============================================================================
 void UIManager::render() {
-    //buildCardVisuals();
     renderTable();
     renderCards();
     renderHUD();
@@ -449,8 +527,11 @@ void UIManager::render() {
     if (showTargetingOverlay_Deliverance)     renderTargetingOverlay_Deliverance();
     if (showTargetingOverlay_NeuralGambit)    renderTargetingOverlay_NeuralGambit();
     if (showPickCardOverlay)                  renderPickCardOverlay();
+    if (showPlayerPickOverlay)                renderPlayerPickOverlay();
     if (showReactivePrompt)                   renderReactivePrompt();
     if (showChronoPrompt)                     renderChronoPrompt();
+    if (showDeckPeek)                         renderDeckPeekOverlay();
+    if (showHoverTooltip)                     renderPlayerTooltip();
     if (showDebugTooltip)                     renderHoverTooltip();
     if (gameLogMode > 0)                      renderGameLog();
 }
@@ -507,10 +588,11 @@ void UIManager::renderCards() {
 }
 
 void UIManager::renderHUD() {
+    float S = UILayout::S();
     // PhaseName label top-left
-    sf::Text phaseText(font, gameState.phaseToString(gameState.getPhaseName()), 16);
+    sf::Text phaseText(font, gameState.phaseToString(gameState.getPhaseName()), (unsigned int)(16 * S));
     phaseText.setFillColor(getPhaseNameColor());
-    phaseText.setPosition({10.f, 10.f});
+    phaseText.setPosition({10.f * S, 10.f * S});
     window.draw(phaseText);
 }
 
@@ -523,15 +605,16 @@ void UIManager::renderActionMenu() {
         return;
     }
 
+    float S = UILayout::S();
     // Dark strip at bottom
-    sf::RectangleShape strip({ (float)window.getSize().x, 70.f });
+    sf::RectangleShape strip({ (float)window.getSize().x, 70.f * S });
     strip.setFillColor(UILayout::HUD_BG);
-    strip.setPosition({ 0.f, (float)window.getSize().y - 70.f });
+    strip.setPosition({ 0.f, (float)window.getSize().y - 70.f * S });
     window.draw(strip);
 
-    sf::Text prompt(font, "Player " + std::to_string(activePlayerId) + " - choose action:", 16);
+    sf::Text prompt(font, "Player " + std::to_string(activePlayerId) + " - choose action:", (unsigned int)(16 * S));
     prompt.setFillColor(sf::Color::Yellow);
-    prompt.setPosition({ 10.f, (float)window.getSize().y - 65.f });
+    prompt.setPosition({ 10.f * S, (float)window.getSize().y - 65.f * S });
     window.draw(prompt);
 
     for (auto& btn : actionButtons) btn.draw(window);
@@ -539,8 +622,11 @@ void UIManager::renderActionMenu() {
 }
 
 void UIManager::renderPlayerVisuals(){
+    float S = UILayout::S();
     //update visuals with info from gameState
     auto players = gameState.getAllPlayerInfo();
+    if (players.empty()) return;
+    ensurePlayerVisuals((int)players.size());
     int currentTurnId = gameState.getCurrentPlayerId();
     for (int i=0;i<(int)players.size();i++){
         playerVisuals[i].playerId=players[i].playerId;
@@ -562,10 +648,11 @@ void UIManager::renderPlayerVisuals(){
 
         // Draw player icon — skip position/scale/draw if borrowed (AnimationManager controls it)
         if (!isBorrowed) {
-            sf::Vector2f iconScale = {GameConfig::PLAYER_ICON_SCALE, GameConfig::PLAYER_ICON_SCALE};
+            float iconS = GameConfig::PLAYER_ICON_SCALE * S;
+            sf::Vector2f iconScale = {iconS, iconS};
             playerVisual.playerSprite.setPosition({
-                playerVisual.seatPostion.x - 56.f,
-                playerVisual.seatPostion.y - 26.f
+                playerVisual.seatPostion.x - 56.f * S,
+                playerVisual.seatPostion.y - 26.f * S
             });
             playerVisual.playerSprite.setScale(iconScale);
             window.draw(playerVisual.playerSprite);
@@ -573,10 +660,10 @@ void UIManager::renderPlayerVisuals(){
 
         // Host label above player icon
         if (playerVisual.isHost) {
-            sf::Text hostLabel(font, "HOST", 16);
+            sf::Text hostLabel(font, "HOST", (unsigned int)(16 * S));
             hostLabel.setFillColor(sf::Color(255, 200, 50));
             hostLabel.setStyle(sf::Text::Bold);
-            hostLabel.setPosition({ playerVisual.seatPostion.x - 56.f, playerVisual.seatPostion.y - 50.f });
+            hostLabel.setPosition({ playerVisual.seatPostion.x - 56.f * S, playerVisual.seatPostion.y - 50.f * S });
             window.draw(hostLabel);
         }
 
@@ -585,7 +672,7 @@ void UIManager::renderPlayerVisuals(){
                           + "  [" + gameState.skillNameToString(playerVisual.skillName)
                           + " x" + std::to_string(playerVisual.skillUses) + "]";
 
-        sf::Text playerLabel(font, label, 11);
+        sf::Text playerLabel(font, label, (unsigned int)(9 * S));
         // Highlight current turn player's name
         if (isCurrentTurn) {
             playerLabel.setFillColor(sf::Color(100, 255, 100));
@@ -599,21 +686,22 @@ void UIManager::renderPlayerVisuals(){
             playerLabel.setStyle(sf::Text::Bold);
         }
 
-        playerLabel.setPosition({ playerVisual.seatPostion.x, playerVisual.seatPostion.y - 20.f });
+        playerLabel.setPosition({ playerVisual.seatPostion.x, playerVisual.seatPostion.y - 20.f * S });
         window.draw(playerLabel);
 
         // Turn indicator arrow
         if (isCurrentTurn) {
-            sf::Text arrow(font, ">", 16);
+            sf::Text arrow(font, ">", (unsigned int)(16 * S));
             arrow.setFillColor(sf::Color(100, 255, 100));
             arrow.setStyle(sf::Text::Bold);
-            arrow.setPosition({ playerVisual.seatPostion.x - 14.f, playerVisual.seatPostion.y - 22.f });
+            arrow.setPosition({ playerVisual.seatPostion.x - 14.f * S, playerVisual.seatPostion.y - 22.f * S });
             window.draw(arrow);
         }
     }
 }
 
 void UIManager::renderTargetingOverlay_Deliverance() {
+    float S = UILayout::S();
     // Auto-pick random card on timeout
     if (inputTimerDuration > 0.f && inputTimerClock.getElapsedTime().asSeconds() >= inputTimerDuration) {
         for (auto& cv : cardVisuals) {
@@ -653,12 +741,12 @@ void UIManager::renderTargetingOverlay_Deliverance() {
             if (cv.isTarget) {
                 float elapsed = shakeClock.getElapsedTime().asSeconds();
                 float shakeOffsetX =
-                    std::sin(elapsed * 40.f) * 3.f +
-                    std::sin(elapsed * 80.f) * 3.f;
+                    std::sin(elapsed * 40.f) * 3.f * S +
+                    std::sin(elapsed * 80.f) * 3.f * S;
 
                 float shakeOffsetY =
-                    std::cos(elapsed * 40.f) * 3.f +
-                    std::sin(elapsed * 80.f) * 3.f;
+                    std::cos(elapsed * 40.f) * 3.f * S +
+                    std::sin(elapsed * 80.f) * 3.f * S;
                 sf::Vector2f origPos = cv.cardSprite.getPosition();
                 cv.cardSprite.setPosition({origPos.x + shakeOffsetX, origPos.y + shakeOffsetY});
                 window.draw(cv.cardSprite);
@@ -677,7 +765,7 @@ void UIManager::renderTargetingOverlay_Deliverance() {
             sf::RectangleShape highlight({cardBounds.size.x, cardBounds.size.y});
             highlight.setPosition({cardBounds.position.x, cardBounds.position.y});
             highlight.setFillColor(sf::Color::Transparent);
-            highlight.setOutlineThickness(hovered ? 5.f : 3.f);
+            highlight.setOutlineThickness(hovered ? 5.f * S : 3.f * S);
             highlight.setOutlineColor(cv.isTarget ? UILayout::CARD_TARGET :
                                       hovered ? sf::Color(255, 240, 100) : UILayout::CARD_HIGHLIGHT);
             window.draw(highlight);
@@ -686,18 +774,19 @@ void UIManager::renderTargetingOverlay_Deliverance() {
 
     // Confirm button
     Button confirmBtn(font, "Confirm",
-        { window.getSize().x - 150.f, (float)window.getSize().y - 60.f },
-        UILayout::BUTTON_SIZE);
+        { window.getSize().x - 150.f * S, (float)window.getSize().y - 60.f * S },
+        UILayout::BUTTON_SIZE());
     confirmBtn.shape.setFillColor(sf::Color(50, 150, 50));
     confirmBtn.draw(window);
 
-    sf::Text prompt(font, "Click a card, then Confirm", 16);
+    sf::Text prompt(font, "Click a card, then Confirm", (unsigned int)(16 * S));
     prompt.setFillColor(sf::Color::Yellow);
-    prompt.setPosition({ 10.f, (float)window.getSize().y - 65.f });
+    prompt.setPosition({ 10.f * S, (float)window.getSize().y - 65.f * S });
     window.draw(prompt);
     renderInputTimerBar();
 }
 void UIManager::renderTargetingOverlay_NeuralGambit() {
+    float S = UILayout::S();
     auto players = gameState.getAllPlayerInfo();
     int totalPlayers = (int)players.size();
 
@@ -750,18 +839,18 @@ void UIManager::renderTargetingOverlay_NeuralGambit() {
     }
 
     // Bottom strip prompt
-    sf::RectangleShape strip({ (float)window.getSize().x, 70.f });
+    sf::RectangleShape strip({ (float)window.getSize().x, 70.f * S });
     strip.setFillColor(UILayout::HUD_BG);
-    strip.setPosition({ 0.f, (float)window.getSize().y - 70.f });
+    strip.setPosition({ 0.f, (float)window.getSize().y - 70.f * S });
     window.draw(strip);
 
     // Step-specific prompt text and visuals
     if (ngStep == NgStep::PICK_PLAYER) {
         hoveredPlayerId = -1;
-        sf::Text prompt(font, "NEURAL GAMBIT: Choose a target player", 16);
+        sf::Text prompt(font, "NEURAL GAMBIT: Choose a target player", (unsigned int)(16 * S));
 
         prompt.setFillColor(sf::Color::Cyan);
-        prompt.setPosition({ 10.f, (float)window.getSize().y - 65.f });
+        prompt.setPosition({ 10.f * S, (float)window.getSize().y - 65.f * S });
         window.draw(prompt);
 
         // Draw highlights for all players (include self)
@@ -774,12 +863,12 @@ void UIManager::renderTargetingOverlay_NeuralGambit() {
             if (playerVisual.isTarget){
                 float elapsed = shakeClock.getElapsedTime().asSeconds();
                 float shakeOffsetX =
-                    std::sin(elapsed * 40.f) * 3.f +
-                    std::sin(elapsed * 80.f) * 3.f;
+                    std::sin(elapsed * 40.f) * 3.f * S +
+                    std::sin(elapsed * 80.f) * 3.f * S;
 
                 float shakeOffsetY =
-                    std::cos(elapsed * 40.f) * 3.f +
-                    std::sin(elapsed * 80.f) * 3.f;
+                    std::cos(elapsed * 40.f) * 3.f * S +
+                    std::sin(elapsed * 80.f) * 3.f * S;
                 sf::Vector2f origPos = playerVisual.playerSprite.getPosition();
                 playerVisual.playerSprite.setPosition({origPos.x + shakeOffsetX, origPos.y + shakeOffsetY});
                 window.draw(playerVisual.playerSprite);
@@ -797,16 +886,16 @@ void UIManager::renderTargetingOverlay_NeuralGambit() {
             sf::RectangleShape highlight({playerBounds.size.x, playerBounds.size.y});
             highlight.setPosition({playerBounds.position.x, playerBounds.position.y});
             highlight.setFillColor(sf::Color::Transparent);
-            highlight.setOutlineThickness(hovered ? 5.f : 3.f);
+            highlight.setOutlineThickness(hovered ? 5.f * S : 3.f * S);
             highlight.setOutlineColor(playerVisual.isTarget ? UILayout::CARD_TARGET :
                                       hovered ? sf::Color(255, 240, 100) : UILayout::CARD_HIGHLIGHT);
             window.draw(highlight);
         }
     }
     else if (ngStep == NgStep::WAITING_FOR_PICKS) {
-        sf::Text prompt(font, "NEURAL GAMBIT: Waiting for players to reveal cards...", 16);
+        sf::Text prompt(font, "NEURAL GAMBIT: Waiting for players to reveal cards...", (unsigned int)(16 * S));
         prompt.setFillColor(sf::Color(150, 220, 255));
-        prompt.setPosition({ 10.f, (float)window.getSize().y - 65.f });
+        prompt.setPosition({ 10.f * S, (float)window.getSize().y - 65.f * S });
         window.draw(prompt);
 
         // Highlight targeted players with shake; others get hover scale
@@ -817,8 +906,8 @@ void UIManager::renderTargetingOverlay_NeuralGambit() {
 
             if (isTarget) {
                 float elapsed = shakeClock.getElapsedTime().asSeconds();
-                float shakeOffsetX = std::sin(elapsed * 40.f) * 3.f + std::sin(elapsed * 80.f) * 3.f;
-                float shakeOffsetY = std::cos(elapsed * 40.f) * 3.f + std::sin(elapsed * 80.f) * 3.f;
+                float shakeOffsetX = std::sin(elapsed * 40.f) * 3.f * S + std::sin(elapsed * 80.f) * 3.f * S;
+                float shakeOffsetY = std::cos(elapsed * 40.f) * 3.f * S + std::sin(elapsed * 80.f) * 3.f * S;
                 sf::Vector2f origPos = playerVisual.playerSprite.getPosition();
                 playerVisual.playerSprite.setPosition({origPos.x + shakeOffsetX, origPos.y + shakeOffsetY});
                 window.draw(playerVisual.playerSprite);
@@ -834,18 +923,18 @@ void UIManager::renderTargetingOverlay_NeuralGambit() {
             sf::RectangleShape highlight({ playerBounds.size.x, playerBounds.size.y });
             highlight.setPosition({ playerBounds.position.x, playerBounds.position.y });
             highlight.setFillColor(sf::Color::Transparent);
-            highlight.setOutlineThickness(isTarget ? 4.f : (hovered ? 3.f : 0.f));
+            highlight.setOutlineThickness(isTarget ? 4.f * S : (hovered ? 3.f * S : 0.f));
             highlight.setOutlineColor(isTarget ? UILayout::CARD_TARGET : sf::Color(255, 240, 100));
             window.draw(highlight);
         }
     }
     else if (ngStep == NgStep::PICK_BOOST_CARD) {
-        sf::Text prompt(font, "NEURAL GAMBIT: Choose which card gets boosted", 16);
+        sf::Text prompt(font, "NEURAL GAMBIT: Choose which card gets boosted", (unsigned int)(16 * S));
         prompt.setFillColor(sf::Color::Cyan);
-        prompt.setPosition({ 10.f, (float)window.getSize().y - 65.f });
+        prompt.setPosition({ 10.f * S, (float)window.getSize().y - 65.f * S });
         window.draw(prompt);
 
-         
+
         // Highlight both revealed cards
         for (auto& cv : cardVisuals) {
 
@@ -866,7 +955,7 @@ void UIManager::renderTargetingOverlay_NeuralGambit() {
             sf::RectangleShape highlight({ bounds.size.x, bounds.size.y });
             highlight.setPosition({ bounds.position.x, bounds.position.y });
             highlight.setFillColor(sf::Color(255, 215, 0, hovered ? 60 : 30));
-            highlight.setOutlineThickness(hovered ? 6.f : 3.f);
+            highlight.setOutlineThickness(hovered ? 6.f * S : 3.f * S);
             highlight.setOutlineColor(sf::Color(255, 215, 0));
             window.draw(highlight);
         }
@@ -880,6 +969,7 @@ void UIManager::renderTargetingOverlay_NeuralGambit() {
 // ============================================================================
 
 void UIManager::renderPickCardOverlay() {
+    float S = UILayout::S();
     // Auto-pick random allowed card on timeout
     if (inputTimerDuration > 0.f && inputTimerClock.getElapsedTime().asSeconds() >= inputTimerDuration
         && !pickCardAllowedIds.empty()) {
@@ -908,14 +998,14 @@ void UIManager::renderPickCardOverlay() {
     }
 
     // Bottom strip
-    sf::RectangleShape strip({ (float)window.getSize().x, 70.f });
+    sf::RectangleShape strip({ (float)window.getSize().x, 70.f * S });
     strip.setFillColor(UILayout::HUD_BG);
-    strip.setPosition({ 0.f, (float)window.getSize().y - 70.f });
+    strip.setPosition({ 0.f, (float)window.getSize().y - 70.f * S });
     window.draw(strip);
 
-    sf::Text prompt(font, "NEURAL GAMBIT: Choose a card to reveal", 16);
+    sf::Text prompt(font, "NEURAL GAMBIT: Choose a card to reveal", (unsigned int)(16 * S));
     prompt.setFillColor(sf::Color::Cyan);
-    prompt.setPosition({ 10.f, (float)window.getSize().y - 65.f });
+    prompt.setPosition({ 10.f * S, (float)window.getSize().y - 65.f * S });
     window.draw(prompt);
 
     
@@ -932,8 +1022,8 @@ void UIManager::renderPickCardOverlay() {
         for (auto& pv : playerVisuals) {
             if (pv.playerId != ownerId) continue;
             float elapsed = shakeClock.getElapsedTime().asSeconds();
-            float shakeOffsetX = std::sin(elapsed * 40.f) * 3.f + std::sin(elapsed * 80.f) * 3.f;
-            float shakeOffsetY = std::cos(elapsed * 40.f) * 3.f + std::sin(elapsed * 80.f) * 3.f;
+            float shakeOffsetX = std::sin(elapsed * 40.f) * 3.f * S + std::sin(elapsed * 80.f) * 3.f * S;
+            float shakeOffsetY = std::cos(elapsed * 40.f) * 3.f * S + std::sin(elapsed * 80.f) * 3.f * S;
             sf::Vector2f origPos = pv.playerSprite.getPosition();
             pv.playerSprite.setPosition({origPos.x + shakeOffsetX, origPos.y + shakeOffsetY});
             window.draw(pv.playerSprite);
@@ -950,8 +1040,8 @@ void UIManager::renderPickCardOverlay() {
 
         if (cv.isTarget) {
             float elapsed = shakeClock.getElapsedTime().asSeconds();
-            float shakeOffsetX = std::sin(elapsed * 40.f) * 3.f + std::sin(elapsed * 80.f) * 3.f;
-            float shakeOffsetY = std::cos(elapsed * 40.f) * 3.f + std::sin(elapsed * 80.f) * 3.f;
+            float shakeOffsetX = std::sin(elapsed * 40.f) * 3.f * S + std::sin(elapsed * 80.f) * 3.f * S;
+            float shakeOffsetY = std::cos(elapsed * 40.f) * 3.f * S + std::sin(elapsed * 80.f) * 3.f * S;
             sf::Vector2f origPos = cv.cardSprite.getPosition();
             cv.cardSprite.setPosition({origPos.x + shakeOffsetX, origPos.y + shakeOffsetY});
             window.draw(cv.cardSprite);
@@ -968,7 +1058,7 @@ void UIManager::renderPickCardOverlay() {
         sf::RectangleShape highlight({ bounds.size.x, bounds.size.y });
         highlight.setPosition({ bounds.position.x, bounds.position.y });
         highlight.setFillColor(sf::Color::Transparent);
-        highlight.setOutlineThickness(hovered ? 5.f : 3.f);
+        highlight.setOutlineThickness(hovered ? 5.f * S : 3.f * S);
         highlight.setOutlineColor(cv.isTarget ? UILayout::CARD_TARGET :
                                   hovered ? sf::Color(255, 240, 100) : UILayout::CARD_HIGHLIGHT);
         window.draw(highlight);
@@ -978,13 +1068,14 @@ void UIManager::renderPickCardOverlay() {
 
 void UIManager::renderInputTimerBar() {
     if (inputTimerDuration <= 0.f) return;
+    float S = UILayout::S();
     float elapsed = inputTimerClock.getElapsedTime().asSeconds();
     float progress = std::max(0.f, 1.f - (elapsed / inputTimerDuration));
 
-    float barW = 300.f;
-    float barH = 6.f;
+    float barW = 300.f * S;
+    float barH = 6.f * S;
     float centerX = window.getSize().x / 2.f;
-    float barY = (float)window.getSize().y - 80.f;
+    float barY = (float)window.getSize().y - 80.f * S;
 
     sf::RectangleShape barBg({barW, barH});
     barBg.setFillColor(sf::Color(60, 60, 60));
@@ -998,6 +1089,7 @@ void UIManager::renderInputTimerBar() {
 }
 
 void UIManager::renderReactivePrompt() {
+    float S = UILayout::S();
     float elapsed = reactivePromptClock.getElapsedTime().asSeconds();
 
     // Auto-decline on timeout
@@ -1016,13 +1108,13 @@ void UIManager::renderReactivePrompt() {
     // Semi-transparent background box
     sf::RectangleShape bg({boxW, boxH});
     bg.setFillColor(sf::Color(20, 20, 40, 220));
-    bg.setOutlineThickness(2.f);
+    bg.setOutlineThickness(2.f * S);
     bg.setOutlineColor(sf::Color(255, 200, 50));
     bg.setPosition({centerX - boxW / 2.f, boxTop});
     window.draw(bg);
 
     // Skill name text
-    sf::Text skillText(font, reactivePromptSkillName + "?", 14);
+    sf::Text skillText(font, reactivePromptSkillName, (unsigned int)(14 * S));
     skillText.setFillColor(sf::Color(255, 200, 50));
     sf::FloatRect stBounds = skillText.getLocalBounds();
     float skillTextY = boxTop + boxH * 0.25f;
@@ -1030,18 +1122,18 @@ void UIManager::renderReactivePrompt() {
     window.draw(skillText);
 
     // Extra info text
-    sf::Text extraInfo(font, reactivePromptExtraInfo, 10);
+    sf::Text extraInfo(font, reactivePromptExtraInfo, (unsigned int)(15 * S));
     extraInfo.setFillColor(sf::Color(255, 200, 50));
     sf::FloatRect eiBounds = extraInfo.getLocalBounds();
-    float extraInfoY = skillTextY + stBounds.size.y + 10.f;
+    float extraInfoY = skillTextY + stBounds.size.y + 10.f * S;
     extraInfo.setPosition({centerX - eiBounds.size.x / 2.f, extraInfoY});
     window.draw(extraInfo);
 
     // Timer bar
-    float barW = boxW - 20.f;
-    float barH = 6.f;
+    float barW = boxW - 20.f * S;
+    float barH = 6.f * S;
     float progress = 1.f - (elapsed / reactivePromptDuration);
-    float barY = extraInfoY + eiBounds.size.y + 12.f;
+    float barY = extraInfoY + eiBounds.size.y + 12.f * S;
     sf::RectangleShape barBg({barW, barH});
     barBg.setFillColor(sf::Color(60, 60, 60));
     barBg.setPosition({centerX - barW / 2.f, barY});
@@ -1053,32 +1145,32 @@ void UIManager::renderReactivePrompt() {
     window.draw(barFill);
 
     // Yes/No buttons — positions must match click handler hitboxes
-    float btnY = centerY + 10.f;
+    float btnY = centerY + 10.f * S;
 
-    sf::RectangleShape yesBtn({70.f, 30.f});
+    sf::RectangleShape yesBtn({70.f * S, 30.f * S});
     yesBtn.setFillColor(sf::Color(50, 150, 50));
-    yesBtn.setOutlineThickness(1.f);
+    yesBtn.setOutlineThickness(1.f * S);
     yesBtn.setOutlineColor(sf::Color::White);
-    yesBtn.setPosition({centerX - 90.f, btnY});
+    yesBtn.setPosition({centerX - 90.f * S, btnY});
     window.draw(yesBtn);
 
-    sf::Text yesText(font, "Yes", 14);
+    sf::Text yesText(font, "Let's roll", (unsigned int)(11 * S));
     yesText.setFillColor(sf::Color::White);
     sf::FloatRect ytBounds = yesText.getLocalBounds();
-    yesText.setPosition({centerX - 90.f + 35.f - ytBounds.size.x / 2.f, btnY + 4.f});
+    yesText.setPosition({centerX - 90.f * S + 35.f * S - ytBounds.size.x / 2.f, btnY + 4.f * S});
     window.draw(yesText);
 
-    sf::RectangleShape noBtn({70.f, 30.f});
+    sf::RectangleShape noBtn({70.f * S, 30.f * S});
     noBtn.setFillColor(sf::Color(150, 50, 50));
-    noBtn.setOutlineThickness(1.f);
+    noBtn.setOutlineThickness(1.f * S);
     noBtn.setOutlineColor(sf::Color::White);
-    noBtn.setPosition({centerX + 20.f, btnY});
+    noBtn.setPosition({centerX + 20.f * S, btnY});
     window.draw(noBtn);
 
-    sf::Text noText(font, "No", 14);
+    sf::Text noText(font, "Nah i'm good", (unsigned int)(11 * S));
     noText.setFillColor(sf::Color::White);
     sf::FloatRect ntBounds = noText.getLocalBounds();
-    noText.setPosition({centerX + 20.f + 35.f - ntBounds.size.x / 2.f, btnY + 4.f});
+    noText.setPosition({centerX + 20.f * S + 35.f * S - ntBounds.size.x / 2.f, btnY + 4.f * S});
     window.draw(noText);
 }
 
@@ -1086,6 +1178,7 @@ void UIManager::renderReactivePrompt() {
 // Chronosphere Choice Prompt
 // ============================================================================
 void UIManager::renderChronoPrompt() {
+    float S = UILayout::S();
     float elapsed = chronoPromptClock.getElapsedTime().asSeconds();
 
     // Auto-decline on timeout
@@ -1105,13 +1198,13 @@ void UIManager::renderChronoPrompt() {
     // Semi-transparent background box
     sf::RectangleShape bg({boxW, boxH});
     bg.setFillColor(sf::Color(20, 20, 40, 220));
-    bg.setOutlineThickness(2.f);
+    bg.setOutlineThickness(2.f * S);
     bg.setOutlineColor(sf::Color(100, 200, 255));
     bg.setPosition({centerX - boxW / 2.f, boxTop});
     window.draw(bg);
 
     // Title text
-    sf::Text titleText(font, "CHRONOSPHERE", 14);
+    sf::Text titleText(font, "CHRONOSPHERE", (unsigned int)(14 * S));
     titleText.setFillColor(sf::Color(100, 200, 255));
     sf::FloatRect ttBounds = titleText.getLocalBounds();
     float titleY = boxTop + boxH * 0.25f;
@@ -1120,18 +1213,18 @@ void UIManager::renderChronoPrompt() {
 
     // Info text
     std::string info = chronoHasSnapshot ? "Choose your action:" : "Snapshot your hand?";
-    sf::Text infoText(font, info, 10);
+    sf::Text infoText(font, info, (unsigned int)(10 * S));
     infoText.setFillColor(sf::Color(100, 200, 255));
     sf::FloatRect itBounds = infoText.getLocalBounds();
-    float infoY = titleY + ttBounds.size.y + 10.f;
+    float infoY = titleY + ttBounds.size.y + 10.f * S;
     infoText.setPosition({centerX - itBounds.size.x / 2.f, infoY});
     window.draw(infoText);
 
     // Timer bar
-    float barW = boxW - 20.f;
-    float barH = 6.f;
+    float barW = boxW - 20.f * S;
+    float barH = 6.f * S;
     float progress = 1.f - (elapsed / chronoPromptDuration);
-    float barY = infoY + itBounds.size.y + 12.f;
+    float barY = infoY + itBounds.size.y + 12.f * S;
     sf::RectangleShape barBg({barW, barH});
     barBg.setFillColor(sf::Color(60, 60, 60));
     barBg.setPosition({centerX - barW / 2.f, barY});
@@ -1143,33 +1236,137 @@ void UIManager::renderChronoPrompt() {
     window.draw(barFill);
 
     // Snapshot button (always available)
-    float btnY = centerY + 10.f;
-    sf::RectangleShape snapBtn({70.f, 30.f});
+    float btnY = centerY + 10.f * S;
+    sf::RectangleShape snapBtn({70.f * S, 30.f * S});
     snapBtn.setFillColor(sf::Color(50, 120, 180));
-    snapBtn.setOutlineThickness(1.f);
+    snapBtn.setOutlineThickness(1.f * S);
     snapBtn.setOutlineColor(sf::Color::White);
-    snapBtn.setPosition({centerX - 90.f, btnY});
+    snapBtn.setPosition({centerX - 90.f * S, btnY});
     window.draw(snapBtn);
 
-    sf::Text snapText(font, "Snapshot", 11);
+    sf::Text snapText(font, "Snapshot", (unsigned int)(11 * S));
     snapText.setFillColor(sf::Color::White);
     sf::FloatRect stBounds = snapText.getLocalBounds();
-    snapText.setPosition({centerX - 90.f + 35.f - stBounds.size.x / 2.f, btnY + 6.f});
+    snapText.setPosition({centerX - 90.f * S + 35.f * S - stBounds.size.x / 2.f, btnY + 6.f * S});
     window.draw(snapText);
 
     // Rewind button (grayed out if no snapshot)
-    sf::RectangleShape rewBtn({70.f, 30.f});
+    sf::RectangleShape rewBtn({70.f * S, 30.f * S});
     rewBtn.setFillColor(chronoHasSnapshot ? sf::Color(180, 120, 50) : sf::Color(80, 80, 80));
-    rewBtn.setOutlineThickness(1.f);
+    rewBtn.setOutlineThickness(1.f * S);
     rewBtn.setOutlineColor(chronoHasSnapshot ? sf::Color::White : sf::Color(120, 120, 120));
-    rewBtn.setPosition({centerX + 20.f, btnY});
+    rewBtn.setPosition({centerX + 20.f * S, btnY});
     window.draw(rewBtn);
 
-    sf::Text rewText(font, "Rewind", 11);
+    sf::Text rewText(font, "Rewind", (unsigned int)(11 * S));
     rewText.setFillColor(chronoHasSnapshot ? sf::Color::White : sf::Color(120, 120, 120));
     sf::FloatRect rtBounds = rewText.getLocalBounds();
-    rewText.setPosition({centerX + 20.f + 35.f - rtBounds.size.x / 2.f, btnY + 6.f});
+    rewText.setPosition({centerX + 20.f * S + 35.f * S - rtBounds.size.x / 2.f, btnY + 6.f * S});
     window.draw(rewText);
+}
+
+// ============================================================================
+// Player-facing Hover Tooltip
+// ============================================================================
+static void drawTooltipBox(sf::RenderWindow& window, sf::Font& font,
+                           const std::vector<std::string>& lines,
+                           sf::Vector2f anchor, sf::Color bgColor = sf::Color(10, 10, 10, 210)) {
+    if (lines.empty()) return;
+    float S = UILayout::S();
+    const unsigned int fontSize = (unsigned int)(10 * S);
+    const float padding = 4.f * S;
+    const float lineHeight = fontSize + 2.f * S;
+    float maxWidth = 0.f;
+    for (auto& line : lines) {
+        sf::Text measure(font, line, fontSize);
+        float w = measure.getLocalBounds().size.x;
+        if (w > maxWidth) maxWidth = w;
+    }
+    float tooltipW = maxWidth + padding * 2.f;
+    float tooltipH = lineHeight * lines.size() + padding * 2.f;
+    float tx = anchor.x + 12.f * S;
+    float ty = anchor.y + 12.f * S;
+    float winW = static_cast<float>(window.getSize().x);
+    float winH = static_cast<float>(window.getSize().y);
+    if (tx + tooltipW > winW) tx = anchor.x - tooltipW - 4.f * S;
+    if (ty + tooltipH > winH) ty = anchor.y - tooltipH - 4.f * S;
+    if (tx < 0.f) tx = 0.f;
+    if (ty < 0.f) ty = 0.f;
+
+    sf::RectangleShape bg({tooltipW, tooltipH});
+    bg.setFillColor(bgColor);
+    bg.setOutlineThickness(1.f * S);
+    bg.setOutlineColor(sf::Color(180, 180, 180, 200));
+    bg.setPosition({tx, ty});
+    window.draw(bg);
+    for (int i = 0; i < (int)lines.size(); i++) {
+        sf::Text text(font, lines[i], fontSize);
+        text.setFillColor(sf::Color(220, 220, 220));
+        text.setPosition({tx + padding, ty + padding + i * lineHeight});
+        window.draw(text);
+    }
+}
+
+void UIManager::renderPlayerTooltip() {
+    int localId = visualState.getLocalPlayerId();
+    std::vector<std::string> lines;
+
+    // Card tooltip: only for cards that are faceUp or belong to the local player
+    for (auto& cv : cardVisuals) {
+        if (cv.location != CardLocation::HAND) continue;
+        if (!cv.cardSprite.getGlobalBounds().contains(mousePos)) continue;
+
+        bool canSee = cv.faceUp || cv.ownerId == localId;
+        if (!canSee) break;
+
+        if (cv.ownerId >= 0 && cv.cardIndex >= 0) {
+            PlayerInfo info = gameState.getPlayerInfo(cv.ownerId);
+            if (cv.cardIndex < (int)info.cardsInHand.size()) {
+                const Card& c = info.cardsInHand[cv.cardIndex];
+                lines.push_back("#" + std::to_string(cv.cardId));
+                lines.push_back(c.getRankAsString() + " of " + c.getSuitAsString());
+                if (c.getRankBonus() != 0)
+                    lines.push_back("Rank bonus: " + std::to_string(c.getRankBonus()));
+            }
+        }
+        break;
+    }
+
+    // Player tooltip: show handValue only if all their cards are logically faceUp
+    // (or it's the local player — they always know their own hand)
+    if (lines.empty()) {
+        for (auto& pv : playerVisuals) {
+            if (!pv.playerSprite.getGlobalBounds().contains(mousePos)) continue;
+
+            PlayerInfo info = gameState.getPlayerInfo(pv.playerId);
+            lines.push_back(gameState.skillNameToString(info.skill));
+            lines.push_back("Uses: " + std::to_string(info.skillUses));
+            lines.push_back("Points: " + std::to_string(info.points));
+            if (pv.playerId == localId) {
+                lines.push_back("Hand: " + std::to_string(info.handValue));
+            } else {
+                bool allFaceUp = true;
+                for (auto& card : info.cardsInHand) {
+                    if (!card.isFaceUp()) { allFaceUp = false; break; }
+                }
+                if (allFaceUp && !info.cardsInHand.empty())
+                    lines.push_back("Hand: " + std::to_string(info.handValue));
+            }
+
+            // Skill description toggled by double-click — split on \n
+            if (skillDescPlayerId == pv.playerId) {
+                std::string desc = gameState.skillDescriptionToString(info.skill);
+                if (!desc.empty()) {
+                    std::istringstream stream(desc);
+                    std::string line;
+                    while (std::getline(stream, line)) lines.push_back(line);
+                }
+            }
+            break;
+        }
+    }
+
+    if (!lines.empty()) drawTooltipBox(window, font, lines, mousePos);
 }
 
 // ============================================================================
@@ -1185,6 +1382,7 @@ static std::string cardLocationStr(CardLocation loc) {
 }
 
 void UIManager::renderHoverTooltip() {
+    float S = UILayout::S();
     std::vector<std::string> lines;
 
     // Cards first (overlap player areas, higher priority)
@@ -1241,9 +1439,9 @@ void UIManager::renderHoverTooltip() {
     if (lines.empty()) return;
 
     // Measure and render
-    const unsigned int fontSize = 10;
-    const float padding = 4.f;
-    const float lineHeight = fontSize + 2.f;
+    const unsigned int fontSize = (unsigned int)(10 * S);
+    const float padding = 4.f * S;
+    const float lineHeight = fontSize + 2.f * S;
     float maxWidth = 0.f;
 
     for (auto& line : lines) {
@@ -1256,20 +1454,20 @@ void UIManager::renderHoverTooltip() {
     float tooltipH = lineHeight * lines.size() + padding * 2.f;
 
     // Position near cursor, clamp to window
-    float tx = mousePos.x + 12.f;
-    float ty = mousePos.y + 12.f;
+    float tx = mousePos.x + 12.f * S;
+    float ty = mousePos.y + 12.f * S;
     float winW = static_cast<float>(window.getSize().x);
     float winH = static_cast<float>(window.getSize().y);
 
-    if (tx + tooltipW > winW) tx = mousePos.x - tooltipW - 4.f;
-    if (ty + tooltipH > winH) ty = mousePos.y - tooltipH - 4.f;
+    if (tx + tooltipW > winW) tx = mousePos.x - tooltipW - 4.f * S;
+    if (ty + tooltipH > winH) ty = mousePos.y - tooltipH - 4.f * S;
     if (tx < 0.f) tx = 0.f;
     if (ty < 0.f) ty = 0.f;
 
     // Background
     sf::RectangleShape bg({tooltipW, tooltipH});
     bg.setFillColor(sf::Color(10, 10, 10, 210));
-    bg.setOutlineThickness(1.f);
+    bg.setOutlineThickness(1.f * S);
     bg.setOutlineColor(sf::Color(180, 180, 180, 200));
     bg.setPosition({tx, ty});
     window.draw(bg);
@@ -1287,14 +1485,15 @@ void UIManager::renderHoverTooltip() {
 // In-Game Log Overlay (Minecraft-style)
 // ============================================================================
 void UIManager::renderGameLog() {
+    float S = UILayout::S();
     const auto& entries = TimestampBuf::getEntries();
     if (entries.empty()) return;
 
-    const unsigned int fontSize = 9;
-    const float lineHeight = fontSize + 3.f;
-    const float padding = 3.f;
-    const float marginBottom = 8.f;
-    const float marginLeft = 4.f;
+    const unsigned int fontSize = (unsigned int)(9 * S);
+    const float lineHeight = fontSize + 3.f * S;
+    const float padding = 3.f * S;
+    const float marginBottom = 8.f * S;
+    const float marginLeft = 4.f * S;
     const float fadeDuration = 2.f;   // seconds to fade out
     const float visibleDuration = 6.f; // seconds before fading starts
     const int maxRecentLines = 15;
@@ -1358,9 +1557,202 @@ void UIManager::renderGameLog() {
             }
         }
         text.setFillColor(sf::Color(200, 200, 200, a));
-        text.setPosition({marginLeft + padding, y + 1.f});
+        text.setPosition({marginLeft + padding, y + 1.f * S});
         window.draw(text);
     }
+}
+
+// ============================================================================
+// Destiny Deflect: Player pick overlay + Deck peek overlay
+// ============================================================================
+void UIManager::requestPlayerPick(const std::vector<int>& allowedPlayerIds) {
+    std::cout << "[UIManager] Player pick requested, " << allowedPlayerIds.size() << " targets" << std::endl;
+    showPlayerPickOverlay = true;
+    playerPickAllowedIds = allowedPlayerIds;
+    pendingTargeting = {};
+    inputTimerClock.restart();
+    inputTimerDuration = GameConfig::TARGET_PROMPT_DURATION;
+}
+
+void UIManager::showDeckPeekOverlay(const std::vector<PeekCardInfo>& cards, float duration) {
+    std::cout << "[UIManager] Deck peek overlay: " << cards.size() << " cards, " << duration << "s" << std::endl;
+    showDeckPeek = true;
+    deckPeekCards = cards;
+    deckPeekDuration = duration;
+    deckPeekClock.restart();
+}
+
+void UIManager::dismissDeckPeek() {
+    showDeckPeek = false;
+    deckPeekCards.clear();
+}
+
+void UIManager::renderPlayerPickOverlay() {
+    float S = UILayout::S();
+    float elapsed = inputTimerClock.getElapsedTime().asSeconds();
+
+    // Auto-pick on timeout: pick player with highest hand value (deterministic)
+    if (elapsed >= inputTimerDuration) {
+        showPlayerPickOverlay = false;
+        int bestId = -1;
+        int bestValue = -1;
+        auto allInfo = gameState.getAllPlayerInfo();
+        for (auto& info : allInfo) {
+            auto it = std::find(playerPickAllowedIds.begin(), playerPickAllowedIds.end(), info.playerId);
+            if (it != playerPickAllowedIds.end()) {
+                if (info.handValue > bestValue || (info.handValue == bestValue && (bestId == -1 || info.playerId < bestId))) {
+                    bestValue = info.handValue;
+                    bestId = info.playerId;
+                }
+            }
+        }
+        if (bestId != -1) {
+            PlayerTargeting target;
+            target.targetPlayerIds.push_back(bestId);
+            pendingTargeting = target;
+            std::cout << "[UIManager] Player pick timed out, auto-picked P" << bestId << std::endl;
+            confirmTargeting();
+        }
+        playerPickAllowedIds = {};
+        return;
+    }
+
+    float centerX = window.getSize().x / 2.f;
+    float boxW = window.getSize().x * 0.6f, boxH = 60.f * S;
+    float boxY = window.getSize().y - 90.f * S;
+
+    // Background strip at bottom
+    sf::RectangleShape bg({boxW, boxH});
+    bg.setFillColor(sf::Color(20, 40, 60, 220));
+    bg.setOutlineThickness(2.f * S);
+    bg.setOutlineColor(sf::Color(50, 200, 255));
+    bg.setPosition({centerX - boxW / 2.f, boxY});
+    window.draw(bg);
+
+    // Title text
+    sf::Text title(font, "Choose your victim", (unsigned int)(12 * S));
+    title.setFillColor(sf::Color(50, 200, 255));
+    sf::FloatRect tBounds = title.getLocalBounds();
+    title.setPosition({centerX - tBounds.size.x / 2.f, boxY + 5.f * S});
+    window.draw(title);
+
+    // Timer bar
+    float barW = boxW - 20.f * S;
+    float barH = 5.f * S;
+    float progress = 1.f - (elapsed / inputTimerDuration);
+    float barY2 = boxY + boxH - 12.f * S;
+    sf::RectangleShape barBg({barW, barH});
+    barBg.setFillColor(sf::Color(60, 60, 60));
+    barBg.setPosition({centerX - barW / 2.f, barY2});
+    window.draw(barBg);
+    sf::RectangleShape barFill({barW * progress, barH});
+    barFill.setFillColor(progress > 0.3f ? sf::Color(100, 255, 100) : sf::Color(255, 80, 80));
+    barFill.setPosition({centerX - barW / 2.f, barY2});
+    window.draw(barFill);
+
+    // Highlight eligible players
+    for (auto& pv : playerVisuals) {
+        auto it = std::find(playerPickAllowedIds.begin(), playerPickAllowedIds.end(), pv.playerId);
+        if (it != playerPickAllowedIds.end()) {
+            sf::FloatRect pvBounds = pv.playerSprite.getGlobalBounds();
+            sf::RectangleShape highlight({pvBounds.size.x + 8.f * S, pvBounds.size.y + 8.f * S});
+            highlight.setFillColor(sf::Color(50, 200, 255, 60));
+            highlight.setOutlineThickness(2.f * S);
+            highlight.setOutlineColor(sf::Color(50, 200, 255));
+            highlight.setPosition({pvBounds.position.x - 4.f * S, pvBounds.position.y - 4.f * S});
+            window.draw(highlight);
+        }
+    }
+}
+
+void UIManager::renderDeckPeekOverlay() {
+    float S = UILayout::S();
+    float elapsed = deckPeekClock.getElapsedTime().asSeconds();
+
+    // Auto-dismiss on timeout
+    if (elapsed >= deckPeekDuration) {
+        dismissDeckPeek();
+        return;
+    }
+
+    // Panel in top-right corner
+    float panelW = 200.f * S, panelH = 190.f * S;
+    float panelX = window.getSize().x - panelW - 10.f * S;
+    float panelY = 10.f * S;
+
+    sf::RectangleShape bg({panelW, panelH});
+    bg.setFillColor(sf::Color(15, 15, 30, 230));
+    bg.setOutlineThickness(2.f * S);
+    bg.setOutlineColor(sf::Color(150, 100, 255));
+    bg.setPosition({panelX, panelY});
+    window.draw(bg);
+
+    // Title
+    sf::Text title(font, "Threads of fate exposed", (unsigned int)(11 * S));
+    title.setFillColor(sf::Color(150, 100, 255));
+    sf::FloatRect tBounds = title.getLocalBounds();
+    title.setPosition({panelX + panelW / 2.f - tBounds.size.x / 2.f, panelY + 5.f * S});
+    window.draw(title);
+
+    // Draw 3 card sprites from the spritesheet
+    if (cardVisuals.empty() || deckPeekCards.empty()) return;
+    sf::Vector2u texSize = cardVisuals[0].cardSprite.getTexture().getSize();
+    int cellW = (int)texSize.x / 15;
+    int cellH = (int)texSize.y / 4;
+    float cardScale = 0.4f * S;
+    float scaledW = cellW * cardScale;
+    float cardStartX = panelX + (panelW - scaledW * deckPeekCards.size() - 5.f * S * ((int)deckPeekCards.size() - 1)) / 2.f;
+    float cardY = panelY + 25.f * S;
+
+    for (int i = 0; i < (int)deckPeekCards.size(); i++) {
+        auto& info = deckPeekCards[i];
+        int col = static_cast<int>(info.rank) - 1;
+        int row;
+        switch (info.suit) {
+            case Suit::Spades:   row = 0; break;
+            case Suit::Diamonds: row = 1; break;
+            case Suit::Clubs:    row = 2; break;
+            case Suit::Hearts:   row = 3; break;
+            default:             row = 0; break;
+        }
+
+        sf::Sprite cardSprite(cardVisuals[0].cardSprite.getTexture());
+        cardSprite.setTextureRect(sf::IntRect({col * cellW, row * cellH}, {cellW, cellH}));
+        cardSprite.setScale({cardScale, cardScale});
+        cardSprite.setPosition({cardStartX + i * (scaledW + 5.f * S), cardY});
+        window.draw(cardSprite);
+    }
+
+    // Timer bar
+    float progress = 1.f - (elapsed / deckPeekDuration);
+    float barW = panelW - 20.f * S;
+    float barH = 4.f * S;
+    float barY = panelY + panelH - 35.f * S;
+    sf::RectangleShape barBg({barW, barH});
+    barBg.setFillColor(sf::Color(60, 60, 60));
+    barBg.setPosition({panelX + 10.f * S, barY});
+    window.draw(barBg);
+    sf::RectangleShape barFill({barW * progress, barH});
+    barFill.setFillColor(sf::Color(150, 100, 255, 200));
+    barFill.setPosition({panelX + 10.f * S, barY});
+    window.draw(barFill);
+
+    // OK button
+    float okW = 80.f * S, okH = 25.f * S;
+    float okX = panelX + panelW / 2.f - okW / 2.f;
+    float okY = panelY + panelH - 30.f * S + barH + 2.f * S;
+    sf::RectangleShape okBtn({okW, okH});
+    okBtn.setFillColor(sf::Color(80, 60, 140));
+    okBtn.setOutlineThickness(1.f * S);
+    okBtn.setOutlineColor(sf::Color(150, 100, 255));
+    okBtn.setPosition({okX, okY});
+    window.draw(okBtn);
+
+    sf::Text okText(font, "Sweet!", (unsigned int)(10 * S));
+    okText.setFillColor(sf::Color::White);
+    sf::FloatRect okBounds = okText.getLocalBounds();
+    okText.setPosition({okX + okW / 2.f - okBounds.size.x / 2.f, okY + okH / 2.f - okBounds.size.y / 2.f - 2.f * S});
+    window.draw(okText);
 }
 
 sf::Color UIManager::getPhaseNameColor() {

@@ -50,13 +50,12 @@ class Phase {
             int drawnCardId;
             int drawerId;
             int actingPlayerId;       // who to re-prompt when all reactive checks done
-            std::string extraInfo;
             
-            struct QueueEntry { int skillOwnerId; SkillName skillName; };
+            struct QueueEntry { int skillOwnerId; SkillName skillName; std::string extraInfo = ""; };
             std::vector<QueueEntry> queue;
             int currentIndex = 0;
 
-            enum Step { PROMPTING, WAITING_RESPONSE, PICKING_CARD, EXECUTING, DONE };
+            enum Step { PROMPTING, WAITING_RESPONSE, PICKING_CARD, PICKING_PLAYER, EXECUTING, DONE };
             Step step = PROMPTING;
 
             bool requestSent = false;
@@ -66,6 +65,9 @@ class Phase {
         };
         std::optional<ReactiveCheckState> reactiveCheck;
         void reactiveTickPending();
+        void tickReactive_FatalDeal(ReactiveCheckState& rc, ReactiveCheckState::QueueEntry& entry);
+        void tickReactive_DestinyDeflect(ReactiveCheckState& rc, ReactiveCheckState::QueueEntry& entry);
+        void tickReactive_Chronosphere(ReactiveCheckState& rc, ReactiveCheckState::QueueEntry& entry);
         bool startReactiveCheck(ReactiveTrigger trigger, int drawnCardId, int drawerId, int actingPlayerId);
 
         // Chronosphere pending state (fusion skill: active + reactive)

@@ -54,6 +54,7 @@ class Player{
         SkillName getSkillName(){
             return skillName;
         }
+        void setSkillName(SkillName name) { skillName = name; }
         int getLoss() const{
             return loss;
         }

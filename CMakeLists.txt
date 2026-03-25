@@ -64,6 +64,7 @@ set(SKILL_ENGINE_HEADERS
     src/skillEngine/Skill_NeuralGambit.h
     src/skillEngine/Skill_FatalDeal.h
     src/skillEngine/Skill_ChronoSphere.h
+    src/skillEngine/Skill_DestinyDeflect.h
 )
 
 set(GAME_ENGINE_SOURCES
@@ -201,10 +202,26 @@ add_executable(CrazyJack
     src/main.cpp
 )
 
-# copy src/assets to build directory
+# copy assets next to the executable (bin/assets/)
+add_custom_command(TARGET CrazyJack POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    "${CMAKE_SOURCE_DIR}/assets"
+    "$<TARGET_FILE_DIR:CrazyJack>/assets"
+)
+
+# copy SFML DLLs to build directory
 add_custom_command(TARGET CrazyJack POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
     "C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/bin"
+    $<TARGET_FILE_DIR:CrazyJack>
+)
+
+# copy MinGW runtime DLLs (so the game runs on machines without MinGW)
+add_custom_command(TARGET CrazyJack POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    "C:/mingw64/bin/libstdc++-6.dll"
+    "C:/mingw64/bin/libgcc_s_seh-1.dll"
+    "C:/mingw64/bin/libwinpthread-1.dll"
     $<TARGET_FILE_DIR:CrazyJack>
 )
 

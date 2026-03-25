@@ -136,18 +136,18 @@ int Player::calculateHandValue() const{
         }
         else handValue +=  static_cast<int>(cardRank);
     }
-
-    // Second pass: handle aces optimally
+    // Apply rank bonuses from skills (e.g. NeuralGambit)
+    for (auto* card : cardsInHand) handValue += card->getRankBonus();
+    // Second pass: handle aces optimally (each ace can be 11, 10, or 1)
     for (int i = 0; i < aceCount; i++) {
         if (handValue + GameConfig::ACE_HIGH_VALUE <= GameConfig::BLACKJACK_VALUE) {
             handValue += GameConfig::ACE_HIGH_VALUE;
+        } else if (handValue + GameConfig::ACE_MID_VALUE <= GameConfig::BLACKJACK_VALUE) {
+            handValue += GameConfig::ACE_MID_VALUE;
         } else {
             handValue += GameConfig::ACE_LOW_VALUE;
         }
     }
-
-    // Apply rank bonuses from skills (e.g. NeuralGambit)
-    for (auto* card : cardsInHand) handValue += card->getRankBonus();
 
     return handValue;
 }

@@ -64,6 +64,11 @@ class SkillDeliverance : public Skill{
                     uses++;
                     return true;
             }
+            if (gameState.getPhaseName() == PhaseName::PLAYER_HIT_PHASE){
+                if (gameState.getCurrentPlayerId() != userId) return false;
+                uses++;
+                return true;
+            }
             return false;
         }
 

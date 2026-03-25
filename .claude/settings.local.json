@@ -6,7 +6,15 @@
       "Bash(cmake --preset debug)",
       "Bash(cmake --build --preset debug -j)",
       "Bash(cmake --build --preset debug -j --clean-first)",
-      "Bash(find c:UsersminhkOneDriveDesktopOVERENGINEERED_BLACKJACK -name Skill_*.h -type f)"
+      "Bash(find c:UsersminhkOneDriveDesktopOVERENGINEERED_BLACKJACK -name Skill_*.h -type f)",
+      "Bash(grep -n \"DECK_PEEK\" \"/c/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src/skillEngine/\"*.h)",
+      "Bash(grep -r DECK_PEEK /c/Users/minhk/OneDrive/Desktop/OVERENGINEERED_BLACKJACK/src --include=*.h --include=*.cpp)",
+      "Bash(taskkill //F //IM CrazyJack.exe)",
+      "Bash(timeout 8 ./CrazyJack.exe)",
+      "Bash(where libstdc++-6.dll)",
+      "Read(//c/msys64/**)",
+      "Bash(cmake --preset release)",
+      "Bash(cmake --build --preset release -j)"
     ]
   }
 }

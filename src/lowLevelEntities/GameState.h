@@ -64,6 +64,11 @@ public:
     int getDeckCount() const { return (int)deckCards.size(); }
     const std::vector<Card>& getDeckCards() const { return deckCards; }
     int getCurrentPlayerId() {return currentPlayerId;}
+    int getHostPlayerId(){
+        for (auto& player : playersInfo)
+            if (player.isHost) return player.playerId;
+        return -1;
+    }
     void incrementCurrentPlayerId(int numPlayers) {
         currentPlayerId = (currentPlayerId + 1) % numPlayers;
         playersProcessed++;
@@ -140,11 +145,35 @@ public:
             case SkillName::NEURALGAMBIT:  return "NEURAL GAMBIT";
             case SkillName::FATALDEAL:     return "FATAL DEAL";
             case SkillName::CHRONOSPHERE:  return "CHRONOSPHERE";
+            case SkillName::DESTINYDEFLECT: return "DESTINY DEFLECT";
             case SkillName::BOOGIEWOOGIE:  return "BOOGIE WOOGIE";
             case SkillName::LOOKMAXXING:   return "LOOKMAXXING";
             case SkillName::SIGMA:         return "SIGMA";
             case SkillName::UNDEFINED:     return "UNDEFINED";
             default:                       return "UNKNOWN";
+        }
+    }
+
+    std::string skillDescriptionToString(SkillName skill) {
+        switch (skill) {
+            case SkillName::DELIVERANCE:    
+            return "Active: During your hit phase, you may spend 1 use, return a card from your hand to the deck.\nPassive - Sanctum: At the start of your hit phase, you gain 1 use";
+            case SkillName::NEURALGAMBIT:   
+            return "Active: During your hit phase, you may spend 1 use, choose 2 players, each chosen player reveal 1 card from their hand, \nyou choose 1 of the cards revealed, that card rank is increased by X \n(X is the difference between the revealed cards).\nPassive - Repercussions: Card affected by Neural gambit can increase their rank infinitely";
+            case SkillName::FATALDEAL:      
+            return "Reactive: When a card is drawn, you may spend 1 use, choose 1 card from your hand, \nswap that card with the drawn card\nPassive - Lethal revelation: When a card is drawn from the deck, you may see its rank";
+            case SkillName::CHRONOSPHERE:   
+            return "Active: During your hit phase, you may snapshot your hand, if you have a hand snapshot, you may spend 1 use,\n initiate [hand rewind] - return all cards from your hand back to the deck, and draw cards matching the rank of the snapshot.\nPassive - Timeline Seal: At the start of a normal player's hit phase, you may snapshot your hand.\nPassive - Temporal Rollbackk: When your hand value changes, you may snapshot your hand, if you have a hand snapshot, you may initiate a [hand rewind]";
+            case SkillName::DESTINYDEFLECT: 
+            return "Reactive: When a card is drawn, you may spend 1 use, add that card to another player's hand\nPassive - Clairvoyance: At the start of the round, you will see the top 3 cards of the deck";
+            case SkillName::BOOGIEWOOGIE:   
+            return "TODO";
+            case SkillName::LOOKMAXXING:    
+            return "TODO";
+            case SkillName::SIGMA:          
+            return "TODO";
+            default:                        
+            return "";
         }
     }
 
