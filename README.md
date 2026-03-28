@@ -1,4 +1,4 @@
-# LastDeal — When Luck In A Gambling Game Is Optional
+# LastDeal — A gambling game where luck is optional
 ## What Is This
 
 Blackjack. But every player has a superpower, the dealer rotates, and someone will definitely rewind time to undo your winning hand. First to **15 points** wins. Good luck.
