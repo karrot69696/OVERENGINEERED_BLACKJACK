@@ -18,7 +18,7 @@ cmake --preset windows-msvc-debug
 cmake --build --preset windows-msvc-debug
 ```
 
-Output: `build/<preset>/bin/CrazyJack.exe`. Assets are copied to `build/<preset>/assets/` automatically.
+Output: `build/<preset>/bin/LastDeal.exe`. Assets are copied to `build/<preset>/assets/` automatically.
 
 **When creating new files, always add them to CMakeLists.txt** in the appropriate source/header list (e.g., `LOW_LEVEL_HEADERS`, `GAME_ENGINE_SOURCES`, etc.).
 

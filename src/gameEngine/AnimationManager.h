@@ -19,7 +19,7 @@ namespace AnimConfig {
     inline constexpr float PHASE_TEXT_DURATION = 0.9f;
     inline constexpr float CARD_DRAW_DURATION = 0.4f;
     inline constexpr float CARD_RETURN_DURATION = 0.2f;
-    inline constexpr float POINT_CHANGE_DURATION = 1.7f;
+    inline constexpr float POINT_CHANGE_DURATION = 2.0f;
     inline constexpr float CARD_FLIP_DURATION = 1.0f;
 }
 struct Animation
@@ -474,56 +474,73 @@ public:
         this->add(phaseTransitionAnimation);
     }
 
-    void spawnFloatingText(const std::string& text, sf::Vector2f position, sf::Color color, float duration = 1.2f){
+    void spawnFloatingText(const std::string& text, sf::Vector2f position, sf::Color color, float duration = 2.0f){
         float S = GameSettings::instance().S;
-        // Scale font size and color intensity by text length
+
         int len = (int)text.size();
         float fontSize = 12.f * S;
         sf::Color colorOverride = color;
+
         bool isNewHost = text.rfind("New host - ", 0) == 0;
-        if (isNewHost){
+        if (isNewHost)
+        {
             fontSize = 10.f * S;
-            colorOverride = sf::Color(255, 215, 0); // gold for new host dealer text
+            colorOverride = sf::Color(255, 215, 0);
         }
+
         auto ft = std::make_shared<sf::Text>(visualState.getFont(), text, fontSize);
         ft->setFillColor(colorOverride);
-        ft->setPosition(position);
         ft->setOutlineThickness(0.1f);
         ft->setOutlineColor(sf::Color::Black);
-        floatingTexts.push_back(ft);
-        auto bounds = ft->getLocalBounds();
-        ft->setOrigin({bounds.position.x + bounds.size.x / 2.f,
-                        bounds.position.y + bounds.size.y / 2.f});
 
-        // Clamp start position so text stays on screen
+        // Center origin
+        auto bounds = ft->getLocalBounds();
+        ft->setOrigin({
+            bounds.position.x + bounds.size.x / 2.f,
+            bounds.position.y + bounds.size.y / 2.f
+        });
+
+        // --- SCREEN INFO ---
         float winW = static_cast<float>(window.getSize().x);
         float winH = static_cast<float>(window.getSize().y);
-        float halfW = bounds.size.x / 2.f;
-        float halfH = bounds.size.y / 2.f;
 
-        sf::Vector2f startPos = position;
-        // Left/right clamp
-        if (startPos.x - halfW < 0.f) startPos.x = halfW;
-        if (startPos.x + halfW > winW) startPos.x = winW - halfW;
-
+        // --- ANIMATION CONSTANTS ---
         float floatDistance = 25.f * S;
-        float totalMove = floatDistance * 2.f;
+        float peakScale = 2.0f;
+        float maxShake = 3.f; // from your animation
 
-        // push startPos down so upward animation never goes off-screen
-        startPos.y = std::max(startPos.y, totalMove + halfH);
+        // --- SAFE BOUNDS (worst case) ---
+        float padding = 2.f * S;
+
+        float halfW = (bounds.size.x * peakScale) / 2.f + padding + maxShake;
+        float halfH = (bounds.size.y * peakScale) / 2.f + padding;
+
+        // --- SMART CLAMP ---
+        sf::Vector2f startPos = position;
+
+        // Clamp X (considering shake)
+        startPos.x = std::clamp(startPos.x, halfW, winW - halfW);
+
+        // Clamp Y (considering upward movement)
+        float minY = floatDistance + halfH;   // so top never clips
+        float maxY = winH - halfH;            // so bottom never clips
+        startPos.y = std::clamp(startPos.y, minY, maxY);
 
         ft->setPosition(startPos);
+        floatingTexts.push_back(ft);
 
-        auto ptr = ft; // shared_ptr keeps it alive
-        auto func = [this, ptr, startPos, colorOverride, floatDistance](float t)
+        auto ptr = ft;
+
+        auto func = [this, ptr, startPos, colorOverride, floatDistance, peakScale](float t)
         {
-            float peakScale = 2.0f;
+            float winW = static_cast<float>(window.getSize().x);
+            float winH = static_cast<float>(window.getSize().y);
 
-            // --- POSITION (fast start, slows down) ---
+            // --- POSITION ---
             float yOffset = floatDistance * easeOutCubic(t);
             float y = startPos.y - yOffset;
 
-            // --- SCALE (quick pop + overshoot + settle) ---
+            // --- SCALE ---
             float scaleT = std::min(t * 3.0f, 1.0f);
             float s;
 
@@ -538,7 +555,7 @@ public:
                 s = peakScale - 0.15f * easeInCubic(local);
             }
 
-            // --- ALPHA (stays visible, then drops fast) ---
+            // --- ALPHA ---
             float fadeStart = 0.3f;
             float alpha = 1.f;
 
@@ -551,13 +568,27 @@ public:
             sf::Color c = colorOverride;
             c.a = static_cast<uint8_t>(255.f * alpha);
 
-            // --- tiny horizontal shake (adds impact) ---
+            // --- SHAKE ---
             float shake = (1.f - t) * 3.f * std::sin(t * 40.f);
             float x = startPos.x + shake;
 
+            // --- APPLY ---
             ptr->setScale({s, s});
             ptr->setPosition({x, y});
             ptr->setFillColor(c);
+
+            // --- FINAL SAFETY CLAMP (optional but bulletproof) ---
+            auto gb = ptr->getGlobalBounds();
+
+            float halfW = gb.size.x / 2.f;
+            float halfH = gb.size.y / 2.f;
+
+            if (x - halfW < 0.f) x = halfW;
+            if (x + halfW > winW) x = winW - halfW;
+            if (y - halfH < 0.f) y = halfH;
+            if (y + halfH > winH) y = winH - halfH;
+
+            ptr->setPosition({x, y});
         };
 
         Animation floatAnim = {func, nullptr, 0, duration};
@@ -779,7 +810,7 @@ public:
                 "+" + std::to_string(boostAmount),
                 { posBoosted.x, posBoosted.y - 20.f },
                 sf::Color(255, 215, 0),
-                1.5f
+                AnimConfig::POINT_CHANGE_DURATION
             );
             if (onFinish) onFinish();
         };

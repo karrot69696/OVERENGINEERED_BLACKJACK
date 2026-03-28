@@ -45,7 +45,7 @@ int main() {
     auto desktop = sf::VideoMode::getDesktopMode();
     unsigned int winW = static_cast<unsigned int>(desktop.size.x * 0.9f);
     unsigned int winH = static_cast<unsigned int>(desktop.size.y * 0.9f);
-    sf::RenderWindow window(sf::VideoMode({winW, winH}), "CrazyJack",
+    sf::RenderWindow window(sf::VideoMode({winW, winH}), "LastDeal",
         sf::Style::Titlebar | sf::Style::Close);
     window.setFramerateLimit(60);
     GameSettings::instance().recalcScale(winW);
@@ -62,7 +62,7 @@ int main() {
         auto dt = sf::VideoMode::getDesktopMode();
         if (settings.smallWindow) {
             window.create(sf::VideoMode({GameConfig::WINDOW_WIDTH, GameConfig::WINDOW_HEIGHT}),
-                "CrazyJack", sf::Style::Titlebar | sf::Style::Close);
+                "LastDeal", sf::Style::Titlebar | sf::Style::Close);
             window.setPosition({
                 static_cast<int>((dt.size.x - GameConfig::WINDOW_WIDTH) / 2),
                 static_cast<int>((dt.size.y - GameConfig::WINDOW_HEIGHT) / 2)
@@ -70,7 +70,7 @@ int main() {
         } else {
             unsigned int w = static_cast<unsigned int>(dt.size.x * 0.9f);
             unsigned int h = static_cast<unsigned int>(dt.size.y * 0.9f);
-            window.create(sf::VideoMode({w, h}), "CrazyJack",
+            window.create(sf::VideoMode({w, h}), "LastDeal",
                 sf::Style::Titlebar | sf::Style::Close);
             window.setPosition({
                 static_cast<int>((dt.size.x - w) / 2),
@@ -90,7 +90,7 @@ int main() {
         float cx = window.getSize().x / 2.f;
         float wy = (float)window.getSize().y;
 
-        sf::Text title(font, "CrazyJack", 36);
+        sf::Text title(font, "LastDeal", 36);
         title.setFillColor(sf::Color(245, 224, 32));
         sf::FloatRect titleBounds = title.getLocalBounds();
         title.setPosition({cx - titleBounds.size.x / 2.f, wy * 0.10f});

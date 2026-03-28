@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 
 # Project definition
-project(CrazyJack
+project(LastDeal
     VERSION 1.0.0
     DESCRIPTION "An overengineered blackjack game with skill system"
     LANGUAGES CXX
@@ -198,34 +198,34 @@ target_link_libraries(PhaseEngine
 
 # Main executable (assumes there's a main.cpp somewhere)
 # Uncomment and adjust when you have your main entry point
-add_executable(CrazyJack
+add_executable(LastDeal
     src/main.cpp
 )
 
 # copy assets next to the executable (bin/assets/)
-add_custom_command(TARGET CrazyJack POST_BUILD
+add_custom_command(TARGET LastDeal POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
     "${CMAKE_SOURCE_DIR}/assets"
-    "$<TARGET_FILE_DIR:CrazyJack>/assets"
+    "$<TARGET_FILE_DIR:LastDeal>/assets"
 )
 
 # copy SFML DLLs to build directory
-add_custom_command(TARGET CrazyJack POST_BUILD
+add_custom_command(TARGET LastDeal POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
     "C:/Users/minhk/OneDrive/Desktop/Downloads/SFML-3.0.2/bin"
-    $<TARGET_FILE_DIR:CrazyJack>
+    $<TARGET_FILE_DIR:LastDeal>
 )
 
 # copy MinGW runtime DLLs (so the game runs on machines without MinGW)
-add_custom_command(TARGET CrazyJack POST_BUILD
+add_custom_command(TARGET LastDeal POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
     "C:/mingw64/bin/libstdc++-6.dll"
     "C:/mingw64/bin/libgcc_s_seh-1.dll"
     "C:/mingw64/bin/libwinpthread-1.dll"
-    $<TARGET_FILE_DIR:CrazyJack>
+    $<TARGET_FILE_DIR:LastDeal>
 )
 
-target_link_libraries(CrazyJack
+target_link_libraries(LastDeal
     PRIVATE
         GameEngine
         SkillEngine

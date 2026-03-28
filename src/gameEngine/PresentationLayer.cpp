@@ -2,7 +2,7 @@
 #include "AnimationManager.h"
 #include "UIManager.h"
 #include "../lowLevelEntities/VisualState.h"
-
+#include "../lowLevelEntities/GameConfig.h"
 PresentationLayer::PresentationLayer(EventQueue& eq, AnimationManager& am,
                                      UIManager& um, VisualState& vs, GameState& gs)
     : eventQueue(eq), animationManager(am), uiManager(um), visualState(vs), gameState(gs)
@@ -74,7 +74,7 @@ void PresentationLayer::processEvents() {
                     "Grace restored",
                 {playerPos.x, playerPos.y - 30.f * S},
                 sf::Color(132, 255, 56),
-                1.2f);
+                AnimConfig::POINT_CHANGE_DURATION);
             animationManager.addSpinAnimation(cardId, [this, cardId, playerId](){
                 std::cout << "[PresentationLayer] DELIVERANCE spin done, cardId=" << cardId
                           << " -> return to deck" << std::endl;
@@ -142,7 +142,7 @@ void PresentationLayer::processEvents() {
             );
             sf::Vector2f textPos = {seat.x, seat.y - 40.f * S};
             sf::Color textColor(255, 69, 69);
-            animationManager.spawnFloatingText(e.reason, textPos, textColor, 0.7f);
+            animationManager.spawnFloatingText(e.reason, textPos, textColor, AnimConfig::POINT_CHANGE_DURATION);
         } break;
 
         case GameEventType::SHOCK_EFFECT: {
@@ -213,7 +213,7 @@ void PresentationLayer::processEvents() {
                     "All according to plan",
                 {cardPos.x, cardPos.y - 30.f * S},
                 sf::Color(48, 190, 255),
-                1.2f);          
+                AnimConfig::POINT_CHANGE_DURATION);          
             // Flip the two revealed cards with animation, then play the NG effect
             animationManager.playCardFlip(e.cardId1);
             animationManager.playCardFlip(e.cardId2);
@@ -286,7 +286,7 @@ void PresentationLayer::processEvents() {
                 "Your fate is signed",
                 {playerPos.x, playerPos.y - 30.f * S},
                 sf::Color(0, 0, 0),
-                1.2f);
+                AnimConfig::POINT_CHANGE_DURATION);
             animationManager.addTeleportSwapAnimation(swappedId, drawnPos, swappedCv.cardIndex, nullptr);
             animationManager.addTeleportSwapAnimation(drawnId,   swappedPos, drawnCv.cardIndex, nullptr);
         } break;
@@ -327,20 +327,20 @@ void PresentationLayer::processEvents() {
                 "TEMPORAL ROLLBACK",
                 {playerPos.x, playerPos.y - 30.f * S},
                 sf::Color(241, 48, 255),
-                1.2f);
+                AnimConfig::POINT_CHANGE_DURATION);
         } break;
 
         case GameEventType::DESTINYDEFLECT_EFFECT: {
-            auto& e = std::get<ChronosphereSnapshotEvent>(event.data);
-            std::cout << "[PresentationLayer] CHRONOSPHERE_SNAPSHOT: P" << e.playerId << std::endl;
+            auto& e = std::get<DestinyDeflectEffectEvent>(event.data);
+            std::cout << "[PresentationLayer] DESTINYDEFLECT_EFFECT: P" << e.playerId << std::endl;
             sf::Vector2f playerPos = visualState.getPlayerSeatPos(
                 e.playerId, (int)gameState.getAllPlayerInfo().size());
             animationManager.playDestinyDeflectEffect({playerPos.x - 20.f * S, playerPos.y});
             animationManager.spawnFloatingText(
                 "Fate calls upon you",
                 {playerPos.x, playerPos.y - 30.f * S},
-                sf::Color(241, 48, 255),
-                1.2f);
+                sf::Color(208, 214, 217),
+                AnimConfig::POINT_CHANGE_DURATION);
         } break;        
 
         case GameEventType::CARD_REDIRECTED: {
@@ -374,7 +374,7 @@ void PresentationLayer::processEvents() {
                 "Fate diverted",
                 {fromPos.x, fromPos.y - 30.f * S},
                 sf::Color(208, 214, 217),
-                1.2f);
+                AnimConfig::POINT_CHANGE_DURATION);
 
             // Animate card sliding to new owner + reposition source hand on finish
             // (folded into one animation to avoid a second cutscene event that clears UI)

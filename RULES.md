@@ -1,4 +1,4 @@
-# CrazyJack — The Rules
+# LastDeal — The Rules
 
 ## What Is This
 
@@ -105,4 +105,4 @@ You draw a card. Someone with Fatal Deal sees it and swaps it with their garbage
 
 You bust. The Host gets Blackjack. Round over. Skills shuffle. It happens again.
 
-Welcome to CrazyJack.
+Welcome to LastDeal.

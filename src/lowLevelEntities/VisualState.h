@@ -147,7 +147,6 @@ class VisualState {
             return cardVisuals[0];
         }
         sf::Vector2f getPlayerSeatPos(int playerId, int totalPlayers) {
-            // Hot-reload layout from file every call — edit layout.txt, alt-tab, see changes
             layoutConfig.loadFromFile("assets/layout.txt");
             float S = GameSettings::instance().S;
 
@@ -158,35 +157,57 @@ class VisualState {
             float midY = h / 2.f - layoutConfig.midY_offset * S;
             float offX = layoutConfig.offsetX * S;
 
-            // Evenly space n items in a row, return X for item i
             auto rowX = [&](int i, int n) -> float {
                 float spacing = w / static_cast<float>(n + 1);
                 return spacing * (i + 1) - offX;
             };
 
+            int visualIndex = (playerId - localPlayerId + totalPlayers) % totalPlayers;
+
             switch (totalPlayers) {
-                case 2: // 1 top, 1 bottom
-                    if (playerId == 0) return { rowX(0, 1), topY };
-                    return { rowX(0, 1), botY };
-                case 3: // 2 top, 1 bottom
-                    if (playerId < 2) return { rowX(playerId, 2), topY };
-                    return { rowX(0, 1), botY };
-                case 4: // 2 top, 2 bottom
-                    if (playerId < 2) return { rowX(playerId, 2), topY };
-                    return { rowX(playerId - 2, 2), botY };
-                case 5: // 3 top, 2 bottom
-                    if (playerId < 3) return { rowX(playerId, 3), topY };
-                    return { rowX(playerId - 3, 2), botY };
-                case 6: // 3 top, 3 bottom
-                    if (playerId < 3) return { rowX(playerId, 3), topY };
-                    return { rowX(playerId - 3, 3), botY };
-                case 7: // 3 top, 3 bottom, 1 right
-                    if (playerId < 3) return { rowX(playerId, 3), topY };
-                    if (playerId < 6) return { rowX(playerId - 3, 3), botY };
+                case 2:
+                    if (visualIndex == 0) return { rowX(0, 1), botY };
+                    return { rowX(0, 1), topY };
+
+                case 3:
+                    // YOU bottom, others go right -> left on top
+                    if (visualIndex == 0) return { rowX(0, 1), botY };
+                    return { rowX(2 - visualIndex, 2), topY };
+
+                case 4:
+                    // Bottom: YOU (left), next (right)
+                    // Top: next (right), next (left)
+                    if (visualIndex < 2)
+                        return { rowX(visualIndex, 2), botY };
+                    return { rowX(3 - visualIndex, 2), topY };
+
+                case 5:
+                    // Bottom: YOU, next
+                    // Top: next → next → next (right → left)
+                    if (visualIndex < 2)
+                        return { rowX(visualIndex, 2), botY };
+                    return { rowX(4 - visualIndex, 3), topY };
+
+                case 6:
+                    // Bottom: YOU → right → far-right
+                    // Top: far-right → left → far-left
+                    if (visualIndex < 3)
+                        return { rowX(visualIndex, 3), botY };
+                    return { rowX(5 - visualIndex, 3), topY };
+
+                case 7:
+                    // Bottom: 3
+                    // Top: 3 (reversed)
+                    // Last: right side
+                    if (visualIndex < 3)
+                        return { rowX(visualIndex, 3), botY };
+                    if (visualIndex < 6)
+                        return { rowX(5 - visualIndex, 3), topY };
                     return { w - layoutConfig.seatRightX_offset * S, midY };
-                default: // fallback: 1 top, rest bottom
-                    if (playerId == 0) return { rowX(0, 1), topY };
-                    return { rowX(playerId - 1, totalPlayers - 1), botY };
+
+                default:
+                    if (visualIndex == 0) return { rowX(0, 1), botY };
+                    return { rowX((totalPlayers - 1) - visualIndex, totalPlayers - 1), topY };
             }
         }
 };

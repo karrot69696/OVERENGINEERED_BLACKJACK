@@ -44,34 +44,22 @@ VisualState::VisualState(sf::RenderWindow& window, GameState& gameState)
 }
 
 void VisualState::buildCardVisuals(Deck& deck, std::vector<Player>& players){
-    //coordinates for sprite creation
     sf::Vector2u texSize = cardTexture.getSize();
     int cellW = (int)texSize.x / 15;
     int cellH = (int)texSize.y / 4;
+
     float scaleX = UILayout::CARD_SIZE().x / cellW;
     float scaleY = UILayout::CARD_SIZE().y / cellH;
 
-    //card coordinates on screen
+    // --- EXACT SAME DECK POSITION AS ANIMATION ---
+    float deckX = static_cast<float>(window.getSize().x) * UILayout::DECK_X_RATIO();
+    float deckY = static_cast<float>(window.getSize().y) / 2.f;
 
-
-    float spacing = cellW * scaleX * 0.004f;   // overlap spacing
-    float cardWidth = cellW * scaleX;
-
-    int totalCards = deck.getCards().size();
-
-    float startX = 50.f * GameSettings::instance().S;  // left side
-    auto winSize = window.getSize();
-    float windowH = static_cast<float>(winSize.y);
-    float y = windowH / 2.f;  // middle vertically
-
-    int i = 0 ;
-        //build cardVisuals based on cards in deck
-    for (auto* card : deck.getCards()) {
-
+    for (auto* card : deck.getCards())
+    {
         bool showFace = cheatOn || card->isFaceUp() || card->getOwnerId() == localPlayerId;
 
         int col, row;
-
         if (showFace) {
             col = cardSpriteCol(card->getRank());
             row = cardSpriteRow(card->getSuit());
@@ -84,20 +72,27 @@ void VisualState::buildCardVisuals(Deck& deck, std::vector<Player>& players){
         sprite.setTextureRect(sf::IntRect({col * cellW, row * cellH}, {cellW, cellH}));
         sprite.setScale({scaleX, scaleY});
 
-        sprite.setPosition({startX + i * 0.03f, y + i * 0.03f});
+        // ✅ CENTER ORIGIN (CRITICAL)
+        sf::FloatRect bounds = sprite.getLocalBounds();
+        sprite.setOrigin({
+            bounds.position.x + bounds.size.x / 2.f,
+            bounds.position.y + bounds.size.y / 2.f
+        });
+
+        // ✅ EXACT SAME POSITION AS RETURN TARGET
+        sprite.setPosition({deckX, deckY});
 
         CardVisual cardVisual(sprite);
-        cardVisual.cardId=card->getId();
+        cardVisual.cardId = card->getId();
         cardVisual.cardIndex = card->getHandIndex();
         cardVisual.ownerId = card->getOwnerId();
         cardVisual.location = CardLocation::DECK;
         cardVisual.highlighted = false;
         cardVisual.isTarget = false;
         cardVisual.faceUp = showFace;
-        cardVisual.rankBonus=0;
-        cardVisuals.emplace_back(cardVisual);
+        cardVisual.rankBonus = 0;
 
-        i++;
+        cardVisuals.emplace_back(cardVisual);
     }
 }
 
